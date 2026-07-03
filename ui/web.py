@@ -1,6 +1,12 @@
-import streamlit as st
+import os
+import sys
 
-from app import assistant
+# Proje kökünü import yoluna ekle (streamlit run ui/web.py ile çalışsın diye).
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import streamlit as st  # noqa: E402
+
+from app import assistant  # noqa: E402
 
 st.set_page_config(page_title="personas", page_icon="🤖")
 st.title("🤖 personas — Kişisel Asistan")

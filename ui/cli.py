@@ -1,4 +1,10 @@
-from app import assistant
+import os
+import sys
+
+# Proje kökünü import yoluna ekle (python ui/cli.py ile de çalışsın diye).
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app import assistant  # noqa: E402
 
 
 def main():
