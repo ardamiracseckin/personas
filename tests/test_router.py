@@ -19,3 +19,12 @@ def test_mail_write():
 
 def test_defaults_to_documents():
     assert route("Kireç temizliği nasıl yapılır?") == {"tool": "documents", "action": "read"}
+
+
+def test_app_open():
+    assert route("Spotify aç") == {"tool": "app", "action": "open"}
+
+
+def test_aciklama_is_not_app_open():
+    # "açıkla" tam kelime "aç" içermez; belge sorusu olarak kalmalı.
+    assert route("Bunu bana açıkla")["tool"] == "documents"

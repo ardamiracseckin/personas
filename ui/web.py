@@ -81,6 +81,7 @@ with st.sidebar:
         '<div class="cap"><span class="ic">📄</span><span>Belgelerinden kaynak göstererek cevap</span></div>'
         '<div class="cap"><span class="ic">📅</span><span>Takvimini okur, onayınla etkinlik ekler</span></div>'
         '<div class="cap"><span class="ic">✉️</span><span>Mailini okur, onayınla e-posta gönderir</span></div>'
+        '<div class="cap"><span class="ic">🚀</span><span>Uygulama açar ("Spotify aç")</span></div>'
         '<div class="cap"><span class="ic">⚡</span><span>Tamamen offline · Foundry Local</span></div>',
         unsafe_allow_html=True,
     )

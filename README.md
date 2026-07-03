@@ -5,6 +5,7 @@ Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Üç işi yapar:
 1. **Belge Soru-Cevap (RAG):** `data/documents/` içindeki kendi belgelerinden kaynak göstererek cevap verir; bilmediğinde "bilmiyorum" der.
 2. **Takvim:** Apple Takvim'i okur ve özetler; **onayınla** yeni etkinlik ekler.
 3. **Mail:** Apple Mail'i okur ve özetler; **onayınla** e-posta gönderir.
+4. **Uygulama açma:** "Spotify aç", "hesap makinesi aç" gibi komutlarla Mac uygulamalarını açar.
 
 Asistanın "beyni" [Microsoft Foundry Local](https://learn.microsoft.com/azure/ai-foundry/foundry-local/) ile cihazda çalışan bir LLM'dir (bulut/Azure yok). Embedding'ler `fastembed` ile yereldir.
 

@@ -7,7 +7,7 @@ import re
 from datetime import datetime, timedelta
 
 from app import llm, retriever, router
-from app.tools import calendar_tool, mail_tool
+from app.tools import app_launcher, calendar_tool, mail_tool
 
 SYSTEM_PROMPT = (
     "Sen yardımcı bir Türkçe kişisel asistansın. SADECE sana verilen BAĞLAM'ı "
@@ -26,6 +26,7 @@ def _default_deps():
         "chat": llm.chat,
         "create_event": calendar_tool.create_event,
         "send_mail": mail_tool.send_mail,
+        "open_app": app_launcher.open_app,
     }
 
 
@@ -33,6 +34,9 @@ def answer(query, deps=None):
     d = deps or _default_deps()
     decision = d["route"](query)
     tool, action = decision["tool"], decision["action"]
+
+    if tool == "app":
+        return _open_app_flow(query, d)
 
     if action == "write":
         return _draft_write(query, tool, d)
@@ -104,6 +108,24 @@ def _draft_write(query, tool, d):
     if tool == "mail":
         return _draft_mail(query)
     return {"text": "Bu işlemi yapamıyorum.", "sources": [], "pending_action": None}
+
+
+def _parse_app_name(query):
+    name = re.sub(r"\b(aç|başlat|çalıştır)\b", "", query, flags=re.IGNORECASE)
+    name = re.sub(r"'[a-zışçöüğıİ]+", "", name, flags=re.IGNORECASE)  # 'ı 'yi gibi ekleri at
+    for w in ("uygulamasını", "uygulamayı", "uygulama", "programını", "lütfen"):
+        name = re.sub(w, "", name, flags=re.IGNORECASE)
+    return name.strip(" ,.-")
+
+
+def _open_app_flow(query, d):
+    name = _parse_app_name(query)
+    opener = d.get("open_app", app_launcher.open_app)
+    try:
+        opened = opener(name)
+        return {"text": f"{opened} uygulamasını açtım. ✓", "sources": [], "pending_action": None}
+    except Exception as e:
+        return {"text": f"Uygulamayı açamadım: {e}", "sources": [], "pending_action": None}
 
 
 def confirm(pending_action, deps=None):

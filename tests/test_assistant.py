@@ -63,3 +63,13 @@ def test_mail_write_returns_pending():
     )
     pa = res["pending_action"]
     assert pa["type"] == "mail" and pa["to"] == "a@b.com"
+
+
+def test_app_open_flow_calls_opener():
+    captured = {}
+    d = deps(route=lambda q: {"tool": "app", "action": "open"})
+    d["open_app"] = lambda name: captured.setdefault("name", name) or "Spotify"
+    res = assistant.answer("Spotify aç", deps=d)
+    assert res["pending_action"] is None
+    assert captured["name"] == "Spotify"
+    assert "Spotify" in res["text"]
