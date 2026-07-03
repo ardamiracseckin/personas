@@ -14,91 +14,89 @@ st.set_page_config(page_title="personas", page_icon="⚡", layout="centered")
 
 CSS = """
 <style>
-:root { --accent:#F5C518; --accent-dim:#C9A100; --bg:#0E0E0E; --panel:#161616; --muted:#9A9A9A; }
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css');
+:root { --accent:#F5C518; --accent-dim:#C9A100; --bg:#0E0E0E; --panel:#121212;
+        --bot:#1B1B1B; --line:#2a2a2a; --muted:#8A8A8A; }
 
-/* Genel arka plan */
-.stApp { background: radial-gradient(1200px 600px at 50% -10%, #1a1a1a 0%, var(--bg) 55%); }
-#MainMenu, footer, header[data-testid="stHeader"] { visibility: hidden; }
-.block-container { padding-top: 2.2rem; max-width: 820px; }
+.stApp { background: var(--bg); }
+#MainMenu, footer, header[data-testid="stHeader"] { display:none; }
+.block-container { padding-top: 2.0rem; padding-bottom: 6rem; max-width: 820px; }
+.ti { font-size: 17px; line-height: 1; }
 
 /* Başlık */
-.app-header { text-align:center; margin-bottom: 0.4rem; }
-.app-header .logo {
-  font-size: 2.6rem; font-weight: 800; letter-spacing: -1px;
-  color: #fff;
-}
-.app-header .logo .p { color: var(--accent); }
-.app-header .bolt { color: var(--accent); }
-.app-header .sub { color: var(--muted); font-size: 0.92rem; margin-top: 2px; }
-.divider { height:3px; width:70px; margin:14px auto 24px auto;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent); border-radius:3px; }
+.hdr { text-align:center; margin-bottom:2px; }
+.hdr .logo { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:2.1rem;
+  font-weight:600; color:#fff; }
+.hdr .logo .g { color:var(--accent); }
+.hdr .sub { color:var(--muted); font-size:0.85rem; margin-top:2px; }
+.rule { height:2px; width:60px; margin:14px auto 22px; background:var(--accent); border-radius:2px; }
 
-/* Sohbet balonları */
-.chat { display:flex; flex-direction:column; gap:14px; margin-bottom: 90px; }
+/* Sohbet */
+.chat { display:flex; flex-direction:column; gap:14px; }
 .row { display:flex; }
 .row.user { justify-content:flex-end; }
 .row.bot  { justify-content:flex-start; }
+.bubble { max-width:76%; padding:12px 15px; font-size:0.96rem; line-height:1.55; }
+.bubble.user { background:var(--accent); color:#141414; border-radius:16px 16px 5px 16px; }
+.bubble.bot  { background:var(--bot); color:#EAEAEA; border:1px solid var(--line);
+  border-left:3px solid var(--accent); border-radius:5px 16px 16px 5px; }
+.bubble.bot code { color:var(--accent); font-size:0.86rem; }
+.src-row { margin-top:9px; display:flex; flex-wrap:wrap; gap:6px; }
+.pill { font-size:0.7rem; color:var(--accent); border:1px solid var(--accent-dim);
+  border-radius:999px; padding:2px 10px; }
 
-.bubble { max-width: 78%; padding: 12px 16px; border-radius: 16px; line-height:1.5;
-  font-size: 0.98rem; box-shadow: 0 2px 10px rgba(0,0,0,0.35); animation: pop .18s ease-out; }
-@keyframes pop { from { transform: translateY(6px); opacity:0 } to { transform:none; opacity:1 } }
-
-.bubble.user { background: var(--accent); color:#141414; border-bottom-right-radius:5px; font-weight:500; }
-.bubble.bot  { background:#1B1B1B; color:#EAEAEA; border:1px solid #2a2a2a;
-  border-left:3px solid var(--accent); border-bottom-left-radius:5px; }
-
-.src-row { margin-top:10px; display:flex; flex-wrap:wrap; gap:6px; }
-.source-badge { font-size:0.72rem; color:var(--accent); border:1px solid var(--accent-dim);
-  border-radius:999px; padding:2px 10px; background:rgba(245,197,24,0.08); }
-
-/* Onay kutusu */
-.confirm-note { color:var(--accent); font-weight:600; margin: 4px 0 8px 2px; }
-
-/* Butonlar */
-div.stButton > button { border-radius:10px; font-weight:700; border:1px solid #2a2a2a;
-  background:#1B1B1B; color:#EAEAEA; }
+/* Onay */
+.confirm-note { color:var(--accent); font-weight:500; margin:6px 0 8px 2px; }
+div.stButton > button { border-radius:10px; font-weight:500; border:1px solid var(--line);
+  background:var(--bot); color:#EAEAEA; }
 div.stButton > button:hover { border-color:var(--accent); color:var(--accent); }
 div.stButton > button[kind="primary"] { background:var(--accent); color:#141414; border:none; }
 
-/* Sohbet girişi */
-[data-testid="stChatInput"] { border:1px solid #2a2a2a; border-radius:14px; background:var(--panel); }
+/* Giriş kutusu */
+[data-testid="stChatInput"] { background:var(--panel); border:1px solid var(--line); border-radius:14px; }
 [data-testid="stChatInput"]:focus-within { border-color:var(--accent); }
+[data-testid="stChatInput"] textarea { color:#EAEAEA; }
 
 /* Kenar çubuğu */
-[data-testid="stSidebar"] { background:#121212; border-right:1px solid #222; }
-.cap { display:flex; gap:10px; align-items:flex-start; padding:9px 0; color:#cfcfcf; font-size:0.9rem; }
-.cap .ic { color:var(--accent); font-size:1.05rem; width:20px; }
-.side-title { color:var(--accent); font-weight:800; letter-spacing:.5px; font-size:0.8rem;
-  text-transform:uppercase; margin: 6px 0 4px 2px; }
+[data-testid="stSidebar"] { background:var(--panel); border-right:1px solid #222; }
+.side-title { color:var(--accent); font-weight:500; letter-spacing:2px; font-size:0.72rem; margin:4px 0 14px 2px; }
+.cap { display:flex; gap:11px; align-items:center; padding:9px 0; color:#cfcfcf; font-size:0.86rem; }
+.cap .ti { color:var(--accent); }
+.side-foot { display:flex; gap:8px; align-items:center; color:#6f6f6f; font-size:0.78rem; margin-top:20px; padding-top:14px; border-top:1px solid #222; }
+.side-foot .ti { color:var(--accent); font-size:15px; }
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
 
-# Kenar çubuğu — yetenekler
 with st.sidebar:
-    st.markdown('<div class="side-title">personas</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="cap"><span class="ic">📄</span><span>Belgelerinden kaynak göstererek cevap</span></div>'
-        '<div class="cap"><span class="ic">📅</span><span>Takvimini okur, onayınla etkinlik ekler</span></div>'
-        '<div class="cap"><span class="ic">✉️</span><span>Mailini okur, onayınla e-posta gönderir</span></div>'
-        '<div class="cap"><span class="ic">🚀</span><span>Uygulama açar ("Spotify aç")</span></div>'
-        '<div class="cap"><span class="ic">⚡</span><span>Tamamen offline · Foundry Local</span></div>',
+        '<div class="side-title">PERSONAS</div>'
+        '<div class="cap"><i class="ti ti-file-text"></i><span>Belgelerinden cevap</span></div>'
+        '<div class="cap"><i class="ti ti-calendar"></i><span>Takvim + etkinlik</span></div>'
+        '<div class="cap"><i class="ti ti-mail"></i><span>Mail oku + gönder</span></div>'
+        '<div class="cap"><i class="ti ti-rocket"></i><span>Uygulama açar</span></div>'
+        '<div class="side-foot"><i class="ti ti-bolt"></i><span>Offline · Foundry Local</span></div>',
         unsafe_allow_html=True,
     )
 
-# Başlık
 st.markdown(
-    '<div class="app-header">'
-    '<div class="logo"><span class="bolt">⚡</span> <span class="p">person</span>as</div>'
-    '<div class="sub">Offline kişisel asistanın — belgelerin, takvimin ve mailin tek yerde</div>'
-    '</div><div class="divider"></div>',
+    '<div class="hdr">'
+    '<div class="logo"><i class="ti ti-bolt" style="color:#F5C518"></i> <span class="g">person</span>as</div>'
+    '<div class="sub">offline kişisel asistanın — belgelerin, takvimin, mailin</div>'
+    '</div><div class="rule"></div>',
     unsafe_allow_html=True,
 )
 
 if "history" not in st.session_state:
-    st.session_state.history = []  # list of (role, text, sources)
+    st.session_state.history = []
 if "pending" not in st.session_state:
     st.session_state.pending = None
+
+if not st.session_state.history:
+    st.session_state.history.append(
+        ("assistant", "Merhaba! Belgelerin, takvimin ve mailin hakkında soru sorabilir; "
+                      "\"yarın 15:00 toplantı ekle\" ya da \"Spotify aç\" gibi işlemler isteyebilirsin.", None)
+    )
 
 
 def bubble_html(role, text, sources):
@@ -106,30 +104,23 @@ def bubble_html(role, text, sources):
     safe = html.escape(text).replace("\n", "<br>")
     src = ""
     if sources:
-        chips = "".join(f'<span class="source-badge">{html.escape(s)}</span>' for s in sources)
+        chips = "".join(f'<span class="pill">{html.escape(s)}</span>' for s in sources)
         src = f'<div class="src-row">{chips}</div>'
     return f'<div class="row {cls}"><div class="bubble {cls}">{safe}{src}</div></div>'
 
 
-if not st.session_state.history:
-    st.session_state.history.append(
-        ("assistant", "Merhaba! Ben personas. Belgelerin, takvimin ve mailin hakkında "
-                      "soru sorabilir; \"yarın 15:00 toplantı ekle\" gibi işlemler isteyebilirsin.", None)
-    )
-
 chat_html = "".join(bubble_html(r, t, s) for (r, t, s) in st.session_state.history)
 st.markdown(f'<div class="chat">{chat_html}</div>', unsafe_allow_html=True)
 
-# Bekleyen onay
 if st.session_state.pending:
     st.markdown('<div class="confirm-note">⚠️ Bu işlemi onaylıyor musun?</div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
-    if c1.button("✅ Onayla", type="primary", use_container_width=True):
+    if c1.button("Onayla", type="primary", use_container_width=True):
         msg = assistant.confirm(st.session_state.pending)
         st.session_state.history.append(("assistant", msg, None))
         st.session_state.pending = None
         st.rerun()
-    if c2.button("❌ İptal", use_container_width=True):
+    if c2.button("İptal", use_container_width=True):
         st.session_state.history.append(("assistant", "İptal edildi.", None))
         st.session_state.pending = None
         st.rerun()
