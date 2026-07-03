@@ -1,0 +1,6 @@
+foundry-local-sdk
+openai
+numpy
+streamlit
+pytest
+fastembed
