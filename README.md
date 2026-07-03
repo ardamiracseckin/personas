@@ -30,7 +30,7 @@ Arayüzler: `ui/cli.py`, `ui/web.py`.
 
 # 2) Foundry Local + sohbet modeli
 brew install microsoft/foundrylocal/foundrylocal
-foundry model download phi-3.5-mini
+foundry model download qwen2.5-1.5b
 
 # 3) Python ortamı
 python3 -m venv .venv && source .venv/bin/activate
@@ -41,7 +41,7 @@ python -m app.ingest
 ```
 
 Modelleri kontrol etmek için: `foundry model list`. Kullanılan aliaslar `app/config.py` içindedir
-(`CHAT_MODEL = "phi-3.5-mini"`, embedding: `paraphrase-multilingual-MiniLM-L12-v2`).
+(`CHAT_MODEL = "qwen2.5-1.5b"`, embedding: `paraphrase-multilingual-MiniLM-L12-v2`).
 
 ## Kullanım
 

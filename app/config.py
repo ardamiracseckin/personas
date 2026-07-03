@@ -6,7 +6,8 @@ DOCUMENTS_DIR = DATA_DIR / "documents"
 DB_PATH = DATA_DIR / "assistant.db"
 
 # Foundry Local chat model (verified via `foundry model list`).
-CHAT_MODEL = "phi-3.5-mini"
+# qwen2.5-1.5b: küçük ama phi-3.5-mini'den belirgin daha iyi Türkçe; 8 GB RAM'e uygun.
+CHAT_MODEL = "qwen2.5-1.5b"
 
 # Embedding model — Foundry Local's catalog had no embedding model, so we use a
 # small multilingual model via fastembed (ONNX, CPU-friendly, good Turkish support).

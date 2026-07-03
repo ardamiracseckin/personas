@@ -10,9 +10,12 @@ from app import llm, retriever, router
 from app.tools import app_launcher, calendar_tool, mail_tool
 
 SYSTEM_PROMPT = (
-    "Sen yardımcı bir Türkçe kişisel asistansın. SADECE sana verilen BAĞLAM'ı "
-    "kullanarak yanıt ver. Bağlamda cevap yoksa 'Bu konuda bilgim yok.' de. "
-    "Mümkünse kaynağı belirt. Kısa, açık ve nazik ol."
+    "Sen 'personas' adlı yardımcı bir kişisel asistansın. HER ZAMAN akıcı ve "
+    "dilbilgisi açısından doğru TÜRKÇE yazarsın. Kurallar:\n"
+    "- Yalnızca sana verilen BAĞLAM'daki bilgiyi kullan; bağlamda yoksa "
+    "'Bu konuda bilgim yok.' de ve asla uydurma.\n"
+    "- Kısa, net ve doğrudan ol; soruyu tekrarlama, gereksiz cümle kurma.\n"
+    "- Komut veya kod verirken bozmadan, doğru biçimde yaz."
 )
 NO_INFO = "Belgelerimde bu konuda bilgi yok."
 
@@ -50,15 +53,31 @@ def answer(query, deps=None):
         return {"text": text, "sources": [s for (s, _t, _sc) in chunks], "pending_action": None}
 
     if tool == "calendar":
-        events = d["calendar"]()
-        context = "\n".join(f"- {e['title']} ({e['start']})" for e in events) or "(etkinlik yok)"
-        text = d["chat"](SYSTEM_PROMPT, f"BUGÜNKÜ ETKİNLİKLER:\n{context}\n\nSORU: {query}")
+        try:
+            events = d["calendar"]()
+        except Exception as e:
+            return {"text": f"Takvime şu an ulaşamadım: {e}", "sources": [], "pending_action": None}
+        if not events:
+            return {"text": "Bugün planlanmış bir etkinliğin görünmüyor.",
+                    "sources": ["Apple Takvim"], "pending_action": None}
+        context = "\n".join(f"- {e['title']} ({e['start']})" for e in events)
+        prompt = (f"Kullanıcının bugünkü takvim etkinlikleri:\n{context}\n\n"
+                  f"Yalnızca bu listeye dayanarak şu soruyu kısa ve doğru yanıtla: {query}")
+        text = d["chat"](SYSTEM_PROMPT, prompt)
         return {"text": text, "sources": ["Apple Takvim"], "pending_action": None}
 
     if tool == "mail":
-        mails = d["mail"]()
-        context = "\n".join(f"- {m['subject']} — {m['sender']}" for m in mails) or "(mail yok)"
-        text = d["chat"](SYSTEM_PROMPT, f"OKUNMAMIŞ MAİLLER:\n{context}\n\nSORU: {query}")
+        try:
+            mails = d["mail"]()
+        except Exception as e:
+            return {"text": f"Mail'e şu an ulaşamadım: {e}", "sources": [], "pending_action": None}
+        if not mails:
+            return {"text": "Okunmamış e-postan yok.",
+                    "sources": ["Apple Mail"], "pending_action": None}
+        context = "\n".join(f"- {m['subject']} — {m['sender']}" for m in mails)
+        prompt = (f"Kullanıcının okunmamış e-postaları:\n{context}\n\n"
+                  f"Yalnızca bu listeye dayanarak şu soruyu kısa ve doğru yanıtla: {query}")
+        text = d["chat"](SYSTEM_PROMPT, prompt)
         return {"text": text, "sources": ["Apple Mail"], "pending_action": None}
 
     text = d["chat"](SYSTEM_PROMPT, query)
