@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>personas — Çevrimdışı RAG Asistanı</title>
+<style>
+  :root{
+    --bg:#0f1216; --panel:#161b22; --line:#252c36; --ink:#e8ecf1; --dim:#9aa6b4;
+    --gold:#e3b341; --green:#4ec9a5; --red:#e06c6c; --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+
+  .deck{height:100vh;display:flex;align-items:center;justify-content:center}
+  .slide{display:none;width:min(1180px,94vw);height:min(680px,88vh);padding:52px 60px;
+         background:linear-gradient(160deg,#151a21,#0f1216);border:1px solid var(--line);
+         border-radius:18px;flex-direction:column;gap:22px;overflow:hidden}
+  .slide.active{display:flex}
+
+  h1{font-size:52px;line-height:1.08;letter-spacing:-.02em}
+  h2{font-size:34px;letter-spacing:-.01em}
+  h2 .num{color:var(--gold);font-family:var(--mono);font-size:20px;margin-right:14px}
+  h3{font-size:19px;color:var(--gold);font-weight:600}
+  p,li{font-size:19px;line-height:1.55;color:var(--ink)}
+  .dim{color:var(--dim)}
+  .lead{font-size:22px;color:var(--dim);max-width:70ch}
+  ul{padding-left:22px;display:flex;flex-direction:column;gap:12px}
+  li::marker{color:var(--gold)}
+  strong{color:var(--gold);font-weight:600}
+  code{font-family:var(--mono);font-size:.9em;background:#0b0e12;border:1px solid var(--line);
+       border-radius:5px;padding:2px 6px;color:var(--green)}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;flex:1;min-height:0}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;
+        display:flex;flex-direction:column;gap:10px}
+  .card p,.card li{font-size:17px}
+  /* İki sütunlu düzende kartlar slayt yüksekliğine geriliyor; içerik dikeyde ortalanınca
+     alt boşluk dengeleniyor. */
+  .cols > .card{justify-content:center}
+  .stat{font-family:var(--mono);font-size:40px;color:var(--gold);line-height:1}
+  .stat.good{color:var(--green)}
+  .label{font-size:14px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em}
+
+  table{width:100%;border-collapse:collapse;font-size:16.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:600;font-size:13.5px;text-transform:uppercase;letter-spacing:.07em}
+  td.mono,th.mono{font-family:var(--mono)}
+  tr.win td{background:rgba(227,179,65,.09)}
+  .ok{color:var(--green)} .bad{color:var(--red)}
+
+  .title-slide{justify-content:center;align-items:flex-start;gap:26px}
+  .kicker{font-family:var(--mono);color:var(--gold);letter-spacing:.14em;font-size:14px;text-transform:uppercase}
+  .meta{display:flex;gap:34px;flex-wrap:wrap;margin-top:8px}
+  .meta div{font-size:16px;color:var(--dim)}
+  .meta b{display:block;color:var(--ink);font-size:17px;font-weight:600;margin-top:3px}
+
+  .quote{border-left:1px solid var(--line);padding:4px 0 4px 18px;font-size:20px;
+         color:var(--dim);font-style:italic}
+  .note{font-size:15px;color:var(--dim)}
+  .note::before{content:attr(data-tag);font-family:var(--mono);font-size:12px;letter-spacing:.1em;
+                margin-right:9px;color:var(--dim)}
+  .note.bad::before{color:var(--red)} .note.good::before{color:var(--green)}
+
+  footer{position:fixed;bottom:18px;left:0;right:0;display:flex;justify-content:center;
+          gap:16px;align-items:center;font-family:var(--mono);font-size:13px;color:var(--dim)}
+  .bar{position:fixed;top:0;left:0;width:100%;height:3px;background:var(--gold);
+       transform-origin:left;transform:scaleX(0);transition:transform .25s}
+  .hint{opacity:.55}
+  @media print{
+    body{overflow:visible;background:#fff}
+    .slide{display:flex!important;page-break-after:always;height:auto;min-height:0;border-radius:0}
+    footer,.bar{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="bar" id="bar"></div>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide active title-slide">
+    <div class="kicker">Summer School · Local RAG AI Assistant with Microsoft Foundry Local</div>
+    <h1>personas<br><span class="dim" style="font-size:34px">Cihazın üzerinde çalışan,<br>internetsiz kişisel asistan</span></h1>
+    <div class="meta">
+      <div>Çalışma zamanı<b>Microsoft Foundry Local</b></div>
+      <div>Donanım<b>Apple M2 · 8 GB RAM</b></div>
+      <div>Bilgi tabanı<b>8 belge · 58 parça</b></div>
+      <div>Ağ trafiği<b>Sıfır</b></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <h2><span class="num">01</span>Problem</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Genel model sizin notlarınızı bilmez</h3>
+        <p>Eğitim verisinde olmayan kişisel notlar, ders kayıtları ve kurum belgeleri sorulduğunda model susmaz, <strong>kendinden emin biçimde uydurur.</strong></p>
+      </div>
+      <div class="card">
+        <h3>Belgeler cihazdan çıkmamalı</h3>
+        <p>Kişisel notlar, takvim ve e-posta bulut API'sine gönderilerek işlenirse gizlilik, saklama ve maliyet sorunları doğar.</p>
+      </div>
+      <div class="card">
+        <h3>İnternet her zaman yok</h3>
+        <p>Asistan uçakta, kampüs ağı olmadan veya kapalı bir laboratuvarda da çalışabilmeli.</p>
+      </div>
+      <div class="card">
+        <h3>Çözüm: yerel RAG</h3>
+        <p>Cevabı modelin ezberinden değil, <strong>cihazdaki belgelerden</strong> üret; kaynağı göster; bulamadığında bilmediğini söyle.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <h2><span class="num">02</span>RAG: Retrieve → Augment → Generate</h2>
+    <svg viewBox="0 0 1060 250" style="width:100%;height:auto">
+      <defs><marker id="a" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+        <path d="M0 0 L9 4.5 L0 9 z" fill="#e3b341"/></marker></defs>
+      <g font-family="var(--sans)" font-size="15" fill="#e8ecf1">
+        <rect x="4" y="90" width="150" height="66" rx="10" fill="#161b22" stroke="#252c36"/>
+        <text x="79" y="122" text-anchor="middle">Kullanıcı sorusu</text>
+        <text x="79" y="142" text-anchor="middle" fill="#9aa6b4" font-size="13">"RAG'in üç adımı?"</text>
+
+        <rect x="214" y="70" width="190" height="106" rx="10" fill="#161b22" stroke="#e3b341"/>
+        <text x="309" y="100" text-anchor="middle" fill="#e3b341" font-weight="600">1 · RETRIEVE</text>
+        <text x="309" y="126" text-anchor="middle" font-size="13.5">Soru vektöre çevrilir,</text>
+        <text x="309" y="146" text-anchor="middle" font-size="13.5">58 parçayla kosinüs</text>
+        <text x="309" y="166" text-anchor="middle" font-size="13.5">benzerliği ölçülür</text>
+
+        <rect x="464" y="70" width="190" height="106" rx="10" fill="#161b22" stroke="#e3b341"/>
+        <text x="559" y="100" text-anchor="middle" fill="#e3b341" font-weight="600">2 · AUGMENT</text>
+        <text x="559" y="126" text-anchor="middle" font-size="13.5">Eşiği geçen en iyi 3</text>
+        <text x="559" y="146" text-anchor="middle" font-size="13.5">parça isteme bağlam</text>
+        <text x="559" y="166" text-anchor="middle" font-size="13.5">olarak eklenir</text>
+
+        <rect x="714" y="70" width="190" height="106" rx="10" fill="#161b22" stroke="#e3b341"/>
+        <text x="809" y="100" text-anchor="middle" fill="#e3b341" font-weight="600">3 · GENERATE</text>
+        <text x="809" y="126" text-anchor="middle" font-size="13.5">Foundry Local'deki</text>
+        <text x="809" y="146" text-anchor="middle" font-size="13.5">model cevabı yalnızca</text>
+        <text x="809" y="166" text-anchor="middle" font-size="13.5">bu bağlamdan yazar</text>
+
+        <rect x="944" y="90" width="112" height="66" rx="10" fill="#161b22" stroke="#4ec9a5"/>
+        <text x="1000" y="116" text-anchor="middle">Cevap</text>
+        <text x="1000" y="138" text-anchor="middle" fill="#4ec9a5" font-size="13">+ kaynak</text>
+
+        <line x1="158" y1="123" x2="208" y2="123" stroke="#e3b341" stroke-width="2" marker-end="url(#a)"/>
+        <line x1="408" y1="123" x2="458" y2="123" stroke="#e3b341" stroke-width="2" marker-end="url(#a)"/>
+        <line x1="658" y1="123" x2="708" y2="123" stroke="#e3b341" stroke-width="2" marker-end="url(#a)"/>
+        <line x1="908" y1="123" x2="938" y2="123" stroke="#e3b341" stroke-width="2" marker-end="url(#a)"/>
+
+        <text x="559" y="228" text-anchor="middle" fill="#9aa6b4" font-size="14.5">
+          Eşiği geçen parça yoksa 3. adım hiç çalıştırılmaz: asistan doğrudan "Belgelerimde bu konuda bilgi yok" der.
+        </text>
+      </g>
+    </svg>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <h2><span class="num">03</span>Mimari</h2>
+    <svg viewBox="0 0 1060 300" style="width:100%;height:auto">
+      <defs><marker id="b" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+        <path d="M0 0 L9 4.5 L0 9 z" fill="#5b6674"/></marker></defs>
+      <g font-size="14.5" fill="#e8ecf1">
+        <rect x="10" y="118" width="132" height="60" rx="10" fill="#161b22" stroke="#252c36"/>
+        <text x="76" y="144" text-anchor="middle">CLI · Streamlit</text>
+        <text x="76" y="164" text-anchor="middle" fill="#9aa6b4" font-size="12.5">ui/cli.py · ui/web.py</text>
+
+        <rect x="196" y="118" width="128" height="60" rx="10" fill="#161b22" stroke="#e3b341"/>
+        <text x="260" y="144" text-anchor="middle" fill="#e3b341">ROUTER</text>
+        <text x="260" y="164" text-anchor="middle" fill="#9aa6b4" font-size="12.5">kural tabanlı</text>
+
+        <rect x="392" y="14" width="210" height="56" rx="10" fill="#161b22" stroke="#252c36"/>
+        <text x="497" y="38" text-anchor="middle">Belge erişimi</text>
+        <text x="497" y="58" text-anchor="middle" fill="#9aa6b4" font-size="12.5">retriever + SQLite (58 parça)</text>
+
+        <rect x="392" y="86" width="210" height="50" rx="10" fill="#161b22" stroke="#252c36"/>
+        <text x="497" y="116" text-anchor="middle">Apple Takvim <tspan fill="#9aa6b4" font-size="12.5">(AppleScript)</tspan></text>
+
+        <rect x="392" y="152" width="210" height="50" rx="10" fill="#161b22" stroke="#252c36"/>
+        <text x="497" y="182" text-anchor="middle">Apple Mail <tspan fill="#9aa6b4" font-size="12.5">(AppleScript)</tspan></text>
+
+        <rect x="392" y="218" width="210" height="50" rx="10" fill="#161b22" stroke="#252c36"/>
+        <text x="497" y="248" text-anchor="middle">Uygulama açma</text>
+
+        <rect x="668" y="118" width="180" height="60" rx="10" fill="#161b22" stroke="#e3b341"/>
+        <text x="758" y="142" text-anchor="middle" fill="#e3b341">Foundry Local</text>
+        <text x="758" y="162" text-anchor="middle" fill="#9aa6b4" font-size="12.5">yerel LLM · OpenAI uyumlu</text>
+
+        <rect x="898" y="118" width="150" height="60" rx="10" fill="#161b22" stroke="#4ec9a5"/>
+        <text x="973" y="142" text-anchor="middle">Cevap + kaynak</text>
+        <text x="973" y="162" text-anchor="middle" fill="#e06c6c" font-size="12.5">yazma → onay kapısı</text>
+
+        <line x1="146" y1="148" x2="192" y2="148" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M328 148 C356 148 356 42 388 42" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M328 148 C356 148 356 111 388 111" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M328 148 C356 148 356 177 388 177" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M328 148 C356 148 356 243 388 243" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M606 42 C640 42 640 140 664 140" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M606 111 C640 111 640 145 664 145" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M606 177 C640 177 640 152 664 152" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <path d="M606 243 C640 243 640 158 664 158" fill="none" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+        <line x1="852" y1="148" x2="894" y2="148" stroke="#5b6674" stroke-width="1.6" marker-end="url(#b)"/>
+      </g>
+    </svg>
+    <p class="dim" style="font-size:17px">Her modülün tek sorumluluğu var; router dışındaki hiçbir katman "hangi araç" sorusunu yeniden sormuyor. Yazma işlemleri (etkinlik ekleme, mail gönderme) mimaride ayrı bir onay kapısından geçiyor.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <h2><span class="num">04</span>Teknoloji ve kısıtlar</h2>
+    <div class="cols">
+      <div>
+        <table>
+          <tr><th>Katman</th><th>Seçim</th></tr>
+          <tr><td>Sohbet modeli</td><td class="mono">phi-4-mini · Foundry Local</td></tr>
+          <tr><td>Embedding</td><td class="mono">paraphrase-multilingual-MiniLM</td></tr>
+          <tr><td>Veritabanı</td><td class="mono">SQLite · tek dosya</td></tr>
+          <tr><td>Benzerlik</td><td class="mono">kosinüs · bellek içi</td></tr>
+          <tr><td>Arayüz</td><td class="mono">CLI + Streamlit</td></tr>
+          <tr><td>Araçlar</td><td class="mono">AppleScript (takvim/mail)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>İki bilinçli sapma</h3>
+        <p><strong>Embedding yerelde, Foundry dışında.</strong> Foundry Local kataloğunda embedding görevine sahip model bulunmuyor (bugün de doğrulandı), bu yüzden vektörler <code>fastembed</code> ile üretiliyor. Çevrimdışılık bozulmuyor.</p>
+        <p><strong>Vektör veritabanı yok.</strong> 58 parça için Chroma/FAISS gereksiz; tüm vektörler belleğe okunup kosinüs hesaplanıyor. Ölçülen erişim süresi milisaniyeler mertebesinde.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <h2><span class="num">05</span>Bilgi tabanı: 3 parçadan 58 parçaya</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Önce</h3>
+        <p>3 belge, her biri ~400 bayt. Belgeler parça sınırının altında kaldığı için <strong>parçalama hiç çalışmıyordu</strong>: veritabanında toplam 3 kayıt vardı ve erişim, "üç belgeden birini seç"e indirgenmişti.</p>
+        <p class="note bad" data-tag="SONUÇ">RAG çekirdeği ne sınanabiliyor ne gösterilebiliyordu.</p>
+      </div>
+      <div class="card">
+        <h3>Sonra</h3>
+        <p>8 Türkçe teknik not · <strong>58 parça</strong> · ortalama 433 karakter (~1–3 paragraf).</p>
+        <p>Parçalama başlık farkındalıklı: markdown başlıkları parça sınırı sayılıyor ve <strong>her parça kendi başlığını taşıyor</strong>, böylece tek başına hangi konuya ait olduğunu belirtiyor.</p>
+        <p class="note good" data-tag="ÖLÇÜM">800 ile 1000 karakter aynı sonucu veriyor: parçaları bölen şey karakter sınırı değil, belgenin kendi bölüm yapısı.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <h2><span class="num">06</span>Nasıl ölçtük</h2>
+    <p class="lead">30 soruluk sabit set (<code>eval/questions.json</code>), tek komutla koşan değerlendirme betiği, markdown rapor çıktısı.</p>
+    <div class="cols3">
+      <div class="card"><div class="stat">14</div><div class="label">Cevaplanabilir</div><p class="dim" style="font-size:15px">Beklenen kaynak dosya adıyla birlikte yazılı</p></div>
+      <div class="card"><div class="stat">6</div><div class="label">Cevaplanamaz</div><p class="dim" style="font-size:15px">Docker, Kubernetes, Excel… uydurmamalı</p></div>
+      <div class="card"><div class="stat">4</div><div class="label">Uç durum</div><p class="dim" style="font-size:15px">Boş sorgu, tek kelime, çok genel, çok uzun</p></div>
+    </div>
+    <div class="cols" style="flex:0">
+      <div class="card">
+        <h3>Deterministik metrikler — LLM'siz</h3>
+        <p>Yönlendirme doğruluğu ve erişim isabeti (hit@K) modeli hiç çalıştırmadan ölçülür; saniyeler sürer ve <strong>pytest içinde regresyon testi</strong> olarak da koşar.</p>
+      </div>
+      <div class="card">
+        <h3>Üretim metrikleri — modelle</h3>
+        <p>Çekimserlik, gecikme (p50/p95) ve elle kalite puanı. Her koşum ısınma turuyla başlar; ilk çağrıdaki model yükleme süresi ölçüme karışmaz.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <h2><span class="num">07</span>Kritik bulgu: eşik tahminle seçilemez</h2>
+    <div class="cols">
+      <div>
+        <svg viewBox="0 0 480 300" style="width:100%;height:auto">
+          <g font-size="12" fill="#9aa6b4" font-family="ui-monospace,monospace">
+            <line x1="52" y1="20" x2="52" y2="238" stroke="#252c36"/>
+            <line x1="52" y1="238" x2="462" y2="238" stroke="#252c36"/>
+            <text x="16" y="26">100%</text><text x="22" y="134">50%</text><text x="30" y="242">0%</text>
+            <line x1="52" y1="20" x2="462" y2="20" stroke="#1b2027"/>
+            <line x1="52" y1="129" x2="462" y2="129" stroke="#1b2027"/>
+            <!-- x ekseni: 0.15 .. 0.50, 8 nokta, adım 58.5 -->
+            <text x="44" y="256">.15</text><text x="161" y="256">.25</text>
+            <text x="278" y="256">.35</text><text x="395" y="256">.45</text>
+            <!-- erişim isabeti: 100,100,100,100,100,100,86,57 -->
+            <polyline fill="none" stroke="#4ec9a5" stroke-width="2.5"
+              points="52,20 110,20 169,20 227,20 286,20 344,20 403,50 461,145"/>
+            <!-- çekimserlik: 0,0,33,33,50,83,100,100 -->
+            <polyline fill="none" stroke="#e3b341" stroke-width="2.5"
+              points="52,238 110,238 169,166 227,166 286,129 344,57 403,20 461,20"/>
+            <line x1="344" y1="14" x2="344" y2="244" stroke="#e06c6c" stroke-dasharray="4 4"/>
+            <text x="350" y="14" fill="#e06c6c" font-size="11.5">seçilen 0.40</text>
+            <circle cx="344" cy="20" r="4" fill="#4ec9a5"/><circle cx="344" cy="57" r="4" fill="#e3b341"/>
+          </g>
+        </svg>
+        <p style="font-size:15px;color:var(--dim);text-align:center">
+          <span style="color:var(--green)">■</span> erişim isabeti &nbsp;
+          <span style="color:var(--gold)">■</span> çekimserlik
+        </p>
+      </div>
+      <div class="card">
+        <h3>Eski eşik 0.20 sessizce bozuktu</h3>
+        <p>Cevaplanamaz soruların <strong>altısı da</strong> eşiği geçiyordu: "Docker imajı nasıl oluşturulur?" sorusunda modele alakasız macOS notları bağlam olarak gidiyordu. Uydurmama garantisi tamamen modelin insafındaydı.</p>
+        <h3>Kusursuz eşik yok</h3>
+        <p>Cevaplanabilirlerin en düşük skoru <strong>0.430</strong>, cevaplanamazların en yükseği <strong>0.440</strong>. İki dağılım çakışıyor.</p>
+        <p><strong>Karar: 0.40.</strong> Erişim isabeti tam kalır (14/14), çekimserlik 0/6 → 5/6 olur, kalan tek sızıntıyı istemdeki "bilmiyorum de" kuralı yakalar.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <h2><span class="num">08</span>Sonuçlar</h2>
+    <div class="cols3">
+      <div class="card"><div class="stat good">6/6</div><div class="label">Yönlendirme doğruluğu</div></div>
+      <div class="card"><div class="stat good">14/14</div><div class="label">Erişim isabeti (hit@3)</div></div>
+      <div class="card"><div class="stat good">5/6</div><div class="label">Cevaplanamazda çekimserlik</div></div>
+      <div class="card"><div class="stat">22/28</div><div class="label">Cevap kalitesi (elle)</div></div>
+      <div class="card"><div class="stat">3.95 sn</div><div class="label">p50 yanıt süresi</div></div>
+      <div class="card"><div class="stat">0</div><div class="label">Uç durumda çökme</div></div>
+    </div>
+    <div class="card" style="flex:0">
+      <h3>Ağır işi erişim katmanı yapıyor</h3>
+      <p>Cevaplanamaz 6 sorunun 5'inde eşik hiç parça bırakmadı: asistan dil modelini hiç çağırmadan, ~0.02 saniyede "Belgelerimde bu konuda bilgi yok" dedi. Eşiği aşan tek soruda (<em>"Fotoğrafta diyafram değeri neyi etkiler?"</em>) phi-4-mini bağlamdaki alakasız parçayı kullanmadı ama <strong>kendi genel bilgisinden</strong> cevap verdi. Aynı soruda qwen2.5-1.5b çekimser kalmıştı: güçlü model, bağlam dışına çıkma eğilimini de getiriyor.</p>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <h2><span class="num">09</span>Model karşılaştırması</h2>
+    <table id="model-table">
+      <tr><th>Model</th><th class="mono">Boyut</th><th class="mono">Kalite</th><th class="mono">p50</th><th>Çekimserlik</th><th>Not</th></tr>
+      <tr class="win"><td class="mono">phi-4-mini</td><td class="mono">3.7 GB</td><td class="mono">22/28</td><td class="mono">3.95 sn</td><td>5/6</td><td>Seçilen: cevap doğruluğunda açık ara önde</td></tr>
+      <tr><td class="mono">qwen2.5-1.5b</td><td class="mono">1.5 GB</td><td class="mono">18/28</td><td class="mono">2.45 sn</td><td class="ok">6/6</td><td>En hızlısı; hafif donanım için alternatif</td></tr>
+      <tr><td class="mono">phi-3.5-mini</td><td class="mono">2.2 GB</td><td class="mono">11/28</td><td class="mono">4.01 sn</td><td>5/6</td><td>Bozuk Türkçe, veri kaybettiren komut, halüsinasyon</td></tr>
+      <tr><td class="mono">qwen3-1.7b</td><td class="mono">1.4 GB</td><td class="mono">—</td><td class="mono">7.50 sn</td><td>5/6</td><td>Elendi: cevabın önüne İngilizce muhakeme yazıyor</td></tr>
+    </table>
+    <div class="cols">
+      <div class="card">
+        <h3 class="bad" style="color:var(--red)">phi-3.5-mini · halüsinasyon</h3>
+        <p class="quote" style="font-size:17px">"Fotoğrafta diyafram değeri neyi etkiler?"<br>→ <em>"Cmd + Shift + 5 tuşları etkiler…"</em></p>
+        <p style="font-size:16px">Alakasız macOS parçasını bağlam sanıp cevap uydurdu. Ayrıca "son commit'i geri al ama değişiklikleri koru" sorusuna <code>git reset --hard</code> önerdi: veri kaybettiren komut.</p>
+      </div>
+      <div class="card">
+        <h3>Büyük model her zaman iyi model değil</h3>
+        <p style="font-size:16px">2.2 GB'lık phi-3.5-mini, 1.5 GB'lık qwen2.5-1.5b'nin belirgin biçimde gerisinde. Seçim kriteri parametre sayısı değil, <strong>hedef dilde talimat takibi</strong>. Kalite sütunu 14 sorunun elle puanlanmasıdır (en yüksek 28).</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <h2><span class="num">10</span>Canlı demo akışı</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>1 · Belgeden cevap + kaynak</h3>
+        <p class="quote" style="font-size:17px">"Ekran görüntüsünü belirli bir bölgeden nasıl alırım?"</p>
+        <p style="font-size:16px">Cmd + Shift + 4 · <span class="dim">Kaynak: macos-kisayollar.md</span></p>
+      </div>
+      <div class="card">
+        <h3>2 · Bilmediğini söyleme</h3>
+        <p class="quote" style="font-size:17px">"Kubernetes'te bir pod nasıl silinir?"</p>
+        <p style="font-size:16px">"Belgelerimde bu konuda bilgi yok." <span class="dim">(model hiç çağrılmadan, 0.02 sn)</span></p>
+      </div>
+      <div class="card">
+        <h3>3 · Takvim okuma</h3>
+        <p class="quote" style="font-size:17px">"Bugün takvimimde ne var?"</p>
+        <p style="font-size:16px">Apple Takvim'den okunan etkinlikler özetlenir. <span class="dim">İnternet yok, AppleScript.</span></p>
+      </div>
+      <div class="card">
+        <h3>4 · Onaylı yazma</h3>
+        <p class="quote" style="font-size:17px">"Yarın 15:00 dişçi randevusu ekle"</p>
+        <p style="font-size:16px">Taslak gösterilir, <strong>onay beklenir</strong>, ancak onaydan sonra etkinlik eklenir.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide">
+    <h2><span class="num">11</span>Yetki sınırı: insan onaylı yazma</h2>
+    <p class="lead">Asistan okumada serbest, yazmada değil. Bu bir arayüz tercihi değil, mimari kural.</p>
+    <div class="cols">
+      <div class="card">
+        <h3>Nasıl çalışıyor</h3>
+        <p><code>assistant.answer()</code> yazma niyeti gördüğünde işlemi <strong>yapmaz</strong>; taslağı <code>pending_action</code> olarak döndürür. İşlemi yalnızca arayüzün onay sonrası çağırdığı <code>confirm()</code> gerçekleştirir.</p>
+      </div>
+      <div class="card">
+        <h3>Neden</h3>
+        <ul style="gap:8px">
+          <li style="font-size:16px">Küçük modelin yanlış anladığı bir cümle e-posta göndermemeli</li>
+          <li style="font-size:16px">Silme yeteneği hiç yok — geri alınamaz işlem yok</li>
+          <li style="font-size:16px">Taslak eksikse (ör. adres yok) işlem yapılmaz, kullanıcıdan bilgi istenir</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide">
+    <h2><span class="num">12</span>Öğrenilenler ve sınırlar</h2>
+    <div class="cols">
+      <div class="card">
+        <h3>Öğrenilenler</h3>
+        <ul style="gap:10px">
+          <li style="font-size:16.5px"><strong>Ölçmeden ayar seçilmiyor.</strong> Makul görünen 0.20 eşiği, sistemin uydurma korumasını tamamen devre dışı bırakmıştı.</li>
+          <li style="font-size:16.5px"><strong>Parça yapısı erişimden önemli.</strong> Belgeler büyümeden RAG'in çalışıp çalışmadığı görülemiyor.</li>
+          <li style="font-size:16.5px"><strong>Büyük model her zaman iyi model değil.</strong> 2.2 GB'lık phi-3.5-mini, 1.5 GB'lık qwen2.5-1.5b'nin gerisinde kaldı; ölçmeden seçilemiyor.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Sınırlar</h3>
+        <ul style="gap:10px">
+          <li style="font-size:16.5px">Küçük yerel model: genel sohbette zayıf, en iyi kendi belgelerinde.</li>
+          <li style="font-size:16.5px">Takvim/mail yalnızca Apple uygulamaları (macOS).</li>
+          <li style="font-size:16.5px">Bellek içi kosinüs binlerce parçaya kadar yeter; ötesinde vektör indeksi gerekir.</li>
+          <li style="font-size:16.5px">Kalite puanlaması elle yapılıyor; otomatik cevap doğruluğu ölçümü yok.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <span id="counter">1 / 13</span>
+  <span class="hint">← → veya boşluk ile gezinin · F ile tam ekran</span>
+</footer>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  const counter = document.getElementById('counter');
+  const bar = document.getElementById('bar');
+  let i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    counter.textContent = `${i + 1} / ${slides.length}`;
+    bar.style.transform = `scaleX(${(i + 1) / slides.length})`;
+  }
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key.toLowerCase() === 'f') {
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('a')) show(i + 1); });
+  show(0);
+</script>
+</body>
+</html>

@@ -39,7 +39,7 @@ def _discover_base_url():
     if not m:
         raise RuntimeError(
             "Foundry Local servisine ulaşılamadı. Terminalde şunu çalıştırın: "
-            "'foundry model load phi-3.5-mini' (servis otomatik başlar)."
+            f"'foundry model load {config.CHAT_MODEL}' (servis otomatik başlar)."
         )
     return m.group(0) + "/v1"
 
@@ -55,6 +55,16 @@ def _ensure_model_loaded():
         pass
 
 
+def pick_model(ids, alias):
+    """Takma adla başlayan model kimliğini seç; eşleşme yoksa None.
+
+    Başka bir modele düşmek yok: yanlış modelle cevap üretmek, hata vermekten
+    daha kötüdür (ölçümler ve demo sessizce başka modeli kullanabilirdi).
+    """
+    want = alias.lower()
+    return next((i for i in ids if i.lower().startswith(want)), None)
+
+
 def _client():
     """Lazy-init the OpenAI client against Foundry Local. Returns (client, model_id)."""
     global _openai, _model_id
@@ -64,15 +74,16 @@ def _client():
         _openai = OpenAI(base_url=_discover_base_url(), api_key="not-needed")
     if _model_id is None:
         ids = [m.id for m in _openai.models.list().data]
-        if not ids:
-            _ensure_model_loaded()
-            ids = [m.id for m in _openai.models.list().data]
-        want = config.CHAT_MODEL.lower()
-        _model_id = next((i for i in ids if i.lower().startswith(want)), ids[0] if ids else None)
+        _model_id = pick_model(ids, config.CHAT_MODEL)
         if _model_id is None:
+            _ensure_model_loaded()  # yapılandırılan model yüklü değil: yüklemeyi dene
+            ids = [m.id for m in _openai.models.list().data]
+            _model_id = pick_model(ids, config.CHAT_MODEL)
+        if _model_id is None:
+            yuklu = ", ".join(ids) if ids else "yok"
             raise RuntimeError(
-                "Foundry Local'de yüklü model bulunamadı. "
-                "'foundry model load phi-3.5-mini' çalıştırın."
+                f"'{config.CHAT_MODEL}' Foundry Local'de yüklü değil (yüklü olanlar: {yuklu}). "
+                f"Çalıştırın: foundry model load {config.CHAT_MODEL}"
             )
     return _openai, _model_id
 

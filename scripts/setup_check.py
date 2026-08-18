@@ -1,7 +1,12 @@
 import os
 import shutil
+import sys
+from pathlib import Path
 
-from app import llm, store
+# Proje kökünü import yoluna ekle (python scripts/setup_check.py ile de çalışsın diye).
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from app import llm, store  # noqa: E402
 
 
 def check(name, fn):

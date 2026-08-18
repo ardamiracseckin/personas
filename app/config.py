@@ -6,8 +6,11 @@ DOCUMENTS_DIR = DATA_DIR / "documents"
 DB_PATH = DATA_DIR / "assistant.db"
 
 # Foundry Local chat model (verified via `foundry model list`).
-# qwen2.5-1.5b: küçük ama phi-3.5-mini'den belirgin daha iyi Türkçe; 8 GB RAM'e uygun.
-CHAT_MODEL = "qwen2.5-1.5b"
+# Dört aday aynı soru setiyle ölçüldü (bkz. docs/eval/degerlendirme-raporu.md §5):
+# phi-4-mini kalitede açık ara önde (22/28), qwen2.5-1.5b daha hızlı (p50 2.45 sn'ye karşı
+# 3.95 sn) ama iki ağır hata yapıyor. Doğruluk, hız yerine tercih edildi.
+# Daha hafif alternatif: CHAT_MODEL = "qwen2.5-1.5b" (1.5 GB, p50 2.45 sn).
+CHAT_MODEL = "phi-4-mini"
 
 # Embedding model — Foundry Local's catalog had no embedding model, so we use a
 # small multilingual model via fastembed (ONNX, CPU-friendly, good Turkish support).

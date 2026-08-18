@@ -35,3 +35,15 @@ def test_chat_returns_content(monkeypatch):
 def test_embed_returns_lists(monkeypatch):
     monkeypatch.setattr(llm, "_embedder", lambda: _FakeEmbedder())
     assert llm.embed(["a", "b"]) == [[0.1, 0.2], [0.1, 0.2]]
+
+
+def test_pick_model_matches_alias_prefix():
+    ids = ["qwen2.5-1.5b-instruct-generic-gpu:4", "Phi-4-mini-instruct-generic-gpu:5"]
+    assert llm.pick_model(ids, "phi-4-mini") == "Phi-4-mini-instruct-generic-gpu:5"
+    assert llm.pick_model(ids, "qwen2.5-1.5b") == "qwen2.5-1.5b-instruct-generic-gpu:4"
+
+
+def test_pick_model_returns_none_instead_of_falling_back():
+    # Yanlış modelle sessizce cevap üretmektense hiç model seçmemek doğrudur.
+    assert llm.pick_model(["qwen2.5-1.5b-instruct-generic-gpu:4"], "phi-4-mini") is None
+    assert llm.pick_model([], "phi-4-mini") is None
