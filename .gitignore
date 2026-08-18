@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 data/assistant.db
 .DS_Store
+
+# Word geçici kilit dosyaları
+~$*

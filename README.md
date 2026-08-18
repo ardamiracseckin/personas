@@ -1,6 +1,6 @@
 # personas — Kişisel Asistan (offline)
 
-Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Üç işi yapar:
+Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Dört işi yapar:
 
 1. **Belge Soru-Cevap (RAG):** `data/documents/` içindeki kendi belgelerinden kaynak göstererek cevap verir; bilmediğinde "bilmiyorum" der.
 2. **Takvim:** Apple Takvim'i okur ve özetler; **onayınla** yeni etkinlik ekler.
@@ -23,7 +23,7 @@ Soru → router (belge? takvim? mail? sohbet?) → bağlam topla / taslak çıka
 ```
 
 Modüller: `app/config.py`, `store.py`, `chunking.py`, `similarity.py`, `llm.py`,
-`ingest.py`, `retriever.py`, `router.py`, `assistant.py`, `app/tools/{applescript,calendar_tool,mail_tool}.py`.
+`ingest.py`, `retriever.py`, `router.py`, `assistant.py`, `app/tools/{applescript,calendar_tool,mail_tool,app_launcher}.py`.
 Arayüzler: `ui/cli.py`, `ui/web.py`.
 
 ## Kurulum
