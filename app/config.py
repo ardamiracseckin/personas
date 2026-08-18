@@ -13,9 +13,13 @@ CHAT_MODEL = "qwen2.5-1.5b"
 # small multilingual model via fastembed (ONNX, CPU-friendly, good Turkish support).
 EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
-# Retrieval tunables
+# Retrieval tunables — eval/questions.json üzerinde ölçülerek seçildi
+# (bkz. docs/eval/degerlendirme-raporu.md). TOP_K=1 iken isabet 13/14, K>=2 iken 14/14;
+# K=3 marj bırakır. Eşik 0.40: cevaplanabilirlerin en düşük skoru 0.43,
+# cevaplanamazların en yükseği 0.44 olduğu için kusursuz ayıran eşik yok —
+# 0.40 erişimi tam tutar, kalan sızıntıyı istemdeki "bilmiyorum" kuralı karşılar.
 TOP_K = 3
-SIM_THRESHOLD = 0.20  # cosine below this ⇒ treat as "no relevant info"
+SIM_THRESHOLD = 0.40  # cosine below this ⇒ treat as "no relevant info"
 
 # Chunking
 # Parçalama başlık sınırlarında bölündüğü için bu üst sınır nadiren devreye girer:
