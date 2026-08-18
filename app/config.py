@@ -18,4 +18,6 @@ TOP_K = 3
 SIM_THRESHOLD = 0.20  # cosine below this ⇒ treat as "no relevant info"
 
 # Chunking
+# Parçalama başlık sınırlarında bölündüğü için bu üst sınır nadiren devreye girer:
+# 8 belgelik bilgi tabanında 58 parça, ortalama 433 karakter (~1-3 paragraf).
 MAX_CHUNK_CHARS = 800
