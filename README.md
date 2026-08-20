@@ -7,27 +7,43 @@ Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Dört işi yapar:
 3. **Mail:** Apple Mail'i okur ve özetler; **onayınla** e-posta gönderir.
 4. **Uygulama açma:** "Spotify aç", "hesap makinesi aç" gibi komutlarla Mac uygulamalarını açar.
 
-Asistanın "beyni" [Microsoft Foundry Local](https://learn.microsoft.com/azure/ai-foundry/foundry-local/) ile cihazda çalışan bir LLM'dir (bulut/Azure yok). Embedding'ler `fastembed` ile yereldir — Foundry Local kataloğunda embedding görevine sahip model bulunmuyor.
+Asistanın "beyni" [Microsoft Foundry Local](https://learn.microsoft.com/azure/ai-foundry/foundry-local/)
+ile cihazda çalışan bir LLM'dir (bulut/Azure yok). Embedding'ler `fastembed` ile yereldir — Foundry
+Local kataloğunda embedding görevine sahip model bulunmuyor.
 
 Bilgi tabanı 8 Türkçe teknik nottan oluşur ve ingest sonrası 58 parçaya bölünür. Erişim ayarları
-(`TOP_K = 3`, `SIM_THRESHOLD = 0.40`) tahminle değil, 30 soruluk bir set üzerinde ölçülerek
+(`TOP_K = 3`, `SIM_THRESHOLD = 0.34`) tahminle değil, 44 soruluk bir set üzerinde ölçülerek
 seçilmiştir; ayrıntı için [değerlendirme raporu](docs/eval/degerlendirme-raporu.md).
 
-Cevaplar **akarak** yazılır (küçük modelde tam cevap saniyeler sürüyor) ve asistan **son iki turu**
-hatırlar: "Python'da sanal ortam nasıl oluşturulur?" → "Peki onu nasıl kapatırım?" çalışır.
-
 > Yazma işlemleri (etkinlik ekleme, mail gönderme) **asla onay olmadan** yapılmaz. Silme yoktur.
+
+## Arayüz
+
+Tarayıcıda açılan tek sayfa bir uygulama; hiçbir dış kaynağa (CDN dâhil) bağlanmaz.
+
+- Cevaplar **akarak** yazılır, markdown ve kod blokları biçimlendirilir (dil etiketi + kopyala).
+- **Sohbetler kalıcıdır**: soldaki listeden geçmiş sohbetlere dönülür, yeniden adlandırılır, silinir.
+  Başlığı ilk cevaptan sonra model üretir.
+- **Kaynak rozetine tıklayınca** cevabın dayandığı parça metniyle birlikte açılır.
+- **Belge sürükle-bırak** ile bilgi tabanına anında eklenir (`.md`, `.txt`, `.pdf`).
+- Soldaki menüden **model değiştirilebilir** (8 GB bellekte tek model yüklü kalır, geçiş 20-30 sn).
+- **Durdur / yeniden üret / kopyala**, `Cmd+K` yeni sohbet, `Esc` durdurur.
+- Asistan **son iki turu hatırlar**: "Python'da sanal ortam nasıl oluşturulur?" → "Peki onu nasıl
+  kapatırım?" çalışır.
+- Arama **yazım hatalarına dayanıklıdır**: "ekran görünütsünü bölgden nasıl alrım" doğru notu bulur.
 
 ## Mimari
 
 ```
-Soru → router (belge? takvim? mail? sohbet?) → bağlam topla / taslak çıkar
-     → Foundry Local LLM cevabı üretir → CLI veya Web'de göster
+Soru → router (belge? takvim? mail? uygulama?) → bağlam topla / taslak çıkar
+     → Foundry Local LLM cevabı üretir → tarayıcıya akıtılır (SSE)
 ```
 
-Modüller: `app/config.py`, `store.py`, `chunking.py`, `similarity.py`, `llm.py`,
-`ingest.py`, `retriever.py`, `router.py`, `assistant.py`, `app/tools/{applescript,calendar_tool,mail_tool,app_launcher}.py`.
-Arayüzler: `ui/cli.py`, `ui/web.py`.
+- `app/` — iş mantığı: `config`, `store`, `chat_store`, `chunking`, `similarity`, `lexical`,
+  `llm`, `models`, `ingest`, `retriever`, `router`, `assistant`,
+  `tools/{applescript,calendar_tool,mail_tool,app_launcher}.py`
+- `server/` — FastAPI (`main.py`) ve tek sayfa arayüz (`static/`)
+- `ui/cli.py` — terminal arayüzü
 
 ## Kurulum
 
@@ -50,24 +66,23 @@ python -m app.ingest
 Modelleri kontrol etmek için: `foundry model list`. Kullanılan aliaslar `app/config.py` içindedir
 (`CHAT_MODEL = "phi-4-mini"`, embedding: `paraphrase-multilingual-MiniLM-L12-v2`).
 
-**Daha hafif donanım için:** `phi-4-mini` 3,7 GB yer kaplar ve p50 3,95 sn sürer. 8 GB bellek
-zorlanıyorsa `app/config.py` içinde `CHAT_MODEL = "qwen2.5-1.5b"` yapın (1,5 GB, p50 2,45 sn);
-karşılığında cevap doğruluğu 22/28'den 18/28'e düşer. Karşılaştırmanın tamamı değerlendirme
-raporundadır.
+**Daha hafif donanım için:** `phi-4-mini` 3,7 GB yer kaplar. 8 GB bellek zorlanıyorsa arayüzdeki
+model menüsünden `qwen2.5-1.5b` seçilebilir (1,5 GB, belirgin daha hızlı); karşılığında cevap
+doğruluğu düşer. Karşılaştırmanın tamamı değerlendirme raporundadır.
 
 ## Kullanım
 
 ```bash
+# Web arayüzü
+uvicorn server.main:app --port 8000      # → http://localhost:8000
+
 # Terminal arayüzü
 python -m ui.cli
-
-# Web arayüzü
-streamlit run ui/web.py
 ```
 
 Örnek sorular: "Ekran görüntüsünü belirli bir bölgeden nasıl alırım?",
 "git'te son commit'i nasıl geri alırım?", "Bugün takvimimde ne var?",
-"Yarın 15:00 dişçi randevusu ekle".
+"Cuma 14:30 dişçi randevusu ekle".
 
 ## İzinler (Takvim / Mail)
 
@@ -77,23 +92,23 @@ streamlit run ui/web.py
 ## Testler ve değerlendirme
 
 ```bash
-python -m pytest -q                  # 63 test (birim + soru seti regresyonu)
+python -m pytest -q                  # 167 test (birim, HTTP katmanı, soru seti regresyonu)
 ```
 
-Uçtan uca değerlendirme koşumu, `eval/questions.json` içindeki 30 soruyu çalıştırıp
-`docs/eval/` altına markdown rapor ve tam cevapların JSON dökümünü yazar:
+Değerlendirme koşumu `eval/questions.json` içindeki 44 soruyu çalıştırıp `docs/eval/` altına
+markdown rapor ve tam cevapların JSON dökümünü yazar:
 
 ```bash
 python scripts/evaluate.py                        # tam koşum (model gerekir)
 python scripts/evaluate.py --llm-yok              # sadece deterministik metrikler, saniyeler sürer
-python scripts/evaluate.py --esik 0.30,0.40,0.50  # eşik taraması
+python scripts/evaluate.py --esik 0.30,0.34,0.40  # eşik taraması
 python scripts/evaluate.py --model qwen2.5-1.5b   # başka modelle karşılaştırma
 ```
 
-Ölçülen metrikler: yönlendirme doğruluğu, erişim isabeti (hit@K), cevaplanamaz sorularda
-çekimserlik, gecikme (p50/p95) ve **otomatik kalite puanı** — cevaplanabilir sorulardaki
-`expected_substrings` alanına göre 0–2 puan. Model değiştirip koşumu tekrarlamak yeterli,
-elle puanlama gerekmez.
+Ölçülen metrikler: yönlendirme doğruluğu, erişim isabeti (hit@K), **yazım hatalı sorularda erişim**,
+cevaplanamaz sorularda çekimserlik, gecikme (p50/p95) ve **otomatik kalite puanı** —
+cevaplanabilir sorulardaki `expected_substrings` alanına göre 0–2 puan. Model değiştirip koşumu
+tekrarlamak yeterli, elle puanlama gerekmez.
 
 ## Teslimler
 
@@ -106,11 +121,15 @@ elle puanlama gerekmez.
 
 ## Sınırlar
 
-- Küçük yerel model (8 GB RAM'e uygun) → genel bilgi/sohbet ChatGPT kadar güçlü değildir; en iyi kendi belgelerinden cevaplarken çalışır.
+- Küçük yerel model (8 GB RAM'e uygun) → genel bilgi/sohbet ChatGPT kadar güçlü değildir; en iyi
+  kendi belgelerinden cevaplarken çalışır.
 - Takvim/Mail entegrasyonu yalnızca **Apple** uygulamaları içindir (macOS).
-- Seçilen model, bilgi tabanı dışındaki sorularda nadiren kendi genel bilgisinden cevap verebiliyor;
-  bu tür cevaplarda kaynak gösterilmez (ölçüm: 6 cevaplanamaz sorunun 1'i).
-- Belge biçimi `.txt` ve `.md` ile sınırlıdır; PDF işleme kapsam dışıdır.
+- **Görsel yükleme henüz kapalı:** kod hazır (`llm.chat_stream(..., image_b64=...)`), ancak kurulu
+  Foundry Local 0.8.119 görsel modelleri yükleyemiyor (`genai_config.json` şeması tanınmıyor).
+  Çalışma zamanı 0.10.x'e yükseltilince açılabilir.
+- Model seçimi süreç ömrü boyunca geçerlidir; sunucu yeniden başlatılınca `config.CHAT_MODEL`
+  varsayılanına döner.
+- Sohbet geçmişinde kaynak parçalarının metni saklanmaz; parça paneli yalnızca canlı cevaplarda dolu gelir.
 
 Tasarım dokümanı: `docs/specs/2026-07-03-kisisel-asistan-design.md` ·
 Uygulama planı: `docs/plans/2026-07-03-personas-implementation-plan.md`

@@ -14,11 +14,12 @@ zayıflıkları belgeler. Tüm koşumlar `scripts/evaluate.py` ile üretilmişti
 
 ### 1.1 Soru seti
 
-`eval/questions.json` — 30 soru, dört kategori:
+`eval/questions.json` — 44 soru, beş kategori:
 
 | Kategori | Adet | Beklenen davranış |
 |---|---|---|
 | `cevaplanabilir` | 14 | Belgelerden doğru cevap + doğru kaynak |
+| `yazim_hatasi` | 14 | Aynı soruların bozuk yazımlı hâli; yine doğru kaynağa gitmeli |
 | `cevaplanamaz` | 6 | "Bilgim yok" demeli, uydurmamalı |
 | `uc_durum` | 4 | Boş sorgu, tek kelime, çok genel, çok uzun soru — çökmemeli |
 | `yonlendirme` | 6 | Takvim / mail / uygulama / belge aracına doğru gitmeli |
@@ -70,6 +71,9 @@ planın istediği aralıkta kalıyor. Sonuç: **8 belge, 58 parça.**
 ---
 
 ## 3. Erişim eşiği taraması
+
+> Bu bölüm **yalnız kosinüs** skoruyla yapılan ilk taramayı belgeler. Erişim katmanı sonradan
+> hibrit hâle geldi; güncel tarama ve seçilen eşik (0.34) Bölüm 9'dadır.
 
 İlk ayarlar (`SIM_THRESHOLD = 0.20`, `TOP_K = 3`) ölçüme değil tahmine dayanıyordu. Tarama
 (`python scripts/evaluate.py --esik 0.15,…,0.50 --k 2,3,5`) şunu gösterdi:
@@ -206,7 +210,10 @@ puanla ucuza eleyip, finale kalan modelin cevaplarına bir kez gözle bakmak.
 
 ---
 
-## 6. Seçilen yapılandırmayla nihai sonuçlar
+## 6. Seçilen yapılandırmayla ara sonuçlar
+
+> Bu tablo, hibrit erişim ve arayüz değişikliği öncesindeki durumu belgeler.
+> **Nihai sayılar Bölüm 11'dedir.**
 
 | Metrik | Sonuç |
 |---|---|
@@ -294,3 +301,71 @@ kaybediyordu. İkonlar gömülü SVG'ye çevrildi; dış bağımlılık kalmadı
 Bir şey de bilerek düzeltilmedi: erişimde her sorguda 58 parça SQLite'tan okunup JSON çözülüyor.
 Ölçüldü, **10 ms** sürüyor — darboğaz tamamen modelde olduğu için önbellek eklemek gereksiz
 karmaşıklık olurdu.
+
+---
+
+## 9. Hibrit erişim ve yazım hatası toleransı
+
+Kullanıcı isteği üzerine erişim katmanı yazım hatalarına dayanıklı hâle getirildi. Embedding
+araması bozuk yazımda zayıflıyor: "bölgden" ile "bölgeden" farklı alt-parçalara ayrıldığı için
+vektörler uzaklaşıyor.
+
+**Çözüm.** `app/lexical.py` metni sadeleştiriyor (Türkçe karakterler ASCII'ye, noktalama atılıyor)
+ve sorgu kelimelerini metindeki kelimelerle `difflib` üzerinden bulanık karşılaştırıyor. Skor
+harmanlanıyor: `0.75 × kosinüs + 0.25 × sözlüksel`. Sadeleştirme yalnızca sözlüksel katmanda
+uygulanıyor; sorgu embedding'e ham hâliyle gidiyor, çünkü çok dilli model Türkçe karakterlerle
+eğitilmiş.
+
+**Ölçüm.** 14 cevaplanabilir sorunun bozuk yazımlı hâli (`yazim_hatasi` kategorisi) eklendi:
+
+| Yapılandırma | İsabet | Yazım hatalı isabet | Çekimserlik |
+|---|---|---|---|
+| Yalnız kosinüs (en iyi eşik 0.38) | 14/14 | 12/14 | 5/6 |
+| **Hibrit, eşik 0.34 (seçilen)** | **14/14** | **13/14** | **6/6** |
+
+Sözlüksel katman iki cephede birden kazandırıyor: bozuk yazımda bir soru daha yakalanıyor ve
+cevaplanamaz sorularda çekimserlik tamamlanıyor. Eşiği tek başına düşürerek aynı yazım kazancını
+elde etmek mümkün ama bedeli ağır: yalnız kosinüsle eşik 0.30'a indirildiğinde çekimserlik
+2/6'ya çöküyor.
+
+Kaçan iki soru: `RAGin uc adimi nedir?` (skor 0.26; "RAG" kısaltması bozulunca ne anlam ne de
+kelime tutuyor) ve kısmen `Yarım kalan degisiklikleri...` sorusu.
+
+---
+
+## 10. İki ölçüm hatası
+
+**10.1 Ölçüm, uygulamanın skorunu kullanmıyordu.** `scripts/evaluate.py` içindeki
+`score_questions` yalnızca kosinüs hesaplıyordu; hibrit skor uygulamaya girdikten sonra bile
+taramalar eski formülü ölçmeye devam etti. İlk "hibrit" sonuçları bu yüzden yanlıştı (0.38 eşiği
+seçilmişti). Düzeltmeden sonra doğru eşik 0.34 çıktı ve üç ölçütte birden daha iyi sonuç verdi.
+Ders: ölçüm aracı, ölçtüğü kodu **çağırmalı**, kopyalamamalı.
+
+**10.2 Üretim sınırı yoktu, sonra fazla genişti.** `max_tokens` başta hiç ayarlanmamıştı; sonra
+1200 yapıldı. Ölçüm, belirsiz sorularda modelin 4000+ karakter yazıp yanıtı **48 saniyeye**
+çıkardığını gösterdi. Doğru cevaplar 200-600 karakter sürüyor. Sınır 450 belirtece çekildi ve
+isteme "en fazla birkaç cümle" kuralı eklendi:
+
+| | Önce | Sonra |
+|---|---|---|
+| Otomatik kalite | 26/28 | **28/28** |
+| Ortalama süre | 10,9 sn | **4,6 sn** |
+| p95 süre | 48,2 sn | **10,3 sn** |
+
+Kaliteyi de yükseltmesi beklenmiyordu: sınır, modeli konudan sapmadan cevaplamaya zorluyor.
+
+---
+
+## 11. Arayüz değişikliğinden sonraki nihai durum
+
+| Metrik | Sonuç |
+|---|---|
+| Sohbet modeli | `phi-4-mini` (Foundry Local) |
+| Yönlendirme doğruluğu | 6/6 (%100) |
+| Erişim isabeti hit@3 | 14/14 (%100) |
+| Yazım hatalı sorularda erişim | 13/14 (%93) |
+| Otomatik kalite puanı | 28/28 (%100) |
+| Cevaplanamazda çekimserlik | 6/6 (%100) |
+| Ortalama / p50 / p95 süre | 4,60 sn / 4,50 sn / 10,27 sn |
+| Uç durumlarda çökme | 0 |
+| Test paketi | 167 test, tamamı geçiyor |

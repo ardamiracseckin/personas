@@ -222,8 +222,8 @@
           <tr><td>Sohbet modeli</td><td class="mono">phi-4-mini · Foundry Local</td></tr>
           <tr><td>Embedding</td><td class="mono">paraphrase-multilingual-MiniLM</td></tr>
           <tr><td>Veritabanı</td><td class="mono">SQLite · tek dosya</td></tr>
-          <tr><td>Benzerlik</td><td class="mono">kosinüs · bellek içi</td></tr>
-          <tr><td>Arayüz</td><td class="mono">CLI + Streamlit</td></tr>
+          <tr><td>Benzerlik</td><td class="mono">kosinüs + sözlüksel (hibrit)</td></tr>
+          <tr><td>Arayüz</td><td class="mono">CLI + web (FastAPI + SSE)</td></tr>
           <tr><td>Araçlar</td><td class="mono">AppleScript (takvim/mail)</td></tr>
         </table>
       </div>
@@ -321,14 +321,14 @@
     <div class="cols3">
       <div class="card"><div class="stat good">6/6</div><div class="label">Yönlendirme doğruluğu</div></div>
       <div class="card"><div class="stat good">14/14</div><div class="label">Erişim isabeti (hit@3)</div></div>
-      <div class="card"><div class="stat good">5/6</div><div class="label">Cevaplanamazda çekimserlik</div></div>
-      <div class="card"><div class="stat">24/28</div><div class="label">Cevap kalitesi (otomatik)</div></div>
-      <div class="card"><div class="stat">4.72 sn</div><div class="label">p50 yanıt süresi</div></div>
+      <div class="card"><div class="stat good">6/6</div><div class="label">Cevaplanamazda çekimserlik</div></div>
+      <div class="card"><div class="stat good">28/28</div><div class="label">Cevap kalitesi (otomatik)</div></div>
+      <div class="card"><div class="stat">4.50 sn</div><div class="label">p50 yanıt süresi</div></div>
       <div class="card"><div class="stat">0</div><div class="label">Uç durumda çökme</div></div>
     </div>
     <div class="card" style="flex:0">
       <h3>Ağır işi erişim katmanı yapıyor</h3>
-      <p>Cevaplanamaz 6 sorunun 5'inde eşik hiç parça bırakmadı: asistan dil modelini hiç çağırmadan, ~0.02 saniyede "Belgelerimde bu konuda bilgi yok" dedi. Eşiği aşan tek soruda (<em>"Fotoğrafta diyafram değeri neyi etkiler?"</em>) phi-4-mini bağlamdaki alakasız parçayı kullanmadı ama <strong>kendi genel bilgisinden</strong> cevap verdi. Aynı soruda qwen2.5-1.5b çekimser kalmıştı: güçlü model, bağlam dışına çıkma eğilimini de getiriyor.</p>
+      <p>Cevaplanamaz altı sorunun <strong>altısında da</strong> eşiği geçen parça kalmıyor: asistan dil modelini hiç çağırmadan, ~0.02 saniyede "Belgelerimde bu konuda bilgi yok" diyor. Sözlüksel katman eklendikten sonra, daha önce sızan "diyafram" sorusu da eşiğin altında kaldı.</p>
     </div>
   </section>
 
@@ -425,9 +425,36 @@
     </div>
   </section>
 
-  <!-- 14 -->
+  <!-- 15 -->
   <section class="slide">
-    <h2><span class="num">13</span>Öğrenilenler ve sınırlar</h2>
+    <h2><span class="num">13</span>Arayüz: tanıdık his, yerel çalışma</h2>
+    <p class="lead">Streamlit bırakıldı; yerine FastAPI ve tek sayfalık bir web arayüzü geldi. Hiçbir dış kaynağa bağlanmıyor: ne CDN, ne yazı tipi, ne betik kütüphanesi.</p>
+    <div class="cols">
+      <div class="card">
+        <h3>Ne değişti</h3>
+        <ul style="gap:8px">
+          <li style="font-size:16px">Cevap <strong>token token akıyor</strong>; markdown ve kod blokları biçimleniyor (kopyala düğmesiyle)</li>
+          <li style="font-size:16px">Sohbetler <strong>kalıcı</strong>, başlığı model üretiyor</li>
+          <li style="font-size:16px">Kaynak rozetine tıklayınca cevabın dayandığı <strong>parça metni</strong> açılıyor</li>
+          <li style="font-size:16px">Belge sürükle-bırak, model seçici, durdur / yeniden üret</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Yazım hatasına dayanıklı arama</h3>
+        <p style="font-size:16px">Embedding bozuk yazımda zayıflıyor: <em>"bölgden"</em> ile <em>"bölgeden"</em> farklı alt-parçalara ayrılıyor. Skora sözlüksel bir katman eklendi (0.75 kosinüs + 0.25 bulanık eşleşme).</p>
+        <table style="font-size:15px">
+          <tr><th></th><th class="mono">yazım hatalı</th><th class="mono">çekimserlik</th></tr>
+          <tr><td>yalnız kosinüs</td><td class="mono">12/14</td><td class="mono">5/6</td></tr>
+          <tr class="win"><td>hibrit</td><td class="mono">13/14</td><td class="mono">6/6</td></tr>
+        </table>
+        <p class="note" data-tag="NOT">Eşiği tek başına düşürmek aynı kazancı verir ama çekimserliği 2/6'ya düşürür.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide">
+    <h2><span class="num">14</span>Öğrenilenler ve sınırlar</h2>
     <div class="cols">
       <div class="card">
         <h3>Öğrenilenler</h3>
@@ -435,6 +462,7 @@
           <li style="font-size:16.5px"><strong>Ölçmeden ayar seçilmiyor.</strong> Makul görünen 0.20 eşiği, sistemin uydurma korumasını tamamen devre dışı bırakmıştı.</li>
           <li style="font-size:16.5px"><strong>Parça yapısı erişimden önemli.</strong> Belgeler büyümeden RAG'in çalışıp çalışmadığı görülemiyor.</li>
           <li style="font-size:16.5px"><strong>Büyük model her zaman iyi model değil.</strong> 2.2 GB'lık phi-3.5-mini, 1.5 GB'lık qwen2.5-1.5b'nin gerisinde kaldı; ölçmeden seçilemiyor.</li>
+          <li style="font-size:16.5px"><strong>Ölçüm aracı, ölçtüğü kodu çağırmalı.</strong> Değerlendirme betiği skoru kendi hesaplıyordu; uygulama hibrit skora geçince ölçüm sessizce eski formülü ölçmeye devam etti ve yanlış eşik seçildi.</li>
         </ul>
       </div>
       <div class="card">
@@ -452,7 +480,7 @@
 </div>
 
 <footer>
-  <span id="counter">1 / 14</span>
+  <span id="counter">1 / 15</span>
   <span class="hint">← → veya boşluk ile gezinin · F ile tam ekran</span>
 </footer>
 

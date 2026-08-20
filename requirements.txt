@@ -1,6 +1,9 @@
 foundry-local-sdk
 openai
 numpy
-streamlit
-pytest
 fastembed
+fastapi
+uvicorn
+python-multipart
+pypdf
+pytest
