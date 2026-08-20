@@ -73,8 +73,10 @@ _ICON_BODY = {
     "belge": '<path d="M7 3h6l4 4v14H7z"/><path d="M13 3v4h4"/><path d="M9.5 12h5M9.5 16h5"/>',
     "takvim": '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     "mail": '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>',
-    "roket": '<path d="M12 3c3 2 5 5.5 5 9l-3 3H10l-3-3c0-3.5 2-7 5-9z"/>'
-             '<circle cx="12" cy="10" r="1.6"/><path d="M9 18l-2 3M15 18l2 3"/>',
+    "roket": '<path d="M12 3c2.5 2.2 4 5.2 4 8.5V15H8v-3.5C8 8.2 9.5 5.2 12 3z"/>'
+             '<circle cx="12" cy="9" r="1.4"/>'
+             '<path d="M8 12 5.5 14.5V18L8 16M16 12l2.5 2.5V18L16 16"/>'
+             '<path d="M10.6 18.4c.5 1.3 1.4 2.2 1.4 2.2s.9-.9 1.4-2.2"/>',
     "simsek": '<path d="M13 3 6 13h5l-1 8 7-10h-5z"/>',
 }
 

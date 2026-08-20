@@ -34,8 +34,11 @@ dil modeli hiç çalıştırılmadan ölçülebilir.
   benzerlik eşiği hiç parça bırakmazsa *erişim* katmanı, parça geldiği hâlde model bağlamı yetersiz
   bulursa *model* katmanı çekimser kalır.
 - **Gecikme** — soru başına uçtan uca süre (ortalama, p50, p95). Program hedefi ~1–3 saniye.
-- **Kalite** — cevaplanabilir sorularda elle puanlama: 2 = doğru ve yeterli, 1 = kısmen doğru,
-  0 = yanlış veya alakasız.
+- **Kalite** — cevaplanabilir sorularda 0–2 puan. İlk ölçümlerde elle yapıldı; sonrasında
+  `eval/questions.json` içindeki `expected_substrings` alanıyla **otomatik** hâle getirildi
+  (beklenen ifadelerin hepsi geçerse 2, bir kısmı geçerse 1, hiçbiri geçmezse 0; boşluklar
+  yok sayılır). Böylece model değiştirmek insan puanlaması gerektirmiyor. İki yöntem aynı
+  sıralamayı verdi (Bölüm 5).
 
 Ölçümden önce her koşumda bir **ısınma turu** yapılır; ilk çağrıda model belleğe yüklendiği ve
 embedding modeli ilk kez başlatıldığı için bu süre ölçüme karışmamalıdır.
@@ -117,6 +120,9 @@ K=2 ve üzeri 14/14 veriyor. K=3 marj bırakırken bağlamı gereksiz büyütmü
 | Erişim isabeti hit@1 | 13/14 (%93) |
 | Erişim katmanında çekimserlik | 5/6 (%83) |
 
+*(Yönlendirme seti, Bölüm 8'de anlatılan hatalar bulunduktan sonra çakışan örneklerle
+genişletildi; 6/6 sonucu düzeltme sonrası ölçümdür.)*
+
 Bu metrikler dil modeli çalıştırılmadan ölçüldüğü için saniyeler sürer ve
 `tests/test_eval_questions.py` içinde regresyon testi olarak da koşar: soru setindeki her
 yönlendirme sorusu ve her cevaplanabilir sorunun beklenen kaynağı, testler her çalıştığında
@@ -127,16 +133,23 @@ yeniden doğrulanır.
 ## 5. Model karşılaştırması
 
 Aynı soru seti, 8 GB belleğe sığan dört sohbet modeliyle koşuldu. Her koşumdan önce bir önceki
-model `foundry model unload` ile bellekten boşaltıldı ve ısınma turu yapıldı. Kalite sütunu,
-14 cevaplanabilir sorunun elle puanlanmasıdır (2 = doğru ve yeterli, 1 = kısmen doğru,
-0 = yanlış/alakasız; en yüksek 28).
+model `foundry model unload` ile bellekten boşaltıldı ve ısınma turu yapıldı.
 
-| Model | Boyut | Kalite | p50 | p95 | Çekimserlik | Sonuç |
-|---|---|---|---|---|---|---|
-| **phi-4-mini** | 3,7 GB | **22/28 (%79)** | 3,95 sn | 10,92 sn | 5/6 | **Seçilen** |
-| qwen2.5-1.5b | 1,5 GB | 18/28 (%64) | **2,45 sn** | **5,68 sn** | **6/6** | Hafif alternatif |
-| phi-3.5-mini | 2,2 GB | 11/28 (%39) | 4,01 sn | 11,63 sn | 5/6 | Elendi |
-| qwen3-1.7b | 1,4 GB | — | 7,50 sn | 9,20 sn | 5/6 | Elendi (biçim) |
+Kalite iki yöntemle ölçüldü: **elle** (2 = doğru ve yeterli, 1 = kısmen doğru, 0 = yanlış) ve
+**otomatik** (beklenen ifadelerin hepsi geçerse 2, bir kısmı geçerse 1, hiçbiri geçmezse 0).
+
+| Model | Boyut | Oto kalite | Elle kalite | p50 | p95 | Çekimserlik | Sonuç |
+|---|---|---|---|---|---|---|---|
+| **phi-4-mini** | 3,7 GB | **24/28 (%86)** | **22/28 (%79)** | 4,72 sn | 12,58 sn | 5/6 | **Seçilen** |
+| qwen2.5-1.5b | 1,5 GB | 20/28 (%71) | 18/28 (%64) | **2,98 sn** | **5,88 sn** | **6/6** | Hafif alternatif |
+| phi-3.5-mini | 2,2 GB | 14/28 (%50) | 11/28 (%39) | 4,47 sn | 12,91 sn | 5/6 | Elendi |
+| qwen3-1.7b | 1,4 GB | 20/28 (%71)* | — | 8,36 sn | 10,04 sn | 5/6 | Elendi (biçim) |
+
+*\* Aldatıcı bir puan; nedeni 5.5'te.*
+
+Gecikmeler koşumdan koşuma değişiyor (phi-4-mini iki ayrı koşumda p50 3,95 ve 4,72 saniye verdi).
+Modeller arası fark bu oynaklıktan büyük olduğu için sıralama etkilenmiyor, ancak tek bir ondalık
+basamağa anlam yüklenmemeli.
 
 ### 5.1 phi-4-mini — seçilen
 
@@ -144,13 +157,13 @@ Cevap doğruluğunda açık ara önde. Kritik örnek: *"Git'te son commit'i geri
 korurum?"* sorusuna doğru komutu (`git reset --soft HEAD~1`) veren tek küçük model. SQLite, RAG ve
 VS Code sorularının tamamını doğru yanıtladı.
 
-Bedeli gecikme ve bellektir: p50 3,95 saniye ile programın 1–3 saniyelik hedefinin dışında kalıyor
-ve 8 GB belleğin yaklaşık yarısını kullanıyor. Tek kalite kaybı C03 ("stash" sorusuna commit geri
-alma cevabı vermesi).
+Bedeli gecikme ve bellektir: p50 ~4,7 saniye ile programın 1–3 saniyelik hedefinin dışında kalıyor
+ve 8 GB belleğin yaklaşık yarısını kullanıyor. İki kalite kaybı: "stash" sorusuna commit geri alma
+cevabı vermesi ve eşik sorusunda bulanık bir açıklama üretmesi.
 
 ### 5.2 qwen2.5-1.5b — hafif alternatif
 
-Hız ve çekimserlikte üstün: hedef aralığı tutturan tek model ve cevaplanamaz soruların altısında da
+Hız ve çekimserlikte üstün: hedef aralığa en yakın model ve cevaplanamaz soruların altısında da
 bağlam dışına çıkmadı. Ancak iki ağır hatası var:
 
 - **C07** — cevap üretmek yerine kendisine verilen istemi olduğu gibi geri yazdı
@@ -174,14 +187,22 @@ Program planında örnek model olarak anılmasına rağmen açık farkla en zay�
 
 Model düşünme (*thinking*) kipinde çalışıyor ve Türkçe cevabın önüne İngilizce muhakeme metni
 yazıyor: *"Okay, the user is asking about…"*. Çoğu soruda muhakeme belirteç sınırını doldurduğu için
-cevap hiç görünmüyor. İstemin sonuna `/no_think` eklendiğinde Türkçe cevap üretiyor, ancak tek soru
-7,1 saniye sürüyor. Bu donanımda kullanılabilir değil.
+cevabın kendisi hiç görünmüyor. İstemin sonuna `/no_think` eklendiğinde Türkçe cevap üretiyor, ancak
+tek soru 7,1 saniye sürüyor. Bu donanımda kullanılabilir değil.
 
-### 5.5 Çıkarım
+### 5.5 Otomatik puanın kör noktası
 
-Parametre sayısı tek başına gösterge değil: 2,2 GB'lık phi-3.5-mini, 1,5 GB'lık qwen2.5-1.5b'nin
-belirgin biçimde gerisinde kaldı. Sınırlı donanımda model seçimi, hedef dilde talimat takibi ve
-gecikme ölçülerek yapılmalı.
+qwen3-1.7b otomatik puanlamada 20/28 aldı — qwen2.5-1.5b ile aynı. Oysa cevapları kullanıcıya
+gösterilemez durumda. Neden: puanlama beklenen ifadenin cevapta **geçip geçmediğine** bakıyor,
+qwen3'ün sayfalarca süren İngilizce muhakemesi ise doğru komutu ("`git reset --soft HEAD~1`") zaten
+içeriyor.
+
+Yani otomatik puan **doğru bilginin bulunup bulunmadığını** ölçer, **cevabın kullanılabilir olup
+olmadığını** değil. Aynı nedenle bozuk Türkçeyi veya cevaba eklenen yanlış bilgiyi de cezalandırmaz;
+bu yüzden elle puandan sistematik olarak yüksektir (24/22, 20/18, 14/11).
+
+Pratikte iki yöntem de aynı sıralamayı verdi. Doğru kullanım şudur: model denemelerini otomatik
+puanla ucuza eleyip, finale kalan modelin cevaplarına bir kez gözle bakmak.
 
 ---
 
@@ -192,11 +213,11 @@ gecikme ölçülerek yapılmalı.
 | Sohbet modeli | `phi-4-mini` (Foundry Local) |
 | Yönlendirme doğruluğu | 6/6 (%100) |
 | Erişim isabeti hit@3 | 14/14 (%100) |
-| Cevap kalitesi (elle) | 22/28 (%79) |
+| Otomatik kalite puanı | 24/28 (%86) |
 | Cevaplanamazda çekimserlik | 5/6 |
-| Ortalama / p50 / p95 süre | 3,62 sn / 3,95 sn / 10,92 sn |
+| Ortalama / p50 / p95 süre | 4,25 sn / 4,72 sn / 12,58 sn |
 | Uç durumlarda çökme | 0 |
-| Test paketi | 63 test, tamamı geçiyor |
+| Test paketi | 108 test, tamamı geçiyor |
 
 Uç durumların hiçbiri sistemi çökertmedi: boş sorgu, tek kelimelik sorgu ve çok genel soru erişim
 eşiğine takılıp 0,01–0,08 saniyede "bilgi yok" cevabı aldı; çok uzun ve çok konulu soru normal
@@ -214,11 +235,62 @@ biçimde yanıtlandı.
 2. **Eşik yükseltmesinin bedeli.** Eşik 0,40'a çıkarıldığında tek kelimelik "git" sorgusu da eşiğin
    altında kalıyor ve asistan bilgi yok diyor. Kısa sorgularda erişim, önceki ayara göre daha
    isteksiz.
-3. **Kalite ölçümü elle.** 14 sorunun puanlaması insan tarafından yapılıyor; otomatik cevap
-   doğruluğu ölçütü (ör. anahtar kelime veya LLM-hakem) yok. Model değiştirildiğinde puanlama
-   tekrarlanmalı.
+3. **Otomatik puanın kör noktası.** Puanlama, doğru bilginin cevapta geçip geçmediğine bakar;
+   cevabın okunabilir olup olmadığına bakmaz (bkz. 5.5). Finale kalan modelin cevapları bir kez
+   gözle okunmalı.
 4. **Soru seti tek yazarlı.** Sorular belgeleri yazan kişi tarafından hazırlandı; gerçek
    kullanıcıların soru biçimlerini temsil etmeyebilir. Program planının önerdiği "takımlar arası
    soru değişimi" uygulanmadı.
-5. **Yönlendirme yalnızca 6 soruyla ölçüldü.** 6/6 sonucu kural katmanının bu örneklerde
-   şaşmadığını gösteriyor; kapsamlı bir yönlendirme testi için daha geniş bir set gerekir.
+5. **Yönlendirme seti hâlâ dar.** Bölüm 8'deki hatalardan sonra çakışan örneklerle genişletildi ve
+   birim testlerine bağlandı, ama toplam örnek sayısı iki haneli değil. Kapsamlı bir yönlendirme
+   ölçümü için daha geniş ve başkası tarafından yazılmış bir set gerekir.
+6. **Çok turlu konuşma dar kapsamlı.** Takip sorusu genişletmesi işaret zamirlerine bakar; zamir
+   kullanmayan takip soruları ("aynı komutu Windows'ta nasıl yazarım?") genişletilmez.
+
+---
+
+## 8. Değerlendirme sonrası bulunan ve düzeltilen hatalar
+
+Ölçümler bittikten sonra yapılan kod incelemesi, soru setinin yakalayamadığı üç hata ortaya
+çıkardı. Üçü de sessizdi: hiçbiri hata vermiyor, yalnızca yanlış davranıyordu.
+
+**8.1 Yönlendirmede araç önceliği.** Takvim kelimeleri mail kelimelerinden önce kontrol
+edildiği için *"ali@example.com adresine toplantı hakkında mail gönder"* takvime gidiyordu.
+*"Ahmet'e yarınki sunum için mail at"* ise çift hata veriyordu: "yarın" takvimi seçiyor, `"at "`
+kalıbı sondaki boşluk yüzünden cümle sonunda eşleşmediği için niyet de okumaya düşüyordu — yani
+mail taslağı yerine takvim okunuyordu. Ayrıca `"at "` alt dize olarak arandığı için *"sanat
+etkinliği"* yazma niyeti sayılıyordu.
+
+Araç seçimi ağırlıklı puanlamaya geçirildi: kesin belirleyici kelimeler (takvim, gelen kutusu)
+2 puan, başka bir aracın konusu olabilecek zayıf ipuçları (toplantı, yarın) 1 puan, e-posta
+adresi 3 puan. Kısa ve başka kelimelerin içinde geçebilen fiiller (`at`, `yaz`, `ilet`) tam
+kelime olarak aranıyor.
+
+**8.2 Takvim taslağında tarih ayrıştırma.** Yalnızca "yarın" tanınıyordu. Tanınmayan her ifade
+sessizce **bugüne** düşüyor ve ifadenin kendisi başlığa sızıyordu: *"Perşembe 14:00 diş randevusu
+ekle"* → bugün, başlık `"Perşembe  diş"`. Artık hafta günleri (geçmişse gelecek haftaya taşınarak),
+"öbür gün", "N gün sonra", "haftaya", "25 Ağustos", "saat 9", sabah/öğlen/akşam ve süre
+("2 saatlik") çözülüyor; başlık tarih ve fiil artıklarından temizleniyor. 24 birim testi eklendi.
+
+Not: bu hata veri kaybettirmiyordu, çünkü onay kapısı taslağı tarihiyle birlikte kullanıcıya
+gösteriyor. Yine de yazma yolundaki her sessiz varsayım risklidir.
+
+**8.3 Web arayüzünün internet bağımlılığı.** `ui/web.py` ikon fontunu bir CDN'den çekiyordu.
+Projenin temel iddiası "tamamen internetsiz" olduğu hâlde arayüz ağsız ortamda ikonlarını
+kaybediyordu. İkonlar gömülü SVG'ye çevrildi; dış bağımlılık kalmadı.
+
+### Aynı incelemede eklenen iyileştirmeler
+
+- **Cevap akışı.** p95 gecikme 12 saniyeye kadar çıkabiliyor ve ekran o süre boyunca boş
+  kalıyordu. `llm.chat_stream()` ile cevap geldikçe yazılıyor; ölçülen süre değişmiyor, algılanan
+  süre belirgin düşüyor.
+- **Çok turlu konuşma.** Son iki tur isteme ekleniyor; işaret zamiri içeren takip soruları
+  ("peki onu nasıl kapatırım?") erişim için önceki soruyla genişletiliyor. Uzunluğa değil zamire
+  bakılıyor ki kendi başına anlamlı kısa sorular ("RAG nedir?") bozulmasın.
+- **Otomatik kalite puanı.** Elle puanlama tekrarlanabilir değildi; `expected_substrings` ile
+  otomatikleşti.
+
+### Ölçüm dışı kalan
+Bir şey de bilerek düzeltilmedi: erişimde her sorguda 58 parça SQLite'tan okunup JSON çözülüyor.
+Ölçüldü, **10 ms** sürüyor — darboğaz tamamen modelde olduğu için önbellek eklemek gereksiz
+karmaşıklık olurdu.

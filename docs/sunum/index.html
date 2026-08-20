@@ -322,8 +322,8 @@
       <div class="card"><div class="stat good">6/6</div><div class="label">Yönlendirme doğruluğu</div></div>
       <div class="card"><div class="stat good">14/14</div><div class="label">Erişim isabeti (hit@3)</div></div>
       <div class="card"><div class="stat good">5/6</div><div class="label">Cevaplanamazda çekimserlik</div></div>
-      <div class="card"><div class="stat">22/28</div><div class="label">Cevap kalitesi (elle)</div></div>
-      <div class="card"><div class="stat">3.95 sn</div><div class="label">p50 yanıt süresi</div></div>
+      <div class="card"><div class="stat">24/28</div><div class="label">Cevap kalitesi (otomatik)</div></div>
+      <div class="card"><div class="stat">4.72 sn</div><div class="label">p50 yanıt süresi</div></div>
       <div class="card"><div class="stat">0</div><div class="label">Uç durumda çökme</div></div>
     </div>
     <div class="card" style="flex:0">
@@ -337,10 +337,10 @@
     <h2><span class="num">09</span>Model karşılaştırması</h2>
     <table id="model-table">
       <tr><th>Model</th><th class="mono">Boyut</th><th class="mono">Kalite</th><th class="mono">p50</th><th>Çekimserlik</th><th>Not</th></tr>
-      <tr class="win"><td class="mono">phi-4-mini</td><td class="mono">3.7 GB</td><td class="mono">22/28</td><td class="mono">3.95 sn</td><td>5/6</td><td>Seçilen: cevap doğruluğunda açık ara önde</td></tr>
-      <tr><td class="mono">qwen2.5-1.5b</td><td class="mono">1.5 GB</td><td class="mono">18/28</td><td class="mono">2.45 sn</td><td class="ok">6/6</td><td>En hızlısı; hafif donanım için alternatif</td></tr>
-      <tr><td class="mono">phi-3.5-mini</td><td class="mono">2.2 GB</td><td class="mono">11/28</td><td class="mono">4.01 sn</td><td>5/6</td><td>Bozuk Türkçe, veri kaybettiren komut, halüsinasyon</td></tr>
-      <tr><td class="mono">qwen3-1.7b</td><td class="mono">1.4 GB</td><td class="mono">—</td><td class="mono">7.50 sn</td><td>5/6</td><td>Elendi: cevabın önüne İngilizce muhakeme yazıyor</td></tr>
+      <tr class="win"><td class="mono">phi-4-mini</td><td class="mono">3.7 GB</td><td class="mono">24/28</td><td class="mono">4.72 sn</td><td>5/6</td><td>Seçilen: cevap doğruluğunda açık ara önde</td></tr>
+      <tr><td class="mono">qwen2.5-1.5b</td><td class="mono">1.5 GB</td><td class="mono">20/28</td><td class="mono">2.98 sn</td><td class="ok">6/6</td><td>En hızlısı; hafif donanım için alternatif</td></tr>
+      <tr><td class="mono">phi-3.5-mini</td><td class="mono">2.2 GB</td><td class="mono">14/28</td><td class="mono">4.47 sn</td><td>5/6</td><td>Bozuk Türkçe, veri kaybettiren komut, halüsinasyon</td></tr>
+      <tr><td class="mono">qwen3-1.7b</td><td class="mono">1.4 GB</td><td class="mono">20/28*</td><td class="mono">8.36 sn</td><td>5/6</td><td>Elendi: cevabın önüne İngilizce muhakeme yazıyor</td></tr>
     </table>
     <div class="cols">
       <div class="card">
@@ -350,7 +350,7 @@
       </div>
       <div class="card">
         <h3>Büyük model her zaman iyi model değil</h3>
-        <p style="font-size:16px">2.2 GB'lık phi-3.5-mini, 1.5 GB'lık qwen2.5-1.5b'nin belirgin biçimde gerisinde. Seçim kriteri parametre sayısı değil, <strong>hedef dilde talimat takibi</strong>. Kalite sütunu 14 sorunun elle puanlanmasıdır (en yüksek 28).</p>
+        <p style="font-size:16px">2.2 GB'lık phi-3.5-mini, 1.5 GB'lık qwen2.5-1.5b'nin belirgin biçimde gerisinde. Seçim kriteri parametre sayısı değil, <strong>hedef dilde talimat takibi</strong>.</p><p class="note" data-tag="*" style="font-size:15px">Otomatik puan doğru bilginin cevapta geçip geçmediğine bakar, cevabın kullanılabilir olduğuna değil: qwen3'ün İngilizce muhakemesi doğru komutu içerdiği için puan alıyor. Metrik eleme için ucuz, karar için tek başına yetmez.</p>
       </div>
     </div>
   </section>
@@ -404,7 +404,30 @@
 
   <!-- 13 -->
   <section class="slide">
-    <h2><span class="num">12</span>Öğrenilenler ve sınırlar</h2>
+    <h2><span class="num">12</span>Kod incelemesi: üç sessiz hata</h2>
+    <p class="lead">Ölçümler bittikten sonra yapılan inceleme, soru setinin yakalayamadığı üç hata çıkardı. Üçü de hata vermiyor, yalnızca yanlış davranıyordu.</p>
+    <div class="cols3">
+      <div class="card">
+        <h3>Yönlendirme önceliği</h3>
+        <p class="quote" style="font-size:16px">"…adresine <strong>toplantı</strong> hakkında <strong>mail gönder</strong>"</p>
+        <p style="font-size:16px">Takvim kelimeleri önce kontrol edildiği için istek <strong>takvime</strong> gidiyordu. Araç seçimi ağırlıklı puanlamaya geçti; e-posta adresi güçlü sinyal oldu.</p>
+      </div>
+      <div class="card">
+        <h3>Tarih ayrıştırma</h3>
+        <p class="quote" style="font-size:16px">"Perşembe 14:00 diş randevusu ekle"</p>
+        <p style="font-size:16px">Yalnızca "yarın" tanınıyordu; diğer her ifade sessizce <strong>bugüne</strong> düşüyor ve başlığa sızıyordu. Artık hafta günleri, "öbür gün", "25 Ağustos", süre ve günün bölümleri çözülüyor.</p>
+      </div>
+      <div class="card">
+        <h3>Arayüz internete bağlıydı</h3>
+        <p style="font-size:16px">Web arayüzü ikon fontunu <strong>CDN'den</strong> çekiyordu — "tamamen internetsiz" iddiasıyla çelişiyordu. İkonlar gömülü SVG oldu.</p>
+        <p class="note good" data-tag="AYRICA">Cevap akışı, çok turlu konuşma ve otomatik kalite puanı da aynı turda eklendi.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide">
+    <h2><span class="num">13</span>Öğrenilenler ve sınırlar</h2>
     <div class="cols">
       <div class="card">
         <h3>Öğrenilenler</h3>
@@ -420,7 +443,7 @@
           <li style="font-size:16.5px">Küçük yerel model: genel sohbette zayıf, en iyi kendi belgelerinde.</li>
           <li style="font-size:16.5px">Takvim/mail yalnızca Apple uygulamaları (macOS).</li>
           <li style="font-size:16.5px">Bellek içi kosinüs binlerce parçaya kadar yeter; ötesinde vektör indeksi gerekir.</li>
-          <li style="font-size:16.5px">Kalite puanlaması elle yapılıyor; otomatik cevap doğruluğu ölçümü yok.</li>
+          <li style="font-size:16.5px">Kalite puanı beklenen ifadelere bakıyor; anlamca doğru ama farklı yazılmış cevabı kaçırabilir.</li>
         </ul>
       </div>
     </div>
@@ -429,7 +452,7 @@
 </div>
 
 <footer>
-  <span id="counter">1 / 13</span>
+  <span id="counter">1 / 14</span>
   <span class="hint">← → veya boşluk ile gezinin · F ile tam ekran</span>
 </footer>
 

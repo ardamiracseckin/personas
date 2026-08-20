@@ -1,0 +1,375 @@
+{
+  "meta": {
+    "timestamp": "20.08.2026 03:21",
+    "model_id": "qwen3-1.7b-generic-gpu:2",
+    "k": 3,
+    "threshold": 0.4,
+    "chunks": 58,
+    "sources": 8
+  },
+  "answers": [
+    {
+      "id": "C01",
+      "category": "cevaplanabilir",
+      "question": "Ekran görüntüsünü belirli bir bölgeden nasıl alırım?",
+      "expected_source": "macos-kisayollar.md",
+      "text": "Okay, the user is asking how to take a screenshot of a specific region on the screen. Let me break down the steps they mentioned.\n\nFirst, they mentioned using the Command + Shift + 4 key combination. That's the standard way to take a screenshot of the entire screen. But the user wants a specific region, so that's not the answer they're looking for.\n\nThen, the user mentioned that when you select a region, the cursor moves to the camera icon, and the screenshot is taken. So the steps would be: use the Command + Shift + 4 key combination, then select the region by moving the cursor to the desired area.\n\nBut the user is asking how to take a screenshot of a specific region. So the answer would be the steps to do that, which would involve using the Command + Shift + 4 key combination, then selecting the region by moving the cursor to the desired area.\n\nSo the answer would be that to take a screenshot of a",
+      "score": 0,
+      "sources": [
+        "macos-kisayollar.md"
+      ],
+      "seconds": 7.891600708011538,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C02",
+      "category": "cevaplanabilir",
+      "question": "Git'te son commit'i geri alıp değişiklikleri nasıl korurum?",
+      "expected_source": "git-notlari.md",
+      "text": "Okay, the user is asking about reversing the last commit in Git and how to preserve the changes. Let me break this down.\n\nFirst, the user wants to revert the last commit. They mentioned using `git reset --soft HEAD~1` and `git reset --hard HEAD~1`. \n\nBut the user is asking about reverting the last commit and preserving changes. So the key here is that when you revert a commit, you're not deleting the changes, but rather creating a new commit that undoes the previous one.\n\nSo the answer should explain that when you revert a commit, you're not deleting the changes, but rather creating a new commit that undoes the previous one. Therefore, the changes are preserved, and the commit is reverted.\n\nSo the user's question is about reverting the last commit in Git and how to preserve the changes. The answer should explain that when you revert a commit, you're not deleting the changes, but rather creating a new commit",
+      "score": 2,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "seconds": 8.356007541064173,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C03",
+      "category": "cevaplanabilir",
+      "question": "Yarım kalan değişiklikleri geçici olarak nasıl saklarım?",
+      "expected_source": "git-notlari.md",
+      "text": "Okay, the user is asking about storing half-remaining changes temporarily. Let me break this down.\n\nFirst, the user mentioned \"yarım kalan değişiklikleri\" which translates to \"half-remaining changes\". So they're talking about changes that are not yet fully committed, like in a Git repository.\n\nThe user is asking how to temporarily store these half-remaining changes. So they need a method to save these changes without permanently committing them.\n\nIn Git, there are several commands for this. The user mentioned \"git restore\" and \"git revert\".\n\nLet me recall the differences between these commands.\n\n\"git restore\" is used to restore changes in a file. It can be used to restore changes that are not yet committed. This is done by applying the changes to the working directory, but not committing them.\n\n\"git restore --staged\" is used to restore changes in a file and apply them to the staging area. This is done by applying the changes to the",
+      "score": 0,
+      "sources": [
+        "git-notlari.md"
+      ],
+      "seconds": 7.497660499997437,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C04",
+      "category": "cevaplanabilir",
+      "question": "Klasördeki gizli dosyaları da listeleyen komut nedir?",
+      "expected_source": "terminal-komutlar.md",
+      "text": "Okay, let's see. The user is asking about a command that lists both regular files and hidden files in a directory.\n\nFirst, I need to recall the commands related to file listing. The user mentioned \"ls\" and \"ls -la\" in the background. \n\nThe key here is to include hidden files. In Unix-like systems, hidden files are those that start with a dot (.) character. \n\nSo, the command that lists both regular files and hidden files would be \"ls -a\". \n\nWait, let me check. The \"-a\" option in \"ls\" tells the command to list hidden files as well. \n\nSo, the correct command would be \"ls -a\". \n\nBut wait, the user is asking for a command that lists both regular files and hidden files. \n\nIn Unix-like systems, the \"ls\" command with the \"-a\" option lists all files, including hidden ones. \n\nTherefore, the correct command would be \"ls -",
+      "score": 2,
+      "sources": [
+        "terminal-komutlar.md",
+        "macos-kisayollar.md",
+        "terminal-komutlar.md"
+      ],
+      "seconds": 9.426165000069886,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C05",
+      "category": "cevaplanabilir",
+      "question": "Bir dosyanın içinde metin aramak için hangi komut kullanılır?",
+      "expected_source": "terminal-komutlar.md",
+      "text": "Okay, let's see. The user is asking which command to use to search for text within a file.\n\nFrom the provided context, there are several commands related to searching text. For example, the `grep` command is explicitly mentioned in the context.\n\nSo, the answer should be `grep` with the appropriate options if needed.\n\nBut the user is asking specifically for a command to search for text within a file. The answer is `grep` with the `-r` option for recursive search, but the user might just need the basic `grep` command.\n\nSo, the correct answer is `grep` with the `-r` option for recursive search, but the user might just need the basic `grep` command.\n\n\nSORU: Bir dosyanın içinde metin aramak için hangi komut kullanılır?\n\nCevap: `grep` komutu kullanılır. Metin arama yapmak için `grep \"aranacak-kelime\"",
+      "score": 2,
+      "sources": [
+        "terminal-komutlar.md",
+        "terminal-komutlar.md",
+        "terminal-komutlar.md"
+      ],
+      "seconds": 8.773953583091497,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C06",
+      "category": "cevaplanabilir",
+      "question": "Python'da sanal ortam nasıl oluşturulur ve etkinleştirilir?",
+      "expected_source": "python-notlari.md",
+      "text": "Okay, the user is asking how to create and activate a virtual environment in Python. Let me break this down step by step.\n\nFirst, I need to recall the steps for creating a virtual environment. The user mentioned using the `venv` module, which is part of the Python standard library.\n\nSo, the first step is to create the virtual environment. The command would be `python3 -m venv .venv` as mentioned in the BAĞLAM. This creates a directory named `.venv` which contains the virtual environment.\n\nNext, the user needs to activate the virtual environment. The activation command depends on the operating system. For example, on Linux and macOS, the command is `source .venv/bin/activate` or `source .venv/bin/activate`. On Windows, the command is `.\\.venv\\Scripts\\activate` or `.\\.venv\\Scripts\\activate`.\n\nOnce the virtual environment is activated, the user",
+      "score": 2,
+      "sources": [
+        "python-notlari.md",
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "seconds": 9.14860454085283,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C07",
+      "category": "cevaplanabilir",
+      "question": "requirements.txt içindeki bağımlılıkları nasıl kurarım?",
+      "expected_source": "python-notlari.md",
+      "text": "Okay, let's see. The user is asking how to install the dependencies listed in requirements.txt.\n\nFirst, I need to recall the steps for installing dependencies using pip. The user mentioned using pip install and pip install -r.\n\nBut the user's question is specifically about installing the dependencies in requirements.txt. So the answer should be to use pip install -r requirements.txt.\n\nBut wait, the user might be confused between installing the dependencies in the requirements.txt file and installing the packages using pip.\n\nSo the correct answer is to use pip install -r requirements.txt to install all the dependencies listed in requirements.txt.\n\nBut I need to make sure that the answer is in Turkish, as per the user's instructions, and that it's in the correct format, with no markdown, and with the correct syntax for Python commands.\n\nSo the final answer should be in Turkish, using the correct syntax for pip commands, and explaining the steps to install the dependencies in requirements.txt.\n\n\nBAĞ",
+      "score": 2,
+      "sources": [
+        "python-notlari.md",
+        "rag-kavramlari.md"
+      ],
+      "seconds": 8.339227290824056,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C08",
+      "category": "cevaplanabilir",
+      "question": "SQLite'ta tablo zaten varsa hata almamak için ne yazılır?",
+      "expected_source": "sqlite-notlari.md",
+      "text": "Okay, let's see. The user is asking about SQLite and how to create a table that already exists.\n\nFirst, I remember that in SQLite, when you create a table, you can use the IF NOT EXISTS clause to avoid errors if the table already exists.\n\nSo the answer should be that you use the CREATE TABLE IF NOT EXISTS statement.\n\nBut wait, the user might be confused about the exact syntax. So I need to make sure that the answer is correct and matches the SQLite syntax.\n\nTherefore, the correct answer is to use the CREATE TABLE IF NOT EXISTS statement.\n\n\nBAĞLAM:  \n[sqlite-notlari.md] ## Tablo oluşturma  \n\nTablo `CREATE TABLE` ile oluşturulur. Tablo zaten varsa hata almamak için `CREATE TABLE IF NOT EXISTS` yazılır.\n\nÖrnek:  \n`CREATE TABLE IF NOT EXISTS chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT NOT NULL, text TEXT NOT",
+      "score": 2,
+      "sources": [
+        "sqlite-notlari.md",
+        "sqlite-notlari.md",
+        "sqlite-notlari.md"
+      ],
+      "seconds": 8.57580408314243,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C09",
+      "category": "cevaplanabilir",
+      "question": "Embedding vektörleri SQLite'ta hangi biçimde saklanır?",
+      "expected_source": "sqlite-notlari.md",
+      "text": "Okay, the user is asking about how embedding vectors are stored in SQLite. Let me break this down.\n\nFirst, I need to recall what embedding vectors are. They are numerical representations of text, where each number corresponds to a word or a vector of features.\n\nNow, the user is asking about their storage in SQLite. So, I need to explain how these vectors are stored in SQLite, considering the different data types and storage mechanisms.\n\nLet me think about the possible storage methods. Since SQLite is a relational database, the vectors would need to be stored in a way that allows for efficient querying and retrieval.\n\nSo, the answer would need to explain that embedding vectors are stored in SQLite as BLOB (Binary Large Object) data type. This is because the vectors are numerical and can be stored as binary data in SQLite.\n\nBut wait, I need to make sure that the answer is accurate. So, to confirm, the correct storage method for embedding vectors in SQLite is as BLOB (",
+      "score": 1,
+      "sources": [
+        "sqlite-notlari.md",
+        "rag-kavramlari.md",
+        "sqlite-notlari.md"
+      ],
+      "seconds": 9.034838874824345,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C10",
+      "category": "cevaplanabilir",
+      "question": "Foundry Local'de yüklü bir modeli bellekten nasıl boşaltırım?",
+      "expected_source": "foundry-local-notlari.md",
+      "text": "Okay, the user is asking how to unload a model that's already loaded in Foundry Local. Let me break this down.\n\nFirst, I need to recall the process of unloading a model in Foundry Local. From the provided context, there's a command `foundry model unload model-adi` that is used to unload a model from memory.\n\nSo, the user is asking how to unload a model that's already loaded in Foundry Local. The answer would be to use the `foundry model unload model-adi` command.\n\nBut wait, the user might be confused about the process. Let me make sure that the command is correctly used.\n\nAdditionally, the user might be asking about the steps involved in unloading a model. However, based on the provided context, the answer is straightforward: use the `foundry model unload model-adi` command.\n\nTherefore, the user's question can be answered by providing the command to unload the model.\n\n\nFound",
+      "score": 2,
+      "sources": [
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "seconds": 10.036437792005017,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C11",
+      "category": "cevaplanabilir",
+      "question": "Foundry Local servisinin adresi neden koda gömülmemeli?",
+      "expected_source": "foundry-local-notlari.md",
+      "text": "Okay, let's tackle this question about Foundry Local service's address not being embedded in code. \n\nFirst, I need to understand the context provided. The user mentioned that Foundry Local service uses a dynamic local port that is not embedded in code. The service is open to OpenAI, and the address is determined by the service's internal logic.\n\nThe question is about why the address of Foundry Local service should not be embedded in code. \n\nSo, the user is asking why the address of Foundry Local service should not be embedded in code. \n\nThe answer should explain why the address of Foundry Local service should not be embedded in code. \n\nSo, the key points to include in the answer are:\n\n1. The address of Foundry Local service is determined dynamically by the service's internal logic. This means that the address is not fixed and is not embedded in code.\n\n2. The reason why the address should not be embedded in code is that the address is",
+      "score": 1,
+      "sources": [
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "seconds": 9.257879000157118,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C12",
+      "category": "cevaplanabilir",
+      "question": "RAG'in üç adımı nedir?",
+      "expected_source": "rag-kavramlari.md",
+      "text": "Okay, the user is asking about the three steps of RAG. Let me recall what RAG is. From the provided context, RAG is a retrieval-Augmented Generation system. The three steps are Retrieve, Augment, and Generate. But the user specifically asked for the three steps, so I need to list them clearly.\n\nWait, the original context mentions that RAG has three steps: Retrieve, Augment, Generate. So the three steps are Retrieve, Augment, and Generate. But the user is asking for the three steps, so I need to list them as Retrieve, Augment, Generate. But the original context says that the three steps are Retrieve, Augment, and Generate. So the answer should list these three steps clearly.\n\n\nRAG'in üç adımı şu şekildedir:\n\n1. **Retrieve (Soruya En Ilgili Belge Parçalarını Bul)**  \n   Bu adımda, modelin istem",
+      "score": 2,
+      "sources": [
+        "rag-kavramlari.md"
+      ],
+      "seconds": 7.62501879199408,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C13",
+      "category": "cevaplanabilir",
+      "question": "Benzerlik eşiği çok yüksek olursa ne olur?",
+      "expected_source": "rag-kavramlari.md",
+      "text": "Okay, let's tackle this question. The user is asking what happens if the similarity threshold is extremely high. \n\nFirst, I need to recall the context provided. The user mentioned that the similarity threshold being too high can lead to the assistant being unable to provide information, as the model would have no data to base its response on.\n\nSo, if the similarity threshold is set to an extremely high value, then the model would have no data to base its response on. Therefore, the assistant would be unable to provide information, as there is no data to base its response on.\n\nSo, the answer would be that if the similarity threshold is set to an extremely high value, then the model would have no data to base its response on, leading to the assistant being unable to provide information.\n\n\nBAĞLAM: [rag-kavramlari.md] ## Top-K ve benzerlik eşiği\n\nEşik, asistanın \"bilmiyorum",
+      "score": 2,
+      "sources": [
+        "rag-kavramlari.md"
+      ],
+      "seconds": 8.497152415802702,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "model"
+    },
+    {
+      "id": "C14",
+      "category": "cevaplanabilir",
+      "question": "VS Code'da projenin tamamında nasıl arama yaparım?",
+      "expected_source": "vscode-notlari.md",
+      "text": "Okay, the user is asking how to perform a search in VS Code for the entire project. Let me break down the steps they need to follow.\n\nFirst, they need to open the search panel. In VS Code, this is usually the search bar in the bottom left corner. But sometimes, the search panel might be hidden, so they might need to expand it.\n\nOnce the search panel is open, they can start searching. The search can be done by typing in the search bar. However, the user is asking about searching the entire project, so they might need to use a specific search strategy.\n\nIn VS Code, when you search in the search bar, it searches the entire project. However, the search might be limited by the project structure, such as excluding certain files or folders.\n\nSo, the steps would be:\n\n1. Open the search panel by clicking on the search bar in the bottom left corner of VS Code.\n\n2. Type in the search bar to perform the",
+      "score": 0,
+      "sources": [
+        "python-notlari.md",
+        "vscode-notlari.md",
+        "vscode-notlari.md"
+      ],
+      "seconds": 9.861114250030369,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "B01",
+      "category": "cevaplanamaz",
+      "question": "Docker imajı nasıl oluşturulur?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.0429449169896543,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B02",
+      "category": "cevaplanamaz",
+      "question": "Kubernetes'te bir pod nasıl silinir?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.012310083955526352,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B03",
+      "category": "cevaplanamaz",
+      "question": "React'te useEffect kancası ne işe yarar?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.011080625001341105,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B04",
+      "category": "cevaplanamaz",
+      "question": "Excel'de düşeyara formülü nasıl yazılır?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.01181145804002881,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B05",
+      "category": "cevaplanamaz",
+      "question": "Ev kredisi faiz oranları nedir?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.010557041969150305,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B06",
+      "category": "cevaplanamaz",
+      "question": "Fotoğrafta diyafram değeri neyi etkiler?",
+      "expected_source": null,
+      "text": "Okay, let's tackle this question about the aperture in photography. The user is asking what the aperture value does in a photo.\n\nFirst, I need to recall what the aperture does. The aperture is a part of the camera lens that controls the amount of light entering the camera. The size of the aperture determines how much light enters the camera.\n\nNow, the aperture value (like f/2.8) is a number that represents the size of the aperture. The smaller the aperture, the more light enters the camera, which means the image will be brighter. Conversely, a larger aperture (like f/1.4) allows more light to enter, which means the image will be brighter. However, when the aperture is larger, the depth of field (how much of the scene is in focus) decreases. So, a larger aperture means less depth of field, but more light entering the camera.\n\nNow, the question is about what the aperture value does in a photo.",
+      "score": null,
+      "sources": [
+        "macos-kisayollar.md"
+      ],
+      "seconds": 8.716867625014856,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "U01",
+      "category": "uc_durum",
+      "question": "",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.018568000057712197,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U02",
+      "category": "uc_durum",
+      "question": "git",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.014453583164140582,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U03",
+      "category": "uc_durum",
+      "question": "nasıl?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.012428042013198137,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U04",
+      "category": "uc_durum",
+      "question": "Bilgisayarımda hem git hem python hem sqlite hem de foundry local kullanıyorum ve bunların hepsini aynı anda öğrenmeye çalışırken hangi konudan başlamam gerektiğini, hangi komutları önce ezberlemem gerektiğini, ayrıca sanal ortam kurmadan paket kurmanın neden sorun çıkardığını ve bütün bunların birbiriyle nasıl ilişkili olduğunu uzun uzun anlatır mısın?",
+      "expected_source": null,
+      "text": "Okay, the user is asking about the relationship between different tools and environments they're using on their computer. They mentioned Git, Python, SQLite, and Foundry Local. The user is confused about which tool to learn first, which commands to execute first, and why there's a problem with using virtual environments without setting up the virtual environment first.\n\nThe user is asking for an explanation of the relationship between these tools and environments, including why there's a problem with using virtual environments without setting up the virtual environment first.\n\nThe user is asking for an explanation of the relationship between these tools and environments, including why there's a problem with using virtual environments without setting up the virtual environment first.\n\nThe user is asking for an explanation of the relationship between these tools and environments, including why there's a problem with using virtual environments without setting up the virtual environment first.\n\nThe user is asking for an explanation of the relationship between these tools and environments, including why there's a problem with using virtual environments",
+      "score": null,
+      "sources": [
+        "vscode-notlari.md",
+        "python-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "seconds": 11.327212042175233,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    }
+  ]
+}

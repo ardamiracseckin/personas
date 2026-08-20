@@ -115,7 +115,7 @@ const govde = [
       ["İstem tasarımı: bağlam dışına çıkma, kaynak göster, bilmiyorsan söyle", "assistant.SYSTEM_PROMPT — üç kural açık biçimde yazılı"],
       ["Arayüz (CLI asgari, Streamlit tercihe bağlı)", "İkisi de: ui/cli.py ve ui/web.py"],
       ["Test seti: cevaplanabilir, cevaplanamaz ve uç durum soruları", "eval/questions.json — 30 soru, dört kategori"],
-      ["Yanıt süresi ~1–3 saniye", "Kısmen: seçilen modelde p50 3,95 sn; hafif alternatif qwen2.5-1.5b ile 2,45 sn (Bölüm 6.4)"],
+      ["Yanıt süresi ~1–3 saniye", "Kısmen: seçilen modelde p50 ~4,7 sn; hafif alternatif qwen2.5-1.5b ile ~3,0 sn (Bölüm 6.4)"],
       ["Proje raporu ve final sunumu", "Bu rapor ve docs/sunum/index.html"],
     ],
     [3400, 5960],
@@ -128,7 +128,11 @@ const govde = [
   p("router.route() gelen soruyu dört araçtan birine ve bir niyete (okuma / yazma / açma) eşler. Katman kural tabanlıdır: anahtar kelimeler aracı, fiiller niyeti belirler. Hiçbir kural eşleşmezse varsayılan belge aramasıdır. Küçük bir modelin araç seçiminde şaşırma riski böylece tamamen ortadan kalkar; ölçümde yönlendirme doğruluğu 6/6 çıkmıştır."),
   h2("3.2 Belge akışı"),
   p("Soru embedding'e çevrilir, veritabanındaki 58 parçanın vektörleriyle kosinüs benzerliği hesaplanır, eşiği geçen en iyi üç parça bağlam olarak isteme eklenir. Eşiği geçen parça yoksa dil modeli hiç çağrılmaz; asistan doğrudan bilgisi olmadığını söyler. Bu, hem doğruluk hem hız açısından belirleyicidir: cevaplanamaz sorular ortalama 0,02 saniyede yanıtlanır."),
-  h2("3.3 Yazma işlemleri ve onay kapısı"),
+  h2("3.3 Cevap akışı ve çok turlu konuşma"),
+  p("Cevap, modelden geldikçe parça parça arayüze yazılır (assistant.answer_stream). Ölçülen süre değişmez ama kullanıcı ilk kelimeleri saniyenin altında görür; küçük modelde p95 gecikmenin on saniyeyi aşabildiği düşünülürse bu belirgin bir fark yaratır. Model çağrılmayan akışlarda (yazma taslağı, bilgi bulunamaması, uygulama açma) tek seferde sonuç döner."),
+  p("Asistan son iki turu hatırlar: geçmiş isteme eklenir ve işaret zamiri içeren takip soruları erişim için önceki soruyla genişletilir. Genişletme uzunluğa değil zamire bakar; böylece kendi başına anlamlı kısa sorular (\"RAG nedir?\") bozulmaz. Örnek: \"Python'da sanal ortam nasıl oluşturulur?\" sorusunun ardından \"Peki onu nasıl kapatırım?\" sorusu doğru biçimde deactivate cevabını verir."),
+
+  h2("3.4 Yazma işlemleri ve onay kapısı"),
   p("Takvime etkinlik eklemek ve e-posta göndermek yazma işlemleridir ve mimaride ayrı tutulur. assistant.answer() yazma niyeti gördüğünde işlemi yapmaz; taslağı pending_action olarak döndürür. Arayüz taslağı kullanıcıya gösterir ve onay ister; işlemi yalnızca onay sonrası çağrılan assistant.confirm() gerçekleştirir. Silme yeteneği hiç uygulanmamıştır."),
 
   h1("4. Teknoloji seçimleri ve sapmaların gerekçesi"),
@@ -162,7 +166,7 @@ const govde = [
   p("Takvim ve mail yeteneklerinin ilk kullanımında macOS otomasyon izni ister: Sistem Ayarları > Gizlilik ve Güvenlik > Otomasyon bölümünden Terminal'e Mail ve Takvim erişimi verilmelidir."),
 
   h1("6. Değerlendirme sonuçları"),
-  p("Ölçümler 30 soruluk sabit bir set (eval/questions.json) üzerinde, scripts/evaluate.py ile yapılmıştır. Ham koşum çıktıları docs/eval/ klasöründedir. Ayrıntılı analiz için docs/eval/degerlendirme-raporu.md dosyasına bakılabilir."),
+  p("Ölçümler 30 soruluk sabit bir set (eval/questions.json) üzerinde, scripts/evaluate.py ile yapılmıştır. Gecikmeler koşumdan koşuma değiştiği için (aynı model iki koşumda p50 3,95 ve 4,72 saniye vermiştir) tek bir ondalık basamağa anlam yüklenmemelidir; modeller arası fark bu oynaklıktan büyüktür. Ham koşum çıktıları docs/eval/ klasöründedir. Ayrıntılı analiz için docs/eval/degerlendirme-raporu.md dosyasına bakılabilir."),
   h2("6.1 Soru seti"),
   table(
     ["Kategori", "Adet", "Beklenen davranış"],
@@ -205,11 +209,12 @@ const govde = [
       ["Yönlendirme doğruluğu", "6/6 (%100)"],
       ["Erişim isabeti hit@3", "14/14 (%100)"],
       ["Erişim isabeti hit@1", "13/14 (%93)"],
+      ["Otomatik kalite puanı", "24/28 (%86)"],
       ["Cevaplanamazda çekimserlik", "5/6 (tamamı erişim eşiği sayesinde)"],
-      ["Ortalama yanıt süresi", "3,62 sn"],
-      ["p50 / p95 yanıt süresi", "3,95 sn / 10,92 sn"],
+      ["Ortalama yanıt süresi", "4,25 sn"],
+      ["p50 / p95 yanıt süresi", "4,72 sn / 12,58 sn"],
       ["Uç durumlarda çökme", "0"],
-      ["Birim ve regresyon testleri", "63 test, tamamı geçiyor"],
+      ["Birim ve regresyon testleri", "108 test, tamamı geçiyor"],
     ],
     [4680, 4680],
   ),
@@ -221,7 +226,7 @@ const govde = [
   bullet("Küçük yerel model genel sohbette ve akıl yürütmede zayıftır; sistem en iyi kendi belgelerinden cevap verirken çalışır."),
   bullet("Takvim ve mail entegrasyonu yalnızca Apple uygulamalarıyla ve yalnızca macOS'te çalışır."),
   bullet("Bellek içi kosinüs araması binlerce parçaya kadar yeterlidir; daha büyük veri kümelerinde vektör indeksi gerekir."),
-  bullet("Cevap kalitesi elle puanlanmaktadır; otomatik doğruluk ölçümü yoktur."),
+  bullet("Otomatik kalite puanı beklenen ifadelerin cevapta geçip geçmediğine bakar; anlamca doğru ama farklı sözcüklerle yazılmış bir cevabı düşük puanlayabilir."),
   bullet("Yönlendirme kural tabanlıdır; tasarım dokümanında öngörülen model tabanlı üçüncü katman, kural katmanı ölçümde 6/6 verdiği için uygulanmamıştır."),
   bullet("Belgeler yalnızca .txt ve .md biçimindedir; PDF işleme kapsam dışıdır."),
 
@@ -230,6 +235,8 @@ const govde = [
   p("Bilgi tabanı büyümeden RAG sınanamaz. Üç kısa belgeyle sistem çalışıyor görünüyordu; oysa erişim katmanı fiilen devre dışıydı. Parça sayısı gerçekçi bir seviyeye çıkarılmadan ne erişim isabeti ne de çekimserlik anlamlı biçimde ölçülebilir."),
   p("Savunma tek katmanda olmaz. Eşik tek başına 5/6, istem kuralı tek başına belirsiz sonuç verirken ikisi birlikte 6/6 vermektedir. Aynı hedefi farklı mekanizmalarla iki kez korumak, küçük modellerle çalışırken pahalı değil zorunludur."),
   p("Büyük model her zaman iyi model değildir. 2,2 GB'lık phi-3.5-mini, 1,5 GB'lık qwen2.5-1.5b'ye karşı hem daha yavaş hem daha hatalıdır. Sınırlı donanımda seçim ölçütü parametre sayısı değil, hedef dilde talimat takibi ve gecikmedir."),
+
+  p("Sessiz hata, gürültülü hatadan tehlikelidir. Ölçümler bittikten sonra yapılan kod incelemesi üç hata çıkardı: yönlendirmede takvim kelimelerinin mail isteğini bastırması, tanınmayan tarih ifadelerinin sessizce bugüne düşmesi ve web arayüzünün ikon fontunu internetten çekmesi. Üçü de istisna fırlatmıyor, test kırmıyor, yalnızca yanlış davranıyordu. Soru seti de bunları yakalamamıştı çünkü sorular çakışmayacak biçimde seçilmişti; bir test kümesinin ne ölçtüğü kadar neyi ölçmediği de bilinmelidir."),
 
   h1("9. Kaynaklar"),
   bullet("Microsoft Learn — What is Foundry Local? (learn.microsoft.com/azure/ai-foundry/foundry-local/)"),
@@ -246,9 +253,9 @@ const govde = [
 const MODELS = JSON.parse(fs.readFileSync(path.join(__dirname, "modeller.json"), "utf8"));
 
 const modelTable = table(
-  ["Model", "Boyut", "p50", "p95", "Çekimserlik", "Değerlendirme"],
+  ["Model", "Boyut", "Oto kalite", "Elle kalite", "p50", "Çekimserlik", "Sonuç"],
   MODELS.rows,
-  [1900, 900, 900, 900, 1200, 3560],
+  [1740, 900, 1180, 1220, 900, 1200, 2220],
 );
 const modelNotes = MODELS.notes.map(n => p(n));
 

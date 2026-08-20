@@ -13,6 +13,9 @@ Bilgi tabanı 8 Türkçe teknik nottan oluşur ve ingest sonrası 58 parçaya b�
 (`TOP_K = 3`, `SIM_THRESHOLD = 0.40`) tahminle değil, 30 soruluk bir set üzerinde ölçülerek
 seçilmiştir; ayrıntı için [değerlendirme raporu](docs/eval/degerlendirme-raporu.md).
 
+Cevaplar **akarak** yazılır (küçük modelde tam cevap saniyeler sürüyor) ve asistan **son iki turu**
+hatırlar: "Python'da sanal ortam nasıl oluşturulur?" → "Peki onu nasıl kapatırım?" çalışır.
+
 > Yazma işlemleri (etkinlik ekleme, mail gönderme) **asla onay olmadan** yapılmaz. Silme yoktur.
 
 ## Mimari
@@ -88,7 +91,9 @@ python scripts/evaluate.py --model qwen2.5-1.5b   # başka modelle karşılaşt�
 ```
 
 Ölçülen metrikler: yönlendirme doğruluğu, erişim isabeti (hit@K), cevaplanamaz sorularda
-çekimserlik ve gecikme (p50/p95).
+çekimserlik, gecikme (p50/p95) ve **otomatik kalite puanı** — cevaplanabilir sorulardaki
+`expected_substrings` alanına göre 0–2 puan. Model değiştirip koşumu tekrarlamak yeterli,
+elle puanlama gerekmez.
 
 ## Teslimler
 

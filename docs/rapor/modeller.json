@@ -1,16 +1,16 @@
 {
   "rows": [
-    ["phi-4-mini", "3,7 GB", "3,95 sn", "10,92 sn", "5/6", "Seçilen. Kalite 22/28; tehlikeli git sorusunu doğru cevaplayan tek model"],
-    ["qwen2.5-1.5b", "1,5 GB", "2,45 sn", "5,68 sn", "6/6", "Kalite 18/28. En hızlısı; hafif donanım için önerilen alternatif"],
-    ["phi-3.5-mini", "2,2 GB", "4,01 sn", "11,63 sn", "5/6", "Kalite 11/28. Bozuk Türkçe, veri kaybettiren komut önerisi, halüsinasyon"],
-    ["qwen3-1.7b", "1,4 GB", "7,50 sn", "9,20 sn", "5/6", "Elendi. Düşünme modu cevabın önüne İngilizce muhakeme yazıyor"]
+    ["phi-4-mini", "3,7 GB", "24/28", "22/28", "4,72 sn", "5/6", "Seçilen"],
+    ["qwen2.5-1.5b", "1,5 GB", "20/28", "18/28", "2,98 sn", "6/6", "Hafif alternatif"],
+    ["phi-3.5-mini", "2,2 GB", "14/28", "11/28", "4,47 sn", "5/6", "Elendi"],
+    ["qwen3-1.7b", "1,4 GB", "20/28 *", "—", "8,36 sn", "5/6", "Elendi (biçim)"]
   ],
   "notes": [
-    "Kalite sütunu, 14 cevaplanabilir sorunun elle puanlanmasıyla elde edilmiştir (2 = doğru ve yeterli, 1 = kısmen doğru, 0 = yanlış veya alakasız; en yüksek 28).",
-    "phi-4-mini varsayılan model olarak seçilmiştir. Kalite farkı belirleyicidir: \"son commit'i geri al ama değişiklikleri koru\" sorusunda doğru komutu (git reset --soft) veren tek küçük modeldir; SQLite, RAG ve VS Code sorularının tamamını doğru yanıtlamıştır. Bedeli gecikmedir: p50 3,95 saniye ile programın 1–3 saniyelik hedefinin dışında kalır ve 8 GB belleğin yaklaşık yarısını kullanır.",
+    "Kalite iki yöntemle ölçülmüştür. Otomatik puan, cevaplanabilir sorulara yazılan beklenen ifadelerin cevapta geçip geçmediğine bakar (hepsi geçerse 2, bir kısmı geçerse 1, hiçbiri geçmezse 0; en yüksek 28). Elle puan aynı ölçeği insan değerlendirmesiyle uygular. İki yöntem aynı sıralamayı vermiştir.",
+    "phi-4-mini varsayılan model olarak seçilmiştir. Kalite farkı belirleyicidir: \"son commit'i geri al ama değişiklikleri koru\" sorusunda doğru komutu (git reset --soft) veren tek küçük modeldir; SQLite, RAG ve VS Code sorularının tamamını doğru yanıtlamıştır. Bedeli gecikmedir: p50 yaklaşık 4,7 saniye ile programın 1–3 saniyelik hedefinin dışında kalır ve 8 GB belleğin yaklaşık yarısını kullanır.",
     "qwen2.5-1.5b hız ve çekimserlik açısından üstündür, cevaplanamaz soruların altısında da bağlam dışına çıkmamıştır. Ancak iki ağır hatası vardır: bir soruda cevap yerine kendisine verilen istemi olduğu gibi geri yazmış, VS Code sorusunda ise belgelerde hiç geçmeyen bir PowerShell akışı uydurmuştur. Sınırlı bellekli makineler için alternatif olarak README'de belgelenmiştir.",
     "phi-3.5-mini, program planında örnek olarak anılmasına rağmen açık farkla en zayıf sonucu vermiştir. \"Son commit'i geri al ama değişiklikleri koru\" sorusuna veri kaybettiren git reset --hard komutunu önermiş, gizli dosya listeleme sorusuna yeni klasör kısayolunu (Cmd + Shift + N) cevap olarak vermiş ve diyafram sorusunda alakasız bir macOS parçasından cevap uydurmuştur.",
-    "qwen3-1.7b ölçüme alınmış ancak elenmiştir: model düşünme (thinking) kipinde çalıştığı için Türkçe cevabın önüne İngilizce muhakeme metni yazmakta, çoğu soruda muhakeme belirteç sınırını doldurduğu için cevap hiç görünmemektedir. İstemin sonuna /no_think eklendiğinde Türkçe cevap üretmekte, ancak tek soru 7,1 saniye sürmektedir.",
+    "(*) qwen3-1.7b otomatik puanlamada qwen2.5-1.5b ile aynı puanı almıştır, ancak cevapları kullanıcıya gösterilebilir durumda değildir: model düşünme kipinde çalıştığı için Türkçe cevabın önüne sayfalarca İngilizce muhakeme yazmakta, çoğu soruda cevabın kendisi belirteç sınırına takılıp hiç görünmemektedir. Doğru komut bu muhakemenin içinde geçtiği için otomatik puan yüksek çıkmaktadır. Bu, ölçütün sınırını gösterir: otomatik puan doğru bilginin bulunduğunu ölçer, cevabın kullanılabilir olduğunu değil. Yöntem, model denemelerini ucuza elemek için uygundur; nihai karar öncesinde cevaplara bir kez gözle bakılmalıdır.",
     "Bulgu: parametre sayısı tek başına bir gösterge değildir. 2,2 GB'lık phi-3.5-mini, 1,5 GB'lık qwen2.5-1.5b'nin belirgin biçimde gerisinde kalmıştır. Sınırlı donanımda model seçimi, hedef dilde talimat takibi ve gecikme ölçülerek yapılmalıdır."
   ]
 }
