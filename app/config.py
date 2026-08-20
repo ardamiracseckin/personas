@@ -23,9 +23,11 @@ MODEL_CATALOG = [
      "not": "Görsel yükleyip soru sorabilirsin"},
 ]
 
-# Üretilecek en fazla belirteç. Sınırsız bırakıldığında model bazen sayfalarca
-# yazıyor; 1200 belirteç uzun bir kod örneği + açıklamaya rahat yetiyor.
-MAX_TOKENS = 1200
+# Üretilecek en fazla belirteç. Ölçüm: doğru cevaplar 200-600 karakter (~60-200
+# belirteç) sürüyor; sınır 1200 iken model belirsiz sorularda 4000+ karakter
+# yazıp yanıtı 48 saniyeye çıkarıyordu. 450 normal cevaba fazlasıyla yeter,
+# savrulmayı keser.
+MAX_TOKENS = 450
 
 # Embedding model — Foundry Local's catalog had no embedding model, so we use a
 # small multilingual model via fastembed (ONNX, CPU-friendly, good Turkish support).
@@ -33,16 +35,16 @@ EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
 # Retrieval tunables — eval/questions.json üzerinde ölçülerek seçildi
 # (bkz. docs/eval/degerlendirme-raporu.md). TOP_K=1 iken isabet 13/14, K>=2 iken 14/14;
-# K=3 marj bırakır. Eşik 0.40: cevaplanabilirlerin en düşük skoru 0.43,
-# cevaplanamazların en yükseği 0.44 olduğu için kusursuz ayıran eşik yok —
-# 0.40 erişimi tam tutar, kalan sızıntıyı istemdeki "bilmiyorum" kuralı karşılar.
+# K=3 marj bırakır. Eşik hibrit skora göre yeniden tarandı; 0.34 üç ölçütte birden
+# en iyisi: temiz sorularda isabet 14/14, yazım hatalı sorularda 13/14,
+# cevaplanamazlarda çekimserlik 6/6. Yalnız kosinüsle en iyi sonuç 14/12/5'ti.
 TOP_K = 3
 
 # Hibrit erişim ağırlıkları: kosinüs anlamı, sözlüksel katman yazım hatasını yakalar
 # (bkz. app/lexical.py). Skor = DENSE_WEIGHT x kosinüs + LEXICAL_WEIGHT x sözlüksel.
 DENSE_WEIGHT = 0.75
 LEXICAL_WEIGHT = 0.25
-SIM_THRESHOLD = 0.40  # cosine below this ⇒ treat as "no relevant info"
+SIM_THRESHOLD = 0.34  # hibrit skor bunun altındaysa ⇒ "ilgili bilgi yok"
 
 # Chunking
 # Parçalama başlık sınırlarında bölündüğü için bu üst sınır nadiren devreye girer:

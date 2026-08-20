@@ -15,6 +15,7 @@ SYSTEM_PROMPT = (
     "- Yalnızca sana verilen BAĞLAM'daki bilgiyi kullan; bağlamda yoksa "
     "'Bu konuda bilgim yok.' de ve asla uydurma.\n"
     "- Kısa, net ve doğrudan ol; soruyu tekrarlama, gereksiz cümle kurma.\n"
+    "- En fazla birkaç cümle yaz; gerekiyorsa tek bir kısa kod bloğu ekle.\n"
     "- Komut veya kod verirken bozmadan, doğru biçimde yaz."
 )
 NO_INFO = "Belgelerimde bu konuda bilgi yok."

@@ -1,5 +1,5 @@
 {
-  "description": "personas değerlendirme soru seti — Faz 3 (test & evaluation). Kategoriler: cevaplanabilir (belgelerden yanıtlanmalı), cevaplanamaz (asistan bilmediğini söylemeli), uc_durum (çökmemeli), yonlendirme (doğru araca gitmeli). Cevaplanabilir sorulardaki expected_substrings, otomatik kalite puanı için kullanılır: hepsi geçerse 2, en az biri geçerse 1, hiçbiri geçmezse 0 puan. Karşılaştırmada boşluklar yok sayılır.",
+  "description": "personas değerlendirme soru seti — Faz 3 (test & evaluation). Kategoriler: cevaplanabilir (belgelerden yanıtlanmalı), cevaplanamaz (asistan bilmediğini söylemeli), uc_durum (çökmemeli), yonlendirme (doğru araca gitmeli). Cevaplanabilir sorulardaki expected_substrings, otomatik kalite puanı için kullanılır: hepsi geçerse 2, en az biri geçerse 1, hiçbiri geçmezse 0 puan. Karşılaştırmada boşluklar yok sayılır. yazim_hatasi kategorisi, cevaplanabilir soruların bozuk yazımlı hâlleridir: hibrit erişimin (kosinüs + sözlüksel) katkısını ölçer.",
   "questions": [
     {
       "id": "C01",
@@ -245,6 +245,104 @@
         "tool": "documents",
         "action": "read"
       }
+    },
+    {
+      "id": "H01",
+      "category": "yazim_hatasi",
+      "question": "Ekran görünütsünü belirli bir bölgden nasıl alrım?",
+      "expected_source": "macos-kisayollar.md",
+      "note": "C01 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H02",
+      "category": "yazim_hatasi",
+      "question": "Gitte son commiti geri alıp değişikliklri nasıl korurm?",
+      "expected_source": "git-notlari.md",
+      "note": "C02 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H03",
+      "category": "yazim_hatasi",
+      "question": "Yarım kalan degisiklikleri gecici olarak nasil saklarim?",
+      "expected_source": "git-notlari.md",
+      "note": "C03 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H04",
+      "category": "yazim_hatasi",
+      "question": "Klasordeki gizli dosyalari da listeleyn komut nedir?",
+      "expected_source": "terminal-komutlar.md",
+      "note": "C04 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H05",
+      "category": "yazim_hatasi",
+      "question": "Bir dosyanin icinde metin aramk icin hangi komut kullanilir?",
+      "expected_source": "terminal-komutlar.md",
+      "note": "C05 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H06",
+      "category": "yazim_hatasi",
+      "question": "Pythonda sanal ortm nasil olusturulur?",
+      "expected_source": "python-notlari.md",
+      "note": "C06 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H07",
+      "category": "yazim_hatasi",
+      "question": "requirements.txt icindeki bagimliliklari nasil kururum?",
+      "expected_source": "python-notlari.md",
+      "note": "C07 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H08",
+      "category": "yazim_hatasi",
+      "question": "SQLitede tablo zatn varsa hata almamk icin ne yazilir?",
+      "expected_source": "sqlite-notlari.md",
+      "note": "C08 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H09",
+      "category": "yazim_hatasi",
+      "question": "Embeding vektorleri SQLitede hangi bicimde saklanir?",
+      "expected_source": "sqlite-notlari.md",
+      "note": "C09 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H10",
+      "category": "yazim_hatasi",
+      "question": "Foundry Localde yuklu bir modeli bellekten nasil bosaltirim?",
+      "expected_source": "foundry-local-notlari.md",
+      "note": "C10 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H11",
+      "category": "yazim_hatasi",
+      "question": "Foundry Local servisinin adrsi neden koda gomulmemeli?",
+      "expected_source": "foundry-local-notlari.md",
+      "note": "C11 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H12",
+      "category": "yazim_hatasi",
+      "question": "RAGin uc adimi nedir?",
+      "expected_source": "rag-kavramlari.md",
+      "note": "C12 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H13",
+      "category": "yazim_hatasi",
+      "question": "Benzerlik esigi cok yuksek olursa ne olur?",
+      "expected_source": "rag-kavramlari.md",
+      "note": "C13 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "H14",
+      "category": "yazim_hatasi",
+      "question": "VS Codeda projenin tamaminda nasil arama yaparim?",
+      "expected_source": "vscode-notlari.md",
+      "note": "C14 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
     }
   ]
 }
