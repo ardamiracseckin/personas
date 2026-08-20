@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>personas</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <svg class="ic gold" viewBox="0 0 24 24"><path d="M13 3 6 13h5l-1 8 7-10h-5z"/></svg>
+    <span><b>person</b>as</span>
+  </div>
+
+  <button id="new-chat" class="btn-new">
+    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+    Yeni sohbet
+  </button>
+
+  <div class="section-label">Sohbetler</div>
+  <div id="conversations" class="conv-list"></div>
+
+  <div class="section-label spaced">
+    Belgeler
+    <button id="add-doc" class="mini" title="Belge ekle (md, txt, pdf)">+</button>
+  </div>
+  <div id="documents" class="doc-list"></div>
+  <input type="file" id="doc-input" accept=".md,.txt,.pdf" hidden>
+
+  <div class="sidebar-foot">
+    <label class="section-label" for="model-select">Model</label>
+    <select id="model-select"></select>
+    <div id="model-note" class="hint"></div>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <h1 id="chat-title">Yeni sohbet</h1>
+    <div class="topbar-right">
+      <span id="offline-chip" class="chip" title="Hiçbir veri cihazdan çıkmıyor">çevrimdışı</span>
+    </div>
+  </header>
+
+  <div id="messages" class="messages"></div>
+
+  <div id="drop-hint" class="drop-hint">Belgeyi bırak, bilgi tabanına eklensin</div>
+
+  <div class="composer-wrap">
+    <form id="composer" class="composer">
+      <button type="button" id="attach" class="icon-btn" title="Belge ekle">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M20 11.5 12.5 19a4.5 4.5 0 0 1-6.4-6.4l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.2-2.1l7.3-7.3"/></svg>
+      </button>
+      <textarea id="input" rows="1" placeholder="Bir şey sor ya da bir işlem iste…"></textarea>
+      <button type="submit" id="send" class="icon-btn send" title="Gönder (Enter)">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+      </button>
+      <button type="button" id="stop" class="icon-btn stop" title="Durdur (Esc)" hidden>
+        <svg class="ic" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+      </button>
+    </form>
+    <div class="composer-foot">
+      <span id="composer-note">Enter gönderir · Shift+Enter satır atlar</span>
+    </div>
+  </div>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

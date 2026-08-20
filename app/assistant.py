@@ -60,8 +60,10 @@ def retrieval_query(query, history=None):
     return f"{onceki} {query}" if onceki else query
 
 
-def _result(text, sources=None, pending=None):
-    return {"text": text, "sources": sources or [], "pending_action": pending}
+def _result(text, sources=None, pending=None, chunks=None):
+    """Arayüz sözleşmesi. `chunks`: kaynak panelinde gösterilecek parça metinleri."""
+    return {"text": text, "sources": sources or [], "pending_action": pending,
+            "chunks": chunks or []}
 
 
 def _prepare(query, d, history):
@@ -69,7 +71,7 @@ def _prepare(query, d, history):
 
     ("result", sözlük) → model çağrılmadan biten akış (yazma taslağı, uygulama
     açma, bağlam bulunamaması, araç hatası).
-    ("prompt", system, user, kaynaklar) → modele gidecek istem.
+    ("prompt", system, user, kaynaklar, parcalar) → modele gidecek istem.
     """
     decision = d["route"](query)
     tool, action = decision["tool"], decision["action"]
@@ -86,7 +88,8 @@ def _prepare(query, d, history):
             return "result", _result(NO_INFO)
         context = "\n\n".join(f"[{s}] {t}" for (s, t, _sc) in chunks)
         user = f"{gecmis}BAĞLAM:\n{context}\n\nSORU: {query}"
-        return "prompt", SYSTEM_PROMPT, user, [s for (s, _t, _sc) in chunks]
+        parcalar = [{"source": s, "text": t, "score": round(sc, 3)} for (s, t, sc) in chunks]
+        return "prompt", SYSTEM_PROMPT, user, [s for (s, _t, _sc) in chunks], parcalar
 
     if tool == "calendar":
         try:
@@ -98,7 +101,7 @@ def _prepare(query, d, history):
         context = "\n".join(f"- {e['title']} ({e['start']})" for e in events)
         user = (f"{gecmis}Kullanıcının bugünkü takvim etkinlikleri:\n{context}\n\n"
                 f"Yalnızca bu listeye dayanarak şu soruyu kısa ve doğru yanıtla: {query}")
-        return "prompt", SYSTEM_PROMPT, user, ["Apple Takvim"]
+        return "prompt", SYSTEM_PROMPT, user, ["Apple Takvim"], []
 
     if tool == "mail":
         try:
@@ -110,9 +113,9 @@ def _prepare(query, d, history):
         context = "\n".join(f"- {m['subject']} — {m['sender']}" for m in mails)
         user = (f"{gecmis}Kullanıcının okunmamış e-postaları:\n{context}\n\n"
                 f"Yalnızca bu listeye dayanarak şu soruyu kısa ve doğru yanıtla: {query}")
-        return "prompt", SYSTEM_PROMPT, user, ["Apple Mail"]
+        return "prompt", SYSTEM_PROMPT, user, ["Apple Mail"], []
 
-    return "prompt", SYSTEM_PROMPT, f"{gecmis}{query}", []
+    return "prompt", SYSTEM_PROMPT, f"{gecmis}{query}", [], []
 
 
 def answer(query, deps=None, history=None):
@@ -121,8 +124,8 @@ def answer(query, deps=None, history=None):
     kind, *payload = _prepare(query, d, history)
     if kind == "result":
         return payload[0]
-    system, user, sources = payload
-    return _result(d["chat"](system, user), sources)
+    system, user, sources, parcalar = payload
+    return _result(d["chat"](system, user), sources, chunks=parcalar)
 
 
 def answer_stream(query, deps=None, history=None):
@@ -136,12 +139,13 @@ def answer_stream(query, deps=None, history=None):
     if kind == "result":
         yield {"type": "final", "result": payload[0]}
         return
-    system, user, sources = payload
-    parcalar = []
+    system, user, sources, kaynak_parcalari = payload
+    uretilen = []
     for token in d["chat_stream"](system, user):
-        parcalar.append(token)
+        uretilen.append(token)
         yield {"type": "token", "text": token}
-    yield {"type": "final", "result": _result("".join(parcalar).strip(), sources)}
+    yield {"type": "final",
+           "result": _result("".join(uretilen).strip(), sources, chunks=kaynak_parcalari)}
 
 
 # --- takvim taslağı: tarih/saat ifadelerini çöz -----------------------------
