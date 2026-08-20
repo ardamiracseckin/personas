@@ -14,14 +14,13 @@ st.set_page_config(page_title="personas", page_icon="⚡", layout="centered")
 
 CSS = """
 <style>
-@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css');
 :root { --accent:#F5C518; --accent-dim:#C9A100; --bg:#0E0E0E; --panel:#121212;
         --bot:#1B1B1B; --line:#2a2a2a; --muted:#8A8A8A; }
 
 .stApp { background: var(--bg); }
 #MainMenu, footer, header[data-testid="stHeader"] { display:none; }
 .block-container { padding-top: 2.0rem; padding-bottom: 6rem; max-width: 820px; }
-.ti { font-size: 17px; line-height: 1; }
+.ic { width:17px; height:17px; flex:none; }
 
 /* Başlık */
 .hdr { text-align:center; margin-bottom:2px; }
@@ -61,27 +60,47 @@ div.stButton > button[kind="primary"] { background:var(--accent); color:#141414;
 [data-testid="stSidebar"] { background:var(--panel); border-right:1px solid #222; }
 .side-title { color:var(--accent); font-weight:500; letter-spacing:2px; font-size:0.72rem; margin:4px 0 14px 2px; }
 .cap { display:flex; gap:11px; align-items:center; padding:9px 0; color:#cfcfcf; font-size:0.86rem; }
-.cap .ti { color:var(--accent); }
+.cap .ic { color:var(--accent); }
 .side-foot { display:flex; gap:8px; align-items:center; color:#6f6f6f; font-size:0.78rem; margin-top:20px; padding-top:14px; border-top:1px solid #222; }
-.side-foot .ti { color:var(--accent); font-size:15px; }
+.side-foot .ic { color:var(--accent); width:15px; height:15px; }
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
 
+# İkonlar gömülü SVG: asistan internetsiz çalışmayı vadediyor, arayüzü de öyle
+# çalışmalı. İkon fontu daha önce CDN'den geliyordu ve ağ yokken kayboluyordu.
+_ICON_BODY = {
+    "belge": '<path d="M7 3h6l4 4v14H7z"/><path d="M13 3v4h4"/><path d="M9.5 12h5M9.5 16h5"/>',
+    "takvim": '<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+    "mail": '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="m3.5 7 8.5 6 8.5-6"/>',
+    "roket": '<path d="M12 3c3 2 5 5.5 5 9l-3 3H10l-3-3c0-3.5 2-7 5-9z"/>'
+             '<circle cx="12" cy="10" r="1.6"/><path d="M9 18l-2 3M15 18l2 3"/>',
+    "simsek": '<path d="M13 3 6 13h5l-1 8 7-10h-5z"/>',
+}
+
+
+def icon(name, color=None):
+    style = f' style="color:{color}"' if color else ""
+    return (f'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            f'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"{style}>'
+            f'{_ICON_BODY[name]}</svg>')
+
+
+
 with st.sidebar:
     st.markdown(
         '<div class="side-title">PERSONAS</div>'
-        '<div class="cap"><i class="ti ti-file-text"></i><span>Belgelerinden cevap</span></div>'
-        '<div class="cap"><i class="ti ti-calendar"></i><span>Takvim + etkinlik</span></div>'
-        '<div class="cap"><i class="ti ti-mail"></i><span>Mail oku + gönder</span></div>'
-        '<div class="cap"><i class="ti ti-rocket"></i><span>Uygulama açar</span></div>'
-        '<div class="side-foot"><i class="ti ti-bolt"></i><span>Offline · Foundry Local</span></div>',
+        f'<div class="cap">{icon("belge")}<span>Belgelerinden cevap</span></div>'
+        f'<div class="cap">{icon("takvim")}<span>Takvim + etkinlik</span></div>'
+        f'<div class="cap">{icon("mail")}<span>Mail oku + gönder</span></div>'
+        f'<div class="cap">{icon("roket")}<span>Uygulama açar</span></div>'
+        f'<div class="side-foot">{icon("simsek")}<span>Offline · Foundry Local</span></div>',
         unsafe_allow_html=True,
     )
 
 st.markdown(
     '<div class="hdr">'
-    '<div class="logo"><i class="ti ti-bolt" style="color:#F5C518"></i> <span class="g">person</span>as</div>'
+    f'<div class="logo">{icon("simsek", "#F5C518")} <span class="g">person</span>as</div>'
     '<div class="sub">offline kişisel asistanın — belgelerin, takvimin, mailin</div>'
     '</div><div class="rule"></div>',
     unsafe_allow_html=True,
@@ -127,9 +146,23 @@ if st.session_state.pending:
 
 query = st.chat_input("Bir şey sor ya da bir işlem iste...")
 if query:
+    # Kullanıcı balonu hemen görünsün, cevap ise geldikçe yazılsın.
+    st.markdown(f'<div class="chat">{bubble_html("user", query, None)}</div>',
+                unsafe_allow_html=True)
+    yer = st.empty()
+    gecmis = [(rol, metin) for (rol, metin, _kaynak) in st.session_state.history]
     st.session_state.history.append(("user", query, None))
-    with st.spinner("Düşünüyor..."):
-        res = assistant.answer(query)
+
+    parcalar, res = [], None
+    for olay in assistant.answer_stream(query, history=gecmis):
+        if olay["type"] == "token":
+            parcalar.append(olay["text"])
+            yer.markdown(
+                f'<div class="chat">{bubble_html("assistant", "".join(parcalar), None)}</div>',
+                unsafe_allow_html=True)
+        else:
+            res = olay["result"]
+
     st.session_state.history.append(("assistant", res["text"], res["sources"] or None))
     st.session_state.pending = res["pending_action"]
     st.rerun()

@@ -101,6 +101,30 @@ def chat(system, user):
     return resp.choices[0].message.content.strip()
 
 
+def chat_stream(system, user):
+    """chat() ile aynı istek; cevabı geldikçe parça parça verir.
+
+    Küçük modelde tam cevap saniyeler sürüyor; arayüzün boş beklemesi yerine
+    ilk kelimeleri hemen göstermek algılanan gecikmeyi belirgin biçimde düşürür.
+    """
+    client, model_id = _client()
+    stream = client.chat.completions.create(
+        model=model_id,
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        temperature=0.2,
+        stream=True,
+    )
+    for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta
+
+
 def _embedder():
     global _embedder_obj
     if _embedder_obj is None:

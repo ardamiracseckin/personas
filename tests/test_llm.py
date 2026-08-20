@@ -47,3 +47,25 @@ def test_pick_model_returns_none_instead_of_falling_back():
     # Yanlış modelle sessizce cevap üretmektense hiç model seçmemek doğrudur.
     assert llm.pick_model(["qwen2.5-1.5b-instruct-generic-gpu:4"], "phi-4-mini") is None
     assert llm.pick_model([], "phi-4-mini") is None
+
+
+class _FakeStreamChat:
+    def __init__(self):
+        self.completions = self
+
+    def create(self, **kw):
+        assert kw["stream"] is True
+        def parca(text):
+            return type("C", (), {"choices": [type("Ch", (), {
+                "delta": type("D", (), {"content": text})})]})
+        return iter([parca("Mer"), parca("haba"), parca(None)])
+
+
+class _FakeStreamClient:
+    def __init__(self):
+        self.chat = _FakeStreamChat()
+
+
+def test_chat_stream_yields_content_deltas(monkeypatch):
+    monkeypatch.setattr(llm, "_client", lambda: (_FakeStreamClient(), "model-id"))
+    assert list(llm.chat_stream("sys", "soru")) == ["Mer", "haba"]

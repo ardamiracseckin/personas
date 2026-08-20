@@ -40,6 +40,22 @@ def is_abstention(text):
     return bool(ABSTAIN_RE.search(text or ""))
 
 
+def _normalize(text):
+    """Karşılaştırma için boşlukları at: 'Cmd + Shift + 4' ile 'Cmd+Shift+4' aynı sayılsın."""
+    return "".join((text or "").lower().split())
+
+
+def quality_score(answer_text, expected_substrings):
+    """Beklenen ifadelere göre 0-2 puan. Elle puanlamanın tekrarlanabilir yaklaşığı."""
+    if not expected_substrings:
+        return None
+    metin = _normalize(answer_text)
+    tutan = sum(1 for parca in expected_substrings if _normalize(parca) in metin)
+    if tutan == len(expected_substrings):
+        return 2
+    return 1 if tutan else 0
+
+
 def load_questions():
     data = json.loads(QUESTIONS_PATH.read_text(encoding="utf-8"))
     return data["questions"]
@@ -156,13 +172,16 @@ def run_answers(questions, categories):
         rows.append({
             "id": q["id"], "category": q["category"], "question": q["question"],
             "expected_source": q.get("expected_source"), "text": text,
+            "score": quality_score(text, q.get("expected_substrings")),
             "sources": sources, "seconds": elapsed, "error": error,
             "abstained": is_abstention(text),
             "abstained_by": ("erişim" if text.strip() == assistant.NO_INFO
                              else "model" if is_abstention(text) else None),
         })
         flag = "!" if error else ("~" if is_abstention(text) else "+")
-        print(f"  [{flag}] {q['id']} {elapsed:5.2f}s  {q['question'][:52]}", flush=True)
+        puan = rows[-1]["score"]
+        etiket = "" if puan is None else f" puan={puan}"
+        print(f"  [{flag}] {q['id']} {elapsed:5.2f}s{etiket}  {q['question'][:44]}", flush=True)
     return rows
 
 
@@ -228,6 +247,7 @@ def build_report(meta, routing, hits, abstains, answers, sweep):
         times = [a["seconds"] for a in answers]
         errors = [a for a in answers if a["error"]]
         unans = [a for a in answers if a["category"] == "cevaplanamaz"]
+        puanlar = [a["score"] for a in answers if a.get("score") is not None]
         abst = sum(a["abstained"] for a in unans)
         by_model = sum(a["abstained_by"] == "model" for a in unans)
         lines += ["## Üretim (uçtan uca cevaplar)", "",
@@ -240,13 +260,17 @@ def build_report(meta, routing, hits, abstains, answers, sweep):
                       ["  — eşik sayesinde / model sayesinde",
                        f"{abst - by_model} / {by_model}" if unans else "—"],
                       ["Hata / çökme", len(errors)],
-                  ]), "",
-                  "Kalite puanı elle doldurulur: 2 = doğru ve yeterli, 1 = kısmen doğru, 0 = yanlış/alakasız.",
-                  "", _table(["ID", "Kategori", "Soru", "Cevap", "Kaynaklar", "Süre", "Puan"], [
+                  ] + ([["Otomatik kalite puanı",
+                         f"{sum(puanlar)}/{2 * len(puanlar)} (%{100 * sum(puanlar) / (2 * len(puanlar)):.0f})"]]
+                       if puanlar else [])), "",
+                  "Otomatik puan beklenen ifadelere bakar (2 = hepsi, 1 = bir kısmı, 0 = hiçbiri); "
+                  "elle puan sütunu gerekirse insan değerlendirmesi için boş bırakılmıştır.",
+                  "", _table(["ID", "Kategori", "Soru", "Cevap", "Kaynaklar", "Süre", "Oto", "Elle"], [
                       [a["id"], a["category"], a["question"][:40] or "(boş)",
                        (a["error"] or a["text"]).replace("\n", " ")[:110],
                        ", ".join(dict.fromkeys(a["sources"])) or "—",
-                       f"{a['seconds']:.2f}", " "]
+                       f"{a['seconds']:.2f}",
+                       "—" if a.get("score") is None else a["score"], " "]
                       for a in answers]), ""]
 
     return "\n".join(lines) + "\n"

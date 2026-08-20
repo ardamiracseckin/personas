@@ -6,9 +6,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import assistant  # noqa: E402
 
+MAX_HISTORY = 8  # son dört soru-cevap bellekte tutulur
+
 
 def main():
     print("personas — Kişisel Asistan (çıkış için 'q')")
+    history = []
     while True:
         try:
             query = input("\nSen> ").strip()
@@ -19,10 +22,25 @@ def main():
             break
         if not query:
             continue
-        res = assistant.answer(query)
-        print(f"\nAsistan> {res['text']}")
+
+        print("\nAsistan> ", end="", flush=True)
+        res, streamed = None, False
+        for event in assistant.answer_stream(query, history=history):
+            if event["type"] == "token":
+                streamed = True
+                print(event["text"], end="", flush=True)
+            else:
+                res = event["result"]
+        if not streamed:  # model çağrılmayan akışlar (taslak, "bilgi yok", uygulama açma)
+            print(res["text"], end="")
+        print()
+
         if res["sources"]:
-            print(f"  (Kaynak: {', '.join(res['sources'])})")
+            print(f"  (Kaynak: {', '.join(dict.fromkeys(res['sources']))})")
+
+        history += [("user", query), ("assistant", res["text"])]
+        history = history[-MAX_HISTORY:]
+
         if res["pending_action"]:
             ok = input("Onayla (e/h)> ").strip().lower()
             if ok in ("e", "evet", "y", "yes"):

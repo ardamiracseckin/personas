@@ -47,3 +47,25 @@ def test_expected_source_is_retrieved_for_every_answerable_question():
     for q in by_category("cevaplanabilir"):
         sources = [src for (src, _text, _score) in retriever.get_top_chunks(q["question"])]
         assert q["expected_source"] in sources, f"{q['id']}: {q['question']}"
+
+
+# --- otomatik kalite puanlaması --------------------------------------------
+
+def test_every_answerable_question_has_expected_substrings():
+    assert all(q.get("expected_substrings") for q in by_category("cevaplanabilir"))
+
+
+def test_quality_score_levels():
+    from scripts.evaluate import quality_score
+
+    beklenen = ["git reset --soft", "HEAD~1"]
+    assert quality_score("git reset --soft HEAD~1 kullanılır", beklenen) == 2
+    assert quality_score("git reset --soft yeterli", beklenen) == 1
+    assert quality_score("git restore kullanın", beklenen) == 0
+    assert quality_score("herhangi bir cevap", None) is None
+
+
+def test_quality_score_ignores_spacing():
+    from scripts.evaluate import quality_score
+
+    assert quality_score("Cmd+Shift+4 tuşlarına basın", ["Cmd + Shift + 4"]) == 2
