@@ -88,20 +88,40 @@ def _client():
     return _openai, _model_id
 
 
-def chat(system, user):
+def reset():
+    """Önbelleklenmiş istemciyi ve model kimliğini unut (model değiştirince gerekir)."""
+    global _openai, _model_id
+    _openai, _model_id = None, None
+
+
+def _messages(system, user, image_b64=None):
+    """OpenAI biçiminde mesajlar. Görsel varsa içerik dizi hâline gelir."""
+    if not image_b64:
+        icerik = user
+    else:
+        icerik = [
+            {"type": "text", "text": user},
+            {"type": "image_url",
+             "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}},
+        ]
+    return [
+        {"role": "system", "content": system},
+        {"role": "user", "content": icerik},
+    ]
+
+
+def chat(system, user, image_b64=None):
     client, model_id = _client()
     resp = client.chat.completions.create(
         model=model_id,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        messages=_messages(system, user, image_b64),
         temperature=0.2,
+        max_tokens=config.MAX_TOKENS,
     )
     return resp.choices[0].message.content.strip()
 
 
-def chat_stream(system, user):
+def chat_stream(system, user, image_b64=None):
     """chat() ile aynı istek; cevabı geldikçe parça parça verir.
 
     Küçük modelde tam cevap saniyeler sürüyor; arayüzün boş beklemesi yerine
@@ -110,11 +130,9 @@ def chat_stream(system, user):
     client, model_id = _client()
     stream = client.chat.completions.create(
         model=model_id,
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        messages=_messages(system, user, image_b64),
         temperature=0.2,
+        max_tokens=config.MAX_TOKENS,
         stream=True,
     )
     for chunk in stream:

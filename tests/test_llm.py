@@ -69,3 +69,22 @@ class _FakeStreamClient:
 def test_chat_stream_yields_content_deltas(monkeypatch):
     monkeypatch.setattr(llm, "_client", lambda: (_FakeStreamClient(), "model-id"))
     assert list(llm.chat_stream("sys", "soru")) == ["Mer", "haba"]
+
+
+def test_messages_without_image_is_plain_text():
+    m = llm._messages("sys", "soru")
+    assert m[1]["content"] == "soru"
+
+
+def test_messages_with_image_becomes_content_array():
+    m = llm._messages("sys", "bu görselde ne var?", image_b64="QUJD")
+    parcalar = m[1]["content"]
+    assert parcalar[0] == {"type": "text", "text": "bu görselde ne var?"}
+    assert parcalar[1]["image_url"]["url"].startswith("data:image/jpeg;base64,QUJD")
+
+
+def test_reset_clears_cached_client(monkeypatch):
+    monkeypatch.setattr(llm, "_openai", object())
+    monkeypatch.setattr(llm, "_model_id", "eski-model")
+    llm.reset()
+    assert llm._openai is None and llm._model_id is None
