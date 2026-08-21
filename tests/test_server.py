@@ -243,3 +243,37 @@ def test_settings_toggle_whatsapp_mode(istemci):
         assert istemci.get("/api/status").json()["whatsapp_auto_send"] is True
     finally:
         ayarlar.WHATSAPP_AUTO_SEND = False
+
+
+def test_pending_draft_survives_a_page_reload(istemci, monkeypatch):
+    taslak = {"type": "whatsapp", "phone": "905551112233", "message": "selam", "contact": "Ahmet"}
+    sahte_akis(monkeypatch, pending=taslak)
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    istemci.post("/api/chat", json={"conversation_id": cid, "message": "Ahmet'e wp at: selam"})
+
+    mesajlar = istemci.get(f"/api/conversations/{cid}/messages").json()
+    assert mesajlar[-1]["pending"] == taslak
+
+
+def test_confirm_clears_the_pending_draft(istemci, monkeypatch):
+    from server import main
+
+    taslak = {"type": "whatsapp", "phone": "905551112233", "message": "selam", "contact": "Ahmet"}
+    sahte_akis(monkeypatch, pending=taslak)
+    monkeypatch.setattr(main.assistant, "confirm", lambda pa, deps=None: "gönderildi")
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    istemci.post("/api/chat", json={"conversation_id": cid, "message": "Ahmet'e wp at: selam"})
+
+    istemci.post("/api/confirm", json={"conversation_id": cid, "pending_action": taslak})
+    assert all(m["pending"] is None for m in
+               istemci.get(f"/api/conversations/{cid}/messages").json())
+
+
+def test_cancel_clears_the_pending_draft(istemci, monkeypatch):
+    taslak = {"type": "mail", "to": "a@b.com", "subject": "k", "body": "i"}
+    sahte_akis(monkeypatch, pending=taslak)
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    istemci.post("/api/chat", json={"conversation_id": cid, "message": "mail at"})
+    istemci.post("/api/cancel", json={"conversation_id": cid})
+    assert all(m["pending"] is None for m in
+               istemci.get(f"/api/conversations/{cid}/messages").json())

@@ -131,7 +131,8 @@ def _chat_events(conversation_id, message, ilk_mesaj_mi):
             else:
                 sonuc = olay["result"]
                 chat_store.add_message(conversation_id, "assistant", sonuc["text"],
-                                       sonuc["sources"], sonuc.get("chunks"))
+                                       sonuc["sources"], sonuc.get("chunks"),
+                                       sonuc.get("pending_action"))
                 yield _sse({"type": "final", "result": sonuc, "user_message_id": kullanici_id})
     except Exception as e:  # model kapalı, servis erişilemez vb.
         yield _sse({"type": "error", "message": str(e)})
@@ -173,6 +174,18 @@ def chat(body: ChatIn):
     )
 
 
+class CancelIn(BaseModel):
+    conversation_id: int
+
+
+@app.post("/api/cancel")
+def cancel(body: CancelIn):
+    """Taslağı iptal et: bekleyen işlem temizlenir, düğmeler bir daha görünmez."""
+    _require_conversation(body.conversation_id)
+    chat_store.clear_pending(body.conversation_id)
+    return {"ok": True}
+
+
 class ConfirmIn(BaseModel):
     conversation_id: int
     pending_action: dict
@@ -185,6 +198,7 @@ def confirm(body: ConfirmIn):
         mesaj = assistant.confirm(body.pending_action)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"İşlem tamamlanamadı: {e}")
+    chat_store.clear_pending(body.conversation_id)
     chat_store.add_message(body.conversation_id, "assistant", mesaj)
     return {"message": mesaj}
 

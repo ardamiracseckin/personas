@@ -289,8 +289,13 @@ function confirmCard(pending) {
       onayla.disabled = false;
     }
   };
-  iptal.onclick = () => {
+  iptal.onclick = async () => {
     kart.replaceWith(Object.assign(document.createElement("p"), { textContent: "İptal edildi." }));
+    try {
+      await api("/api/cancel", {
+        method: "POST", body: JSON.stringify({ conversation_id: state.conversationId }),
+      });
+    } catch (_) { /* taslak zaten temizlenmişse sorun değil */ }
   };
   return kart;
 }
@@ -429,7 +434,7 @@ async function openConversation(id) {
   const mesajlar = await api(`/api/conversations/${id}/messages`);
   messagesEl.innerHTML = '<div class="thread"></div>';
   if (!mesajlar.length) renderWelcome();
-  for (const m of mesajlar) appendMessage(m.role, m.text, m.sources, m.chunks, null, m.id);
+  for (const m of mesajlar) appendMessage(m.role, m.text, m.sources, m.chunks, m.pending, m.id);
   await loadConversations();
 }
 
