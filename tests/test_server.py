@@ -189,7 +189,8 @@ def test_status_reports_model_and_warmth(istemci, monkeypatch):
     monkeypatch.setattr(main.models, "current", lambda: "phi-4-mini")
     monkeypatch.setattr(main.models, "is_loaded", lambda alias=None: False)
     durum = istemci.get("/api/status").json()
-    assert durum == {"model": "phi-4-mini", "loaded": False}
+    assert durum["model"] == "phi-4-mini" and durum["loaded"] is False
+    assert "whatsapp_auto_send" in durum
 
 
 # --- başlık temizliği -------------------------------------------------------
@@ -231,3 +232,14 @@ def test_final_event_carries_the_user_message_id(istemci, monkeypatch):
     cevap = istemci.post("/api/chat", json={"conversation_id": cid, "message": "selam"})
     final = next(o for o in sse_olaylari(cevap) if o["type"] == "final")
     assert isinstance(final["user_message_id"], int)
+
+
+def test_settings_toggle_whatsapp_mode(istemci):
+    import app.config as ayarlar
+
+    try:
+        assert istemci.post("/api/settings",
+                            json={"whatsapp_auto_send": True}).json()["whatsapp_auto_send"] is True
+        assert istemci.get("/api/status").json()["whatsapp_auto_send"] is True
+    finally:
+        ayarlar.WHATSAPP_AUTO_SEND = False

@@ -32,6 +32,12 @@ MODEL_CATALOG = [
 # savrulmayı keser.
 MAX_TOKENS = 450
 
+# WhatsApp gönderimi: varsayılan olarak taslak açılır ve gönder tuşuna kullanıcı
+# basar. True yapılırsa asistan onaydan sonra Enter'a da basar; bu macOS
+# Erişilebilirlik izni ister ve WhatsApp arayüzü değişirse bozulabilir.
+WHATSAPP_AUTO_SEND = False
+DEFAULT_COUNTRY_CODE = "90"
+
 # Not: 0.8 sürümünde yüklü model 600 sn hareketsizlikte bellekten atılıyor ve ilk
 # soru ~30 saniye sürüyordu. 0.10 ile bu davranış Foundry ayarına taşındı
 # (`foundry config show` → idle-timeout-minutes, varsayılan: disabled), bu yüzden

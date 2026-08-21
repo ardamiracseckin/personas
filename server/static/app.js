@@ -6,6 +6,7 @@ const state = {
   documents: [],
   streaming: false,
   abort: null,
+  whatsappAuto: false,
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -24,7 +25,7 @@ const SUGGESTIONS = [
   ["Ekran görüntüsünü belirli bir bölgeden nasıl alırım?", "belgelerinden cevap"],
   ["Git'te son commit'i geri alıp değişiklikleri nasıl korurum?", "kaynak göstererek"],
   ["Yarın 15:00 dişçi randevusu ekle", "onayınla takvime yazar"],
-  ["Bugün takvimimde ne var?", "Apple Takvim'i okur"],
+  ["Ahmet'e wp'den mesaj at: yoldayım", "onayınla WhatsApp'ta hazırlar"],
 ];
 
 /* ------------------------------------------------------------------ istekler */
@@ -250,15 +251,27 @@ function toggleChunks(body, kaynak, chunks) {
 function confirmCard(pending) {
   const kart = document.createElement("div");
   kart.className = "confirm-card";
-  const satirlar = pending.type === "calendar"
-    ? [["Başlık", pending.title],
-       ["Tarih", `${String(pending.day).padStart(2, "0")}.${String(pending.month).padStart(2, "0")}.${pending.year}`],
-       ["Saat", `${String(pending.hour).padStart(2, "0")}:${String(pending.minute).padStart(2, "0")}`],
-       ["Süre", `${pending.duration_min} dk`]]
-    : [["Kime", pending.to], ["Konu", pending.subject], ["İçerik", pending.body]];
+  const bicimler = {
+    calendar: {
+      baslik: "Takvime eklenecek",
+      satirlar: [["Başlık", pending.title],
+                 ["Tarih", `${String(pending.day).padStart(2, "0")}.${String(pending.month).padStart(2, "0")}.${pending.year}`],
+                 ["Saat", `${String(pending.hour).padStart(2, "0")}:${String(pending.minute).padStart(2, "0")}`],
+                 ["Süre", `${pending.duration_min} dk`]],
+    },
+    whatsapp: {
+      baslik: state.whatsappAuto ? "WhatsApp'tan gönderilecek" : "WhatsApp'ta hazırlanacak",
+      satirlar: [["Kime", pending.contact], ["Mesaj", pending.message]],
+    },
+    mail: {
+      baslik: "Gönderilecek e-posta",
+      satirlar: [["Kime", pending.to], ["Konu", pending.subject], ["İçerik", pending.body]],
+    },
+  };
+  const bicim = bicimler[pending.type] || bicimler.mail;
+  const satirlar = bicim.satirlar;
 
-  kart.innerHTML =
-    `<strong>${pending.type === "calendar" ? "Takvime eklenecek" : "Gönderilecek e-posta"}</strong>` +
+  kart.innerHTML = `<strong>${bicim.baslik}</strong>` +
     `<div class="rows">${satirlar.map(([k, v]) => `${k}: ${escapeHtml(String(v ?? ""))}`).join("<br>")}</div>` +
     '<div class="buttons"><button class="btn primary">Onayla</button><button class="btn">İptal</button></div>';
 
@@ -515,6 +528,9 @@ async function loadModels() {
 async function refreshStatus() {
   try {
     const durum = await api("/api/status");
+    state.whatsappAuto = durum.whatsapp_auto_send;
+    const kutu = $("#wa-auto");
+    if (kutu) kutu.checked = durum.whatsapp_auto_send;
     const not = $("#model-note");
     if (!durum.loaded) {
       not.textContent = "Model belleğe alınıyor… ilk cevap gecikebilir.";
@@ -556,6 +572,20 @@ $("#attach").onclick = () => $("#doc-input").click();
 $("#add-doc").onclick = () => $("#doc-input").click();
 $("#doc-input").onchange = (e) => uploadFiles(e.target.files);
 $("#model-select").onchange = (e) => switchModel(e.target.value);
+$("#wa-auto").onchange = async (e) => {
+  try {
+    await api("/api/settings", {
+      method: "POST", body: JSON.stringify({ whatsapp_auto_send: e.target.checked }),
+    });
+    state.whatsappAuto = e.target.checked;
+    toast(e.target.checked
+      ? "WhatsApp mesajları onaydan sonra doğrudan gönderilecek."
+      : "WhatsApp mesajları taslak olarak açılacak.");
+  } catch (hata) {
+    toast(hata.message);
+    e.target.checked = !e.target.checked;
+  }
+};
 
 inputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); }

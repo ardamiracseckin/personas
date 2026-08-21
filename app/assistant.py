@@ -3,11 +3,12 @@
 Read queries return {text, sources, pending_action=None}. Write queries return a
 draft in `pending_action` and DO NOT execute it — the UI must call confirm().
 """
+import json
 import re
 from datetime import datetime, timedelta
 
-from app import llm, retriever, router
-from app.tools import app_launcher, calendar_tool, mail_tool
+from app import config, llm, retriever, router
+from app.tools import app_launcher, calendar_tool, contacts, mail_tool, whatsapp
 
 SYSTEM_PROMPT = (
     "Sen 'personas' adlı yardımcı bir kişisel asistansın. HER ZAMAN akıcı ve "
@@ -40,6 +41,8 @@ def _default_deps():
         "chat_stream": llm.chat_stream,
         "create_event": calendar_tool.create_event,
         "send_mail": mail_tool.send_mail,
+        "send_whatsapp": whatsapp.send,
+        "find_people": contacts.find_people,
         "open_app": app_launcher.open_app,
     }
 
@@ -80,6 +83,10 @@ def _prepare(query, d, history):
 
     if tool == "app":
         return "result", _open_app_flow(query, d)
+    if tool == "whatsapp" and action != "write":
+        return "result", _result(
+            "WhatsApp mesajlarını okuyamıyorum; WhatsApp dışarıya okuma izni vermiyor. "
+            "Ama mesaj gönderebilirim: \"Ahmet'e wp'den mesaj at: ...\" gibi yazman yeterli.")
     if action == "write":
         return "result", _draft_write(query, tool, d)
 
@@ -243,19 +250,123 @@ def _parse_calendar_draft(query, now=None):
     }
 
 
-def _draft_mail(query):
-    m = re.search(r"[\w.\-]+@[\w.\-]+", query)
-    to = m.group(0) if m else None
-    subj = re.search(r"'([^']+)'", query) or re.search(r"\"([^\"]+)\"", query)
-    subject = subj.group(1) if subj else "(konu yok)"
-    body = query.split(":", 1)[1].strip() if ":" in query else "(içerik yok)"
-    if not to:
-        return {"text": "Kime göndereceğimi anlayamadım. E-posta adresi verir misin?",
-                "sources": [], "pending_action": None}
-    pa = {"type": "mail", "to": to, "subject": subject, "body": body}
-    text = ("Şu e-postayı göndermemi ister misin?\n"
-            f"  Kime: {to}\n  Konu: {subject}\n  İçerik: {body}\n(Onaylıyor musun?)")
-    return {"text": text, "sources": [], "pending_action": pa}
+EMAIL_RE = re.compile(r"[\w.\-]+@[\w.\-]+\.\w+")
+PHONE_RE = re.compile(r"\+?\d[\d\s().\-]{8,}")
+# "Ahmet'e", "Ahmet Yılmaz'a" gibi kalıplardan alıcı adını tahmin et. Çok kelimeli
+# ad da yakalanır; cümle başındaki büyük harfli kelime ("Yarın Ahmet'e") yanlışlıkla
+# ada karışabildiği için baştan kelime atarak birden fazla aday denenir.
+NAME_RE = re.compile(
+    r"\b([A-ZÇĞİÖŞÜ][a-zçğıöşü]+(?:\s+[A-ZÇĞİÖŞÜ][a-zçğıöşü]+)*)['’]?(?:e|a|ye|ya|na|ne)\b")
+
+
+def _name_candidates(isim):
+    """En uzun addan başlayarak baştan kelime atılmış varyantlar."""
+    kelimeler = isim.split()
+    return [" ".join(kelimeler[i:]) for i in range(len(kelimeler))]
+
+FIELD_PROMPT = (
+    "Aşağıdaki istekten mesaj bilgilerini çıkar ve YALNIZCA şu JSON'u yaz:\n"
+    '{"kime": "", "konu": "", "icerik": ""}\n'
+    "Bilmediğin alanı boş bırak. Açıklama yazma, başka hiçbir şey yazma."
+)
+
+
+def _llm_fields(query, d):
+    """Alıcı/konu/içerik alanlarını modele çıkarttır; başarısız olursa boş döner."""
+    bos = {"kime": "", "konu": "", "icerik": ""}
+    try:
+        ham = d["chat"](FIELD_PROMPT, query)
+        veri = json.loads(re.search(r"\{.*\}", ham, re.S).group(0))
+        return {alan: str(veri.get(alan, "") or "").strip() for alan in bos}
+    except Exception:
+        return bos
+
+
+def _quoted(query):
+    m = re.search(r"'([^']+)'|\"([^\"]+)\"", query)
+    return (m.group(1) or m.group(2)).strip() if m else ""
+
+
+def _after_colon(query):
+    return query.split(":", 1)[1].strip() if ":" in query else ""
+
+
+def _resolve_contact(query, d, alanlar, kind):
+    """(hedef, kişi adı, hata mesajı). Rehberde tek eşleşme varsa doğrudan kullanılır."""
+    isim = (alanlar.get("kime") or "").strip()
+    if not isim or EMAIL_RE.search(isim):
+        m = NAME_RE.search(query)
+        isim = m.group(1) if m else isim
+    if not isim:
+        return None, None, None
+
+    alan = "emails" if kind == "mail" else "phones"
+    belirsiz = None
+    for aday in _name_candidates(isim):
+        kisiler = [k for k in d["find_people"](aday) if k.get(alan)]
+        if len(kisiler) == 1:
+            return kisiler[0][alan][0], kisiler[0]["name"], None
+        if len(kisiler) > 1 and belirsiz is None:
+            adlar = ", ".join(k["name"] for k in kisiler)
+            belirsiz = (f"Rehberde '{aday}' ile eşleşen birden fazla kişi var: {adlar}. "
+                        "Hangisini kastettin? Tam adını yazabilirsin.")
+    if belirsiz:
+        return None, None, belirsiz
+    ne = "e-posta adresi" if kind == "mail" else "telefon numarası"
+    return None, None, (f"'{isim}' için rehberde {ne} bulamadım. "
+                        f"{'Adresi' if kind == 'mail' else 'Numarayı'} yazar mısın?")
+
+
+def _draft_mail(query, d):
+    konu, govde = _quoted(query), _after_colon(query)
+    alanlar = {}
+    if not konu or not govde:
+        alanlar = _llm_fields(query, d)
+        konu = konu or alanlar["konu"] or "(konu yok)"
+        govde = govde or alanlar["icerik"] or "(içerik yok)"
+
+    adres = EMAIL_RE.search(query)
+    kisi = None
+    if adres:
+        hedef = adres.group(0)
+    else:
+        hedef, kisi, hata = _resolve_contact(query, d, alanlar, "mail")
+        if not hedef:
+            return _result(hata or "Kime göndereceğimi anlayamadım. E-posta adresi verir misin?")
+
+    pa = {"type": "mail", "to": hedef, "subject": konu, "body": govde}
+    kime = f"{hedef} ({kisi})" if kisi else hedef
+    return _result(f"Şu e-postayı göndermemi ister misin?\n  Kime: {kime}\n"
+                   f"  Konu: {konu}\n  İçerik: {govde}\n(Onaylıyor musun?)", pending=pa)
+
+
+def _draft_whatsapp(query, d):
+    mesaj = _after_colon(query)
+    alanlar = {}
+    if not mesaj:
+        alanlar = _llm_fields(query, d)
+        mesaj = alanlar.get("icerik", "")
+
+    telefon = PHONE_RE.search(query)
+    kisi = None
+    if telefon:
+        ham = telefon.group(0)
+    else:
+        ham, kisi, hata = _resolve_contact(query, d, alanlar, "whatsapp")
+        if not ham:
+            return _result(hata or "Kime göndereceğimi anlayamadım. Numarayı yazar mısın?")
+
+    try:
+        numara = whatsapp.normalize_phone(ham)
+    except ValueError:
+        return _result("Telefon numarasını anlayamadım. Başında ülke kodu olacak şekilde yazar mısın?")
+    if not mesaj:
+        return _result("Ne yazmamı istediğini de söyler misin?")
+
+    pa = {"type": "whatsapp", "phone": numara, "message": mesaj, "contact": kisi or numara}
+    kime = f"{kisi} ({numara})" if kisi else numara
+    return _result(f"Şu WhatsApp mesajını hazırlayayım mı?\n  Kime: {kime}\n"
+                   f"  Mesaj: {mesaj}\n(Onaylıyor musun?)", pending=pa)
 
 
 def _draft_write(query, tool, d):
@@ -267,8 +378,10 @@ def _draft_write(query, tool, d):
                 f"{pa['hour']:02d}:{pa['minute']:02d}\n(Onaylıyor musun?)")
         return {"text": text, "sources": [], "pending_action": pa}
     if tool == "mail":
-        return _draft_mail(query)
-    return {"text": "Bu işlemi yapamıyorum.", "sources": [], "pending_action": None}
+        return _draft_mail(query, d)
+    if tool == "whatsapp":
+        return _draft_whatsapp(query, d)
+    return _result("Bu işlemi yapamıyorum.")
 
 
 def _parse_app_name(query):
@@ -301,4 +414,11 @@ def confirm(pending_action, deps=None):
         send = d.get("send_mail", mail_tool.send_mail)
         send(pa["to"], pa["subject"], pa["body"])
         return "E-posta gönderildi. ✓"
+    if pa["type"] == "whatsapp":
+        gonder = d.get("send_whatsapp", whatsapp.send)
+        gonder(pa["phone"], pa["message"])
+        if config.WHATSAPP_AUTO_SEND:
+            return "WhatsApp mesajı gönderildi. ✓"
+        return ("WhatsApp'ta sohbet mesaj yazılmış hâlde açıldı; "
+                "göndermek için Enter'a basman yeterli. ✓")
     return "Bilinmeyen işlem."

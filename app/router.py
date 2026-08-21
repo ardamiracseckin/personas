@@ -13,6 +13,9 @@ CAL_WEAK = ("toplantı", "yarın", "bugün ne", "ders", "sınav")
 MAIL_STRONG = ("mail", "e-posta", "eposta", "gelen kutusu", "okunmamış")
 MAIL_WEAK = ("mesaj", "ilet")
 
+# WhatsApp ayrı bir araç: "wp aç" uygulamayı açar, "wp'den mesaj at" mesaj gönderir.
+_WHATSAPP_RE = re.compile(r"\bwp\b|\bwpp\b|whatsapp|watsap|vatsap")
+
 STRONG, WEAK = 2, 1
 ADDRESS_BONUS = 3  # e-posta adresi geçiyorsa istek neredeyse kesin mail'dir
 
@@ -39,6 +42,13 @@ def route(query):
     """Classify a query into a tool and action. Defaults to documents/read."""
     q = query.lower()
     is_write = any(w in q for w in WRITE_WORDS) or bool(_WRITE_SHORT_RE.search(q))
+
+    if _WHATSAPP_RE.search(q):
+        if is_write:
+            return {"tool": "whatsapp", "action": "write"}
+        if _APP_VERB_RE.search(q):
+            return {"tool": "app", "action": "open"}
+        return {"tool": "whatsapp", "action": "read"}
 
     cal = _score(q, CAL_STRONG, CAL_WEAK)
     mail = _score(q, MAIL_STRONG, MAIL_WEAK)

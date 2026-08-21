@@ -233,7 +233,19 @@ class ModelIn(BaseModel):
 @app.get("/api/status")
 def status():
     """Arayüzün model durumunu gösterebilmesi için: hangi model, bellekte mi."""
-    return {"model": models.current(), "loaded": models.is_loaded()}
+    return {"model": models.current(), "loaded": models.is_loaded(),
+            "whatsapp_auto_send": config.WHATSAPP_AUTO_SEND}
+
+
+class SettingsIn(BaseModel):
+    whatsapp_auto_send: bool
+
+
+@app.post("/api/settings")
+def update_settings(body: SettingsIn):
+    """WhatsApp gönderim kipi: taslak (varsayılan) ya da onaydan sonra otomatik gönder."""
+    config.WHATSAPP_AUTO_SEND = body.whatsapp_auto_send
+    return {"whatsapp_auto_send": config.WHATSAPP_AUTO_SEND}
 
 
 @app.get("/api/models")

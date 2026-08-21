@@ -59,3 +59,23 @@ def test_yazilim_does_not_trigger_write():
 def test_at_only_matches_as_a_whole_word():
     # "atla" veya "sanat" yazma niyeti tetiklememeli.
     assert route("Sanat etkinliği takvimimde var mı?") == {"tool": "calendar", "action": "read"}
+
+
+# --- WhatsApp: mesaj göndermek ile uygulamayı açmak ayrılmalı -----------------
+
+def test_whatsapp_message_is_a_write():
+    assert route("Ahmet'e wp'den mesaj at") == {"tool": "whatsapp", "action": "write"}
+    assert route("whatsapp'tan anneme mesaj gönder") == {"tool": "whatsapp", "action": "write"}
+
+
+def test_opening_whatsapp_is_still_the_app_tool():
+    assert route("wp aç") == {"tool": "app", "action": "open"}
+    assert route("whatsappı aç") == {"tool": "app", "action": "open"}
+
+
+def test_whatsapp_read_is_recognised_separately():
+    assert route("whatsapp mesajlarımı oku") == {"tool": "whatsapp", "action": "read"}
+
+
+def test_mail_is_unaffected():
+    assert route("ali@x.com adresine mail gönder") == {"tool": "mail", "action": "write"}

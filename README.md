@@ -1,11 +1,18 @@
 # personas — Kişisel Asistan (offline)
 
-Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Dört işi yapar:
+Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Beş işi yapar:
 
 1. **Belge Soru-Cevap (RAG):** `data/documents/` içindeki kendi belgelerinden kaynak göstererek cevap verir; bilmediğinde "bilmiyorum" der.
 2. **Takvim:** Apple Takvim'i okur ve özetler; **onayınla** yeni etkinlik ekler.
 3. **Mail:** Apple Mail'i okur ve özetler; **onayınla** e-posta gönderir.
-4. **Uygulama açma:** "Spotify aç", "hesap makinesi aç" gibi komutlarla Mac uygulamalarını açar.
+   Alıcıyı isimle söyleyebilirsin ("Ahmet'e mail at"): adres Rehber'den bulunur, birden fazla
+   eşleşme varsa asistan hangisi olduğunu sorar.
+4. **WhatsApp:** **onayınla** mesaj hazırlar. Varsayılan olarak sohbeti mesaj yazılmış hâlde açar,
+   gönder tuşuna sen basarsın; kenar çubuğundaki "WhatsApp'ı otomatik gönder" anahtarı açıksa
+   onaydan sonra doğrudan gönderir (macOS Erişilebilirlik izni ister).
+   WhatsApp **okuma** yapılamaz — uygulama dışarıya okuma izni vermiyor.
+5. **Uygulama açma:** "Spotify aç", "wp aç", "hesap makinesi aç" gibi komutlarla Mac
+   uygulamalarını açar.
 
 Asistanın "beyni" [Microsoft Foundry Local](https://learn.microsoft.com/azure/ai-foundry/foundry-local/)
 ile cihazda çalışan bir LLM'dir (bulut/Azure yok). Embedding'ler `fastembed` ile yereldir — Foundry
@@ -94,7 +101,7 @@ python -m ui.cli
 ## Testler ve değerlendirme
 
 ```bash
-python -m pytest -q                  # 196 test (birim, HTTP katmanı, soru seti regresyonu)
+python -m pytest -q                  # 225 test (birim, HTTP katmanı, soru seti regresyonu)
 ```
 
 Değerlendirme koşumu `eval/questions.json` içindeki 50 soruyu çalıştırıp `docs/eval/` altına
