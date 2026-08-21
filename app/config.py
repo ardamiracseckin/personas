@@ -19,8 +19,11 @@ MODEL_CATALOG = [
      "not": "En doğru cevaplar (varsayılan)"},
     {"alias": "qwen2.5-1.5b", "boyut": "1.5 GB", "gorsel": False,
      "not": "En hızlı, hafif donanım için"},
-    {"alias": "qwen3-vl-2b-instruct", "boyut": "1.3 GB", "gorsel": True,
-     "not": "Görsel yükleyip soru sorabilirsin"},
+    # Görsel-dil modeli, ama Foundry Local'in OpenAI uç noktası içerik dizisini
+    # metne çevirip görseli modele iletmiyor (0.10.3'te doğrulandı). Sohbet için
+    # kullanılabilir; görsel yeteneği bu yüzden kapalı işaretli.
+    {"alias": "qwen3-vl-2b-instruct", "boyut": "1.3 GB", "gorsel": False,
+     "not": "En hafif model; görsel yeteneği Foundry tarafından iletilmiyor"},
 ]
 
 # Üretilecek en fazla belirteç. Ölçüm: doğru cevaplar 200-600 karakter (~60-200
@@ -29,10 +32,10 @@ MODEL_CATALOG = [
 # savrulmayı keser.
 MAX_TOKENS = 450
 
-# Foundry Local, yüklü modeli varsayılan 600 saniyelik hareketsizlikten sonra
-# bellekten atıyor; sonraki ilk soru ~30 saniye sürüyordu. Sunucu açıkken model
-# sıcak kalsın diye TTL uzatıldı (bellek karşılığında beklemeyi ortadan kaldırır).
-MODEL_TTL_SECONDS = 21600
+# Not: 0.8 sürümünde yüklü model 600 sn hareketsizlikte bellekten atılıyor ve ilk
+# soru ~30 saniye sürüyordu. 0.10 ile bu davranış Foundry ayarına taşındı
+# (`foundry config show` → idle-timeout-minutes, varsayılan: disabled), bu yüzden
+# uygulama tarafında TTL ayarı tutulmuyor. Sunucu açılışında model yine de ısıtılır.
 
 # Embedding model — Foundry Local's catalog had no embedding model, so we use a
 # small multilingual model via fastembed (ONNX, CPU-friendly, good Turkish support).

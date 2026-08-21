@@ -12,7 +12,7 @@ ile cihazda çalışan bir LLM'dir (bulut/Azure yok). Embedding'ler `fastembed` 
 Local kataloğunda embedding görevine sahip model bulunmuyor.
 
 Bilgi tabanı 8 Türkçe teknik nottan oluşur ve ingest sonrası 58 parçaya bölünür. Erişim ayarları
-(`TOP_K = 3`, `SIM_THRESHOLD = 0.34`) tahminle değil, 44 soruluk bir set üzerinde ölçülerek
+(`TOP_K = 3`, `SIM_THRESHOLD = 0.34`) tahminle değil, 50 soruluk bir set üzerinde ölçülerek
 seçilmiştir; ayrıntı için [değerlendirme raporu](docs/eval/degerlendirme-raporu.md).
 
 > Yazma işlemleri (etkinlik ekleme, mail gönderme) **asla onay olmadan** yapılmaz. Silme yoktur.
@@ -31,6 +31,8 @@ Tarayıcıda açılan tek sayfa bir uygulama; hiçbir dış kaynağa (CDN dâhil
 - Asistan **son iki turu hatırlar**: "Python'da sanal ortam nasıl oluşturulur?" → "Peki onu nasıl
   kapatırım?" çalışır.
 - Arama **yazım hatalarına dayanıklıdır**: "ekran görünütsünü bölgden nasıl alrım" doğru notu bulur.
+- Uygulama açma kısaltma ve ek tanır: "wp aç", "whatsappı aç", "chrome'u aç"; bulunamazsa kurulu
+  uygulamalar arasından en yakınını önerir.
 
 ## Mimari
 
@@ -92,10 +94,10 @@ python -m ui.cli
 ## Testler ve değerlendirme
 
 ```bash
-python -m pytest -q                  # 167 test (birim, HTTP katmanı, soru seti regresyonu)
+python -m pytest -q                  # 196 test (birim, HTTP katmanı, soru seti regresyonu)
 ```
 
-Değerlendirme koşumu `eval/questions.json` içindeki 44 soruyu çalıştırıp `docs/eval/` altına
+Değerlendirme koşumu `eval/questions.json` içindeki 50 soruyu çalıştırıp `docs/eval/` altına
 markdown rapor ve tam cevapların JSON dökümünü yazar:
 
 ```bash
@@ -106,6 +108,7 @@ python scripts/evaluate.py --model qwen2.5-1.5b   # başka modelle karşılaşt�
 ```
 
 Ölçülen metrikler: yönlendirme doğruluğu, erişim isabeti (hit@K), **yazım hatalı sorularda erişim**,
+**kısa/anahtar kelime sorgularında erişim**,
 cevaplanamaz sorularda çekimserlik, gecikme (p50/p95) ve **otomatik kalite puanı** —
 cevaplanabilir sorulardaki `expected_substrings` alanına göre 0–2 puan. Model değiştirip koşumu
 tekrarlamak yeterli, elle puanlama gerekmez.
@@ -124,12 +127,12 @@ tekrarlamak yeterli, elle puanlama gerekmez.
 - Küçük yerel model (8 GB RAM'e uygun) → genel bilgi/sohbet ChatGPT kadar güçlü değildir; en iyi
   kendi belgelerinden cevaplarken çalışır.
 - Takvim/Mail entegrasyonu yalnızca **Apple** uygulamaları içindir (macOS).
-- **Görsel yükleme henüz kapalı:** kod hazır (`llm.chat_stream(..., image_b64=...)`), ancak kurulu
-  Foundry Local 0.8.119 görsel modelleri yükleyemiyor (`genai_config.json` şeması tanınmıyor).
-  Çalışma zamanı 0.10.x'e yükseltilince açılabilir.
+- **Görsel yükleme kapalı.** Kod hazır (`llm.chat_stream(..., image_b64=...)`) ve Foundry Local
+  0.10.3 ile görsel-dil modeli artık yükleniyor; ancak yerel OpenAI uç noktası içerik dizisini
+  düz metne çevirip görseli modele iletmiyor. Model, gönderilen JSON'u metin olarak "okuyup"
+  cevap veriyor. Foundry bu davranışı düzeltene kadar özellik kapalı tutuluyor.
 - Model seçimi süreç ömrü boyunca geçerlidir; sunucu yeniden başlatılınca `config.CHAT_MODEL`
   varsayılanına döner.
-- Sohbet geçmişinde kaynak parçalarının metni saklanmaz; parça paneli yalnızca canlı cevaplarda dolu gelir.
 
 Tasarım dokümanı: `docs/specs/2026-07-03-kisisel-asistan-design.md` ·
 Uygulama planı: `docs/plans/2026-07-03-personas-implementation-plan.md`

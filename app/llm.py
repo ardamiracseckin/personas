@@ -7,6 +7,7 @@ a small multilingual model through fastembed, since Foundry Local's catalog has
 no embedding model. Everything is lazily initialised and runs offline once the
 models are present.
 """
+import json
 import os
 import re
 import shutil
@@ -23,19 +24,33 @@ def _foundry_exe():
     return shutil.which("foundry") or "/opt/homebrew/bin/foundry"
 
 
+def _foundry_output(*args, timeout=20):
+    try:
+        return subprocess.run([_foundry_exe(), *args], capture_output=True,
+                              text=True, timeout=timeout).stdout
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return ""
+
+
 def _discover_base_url():
-    """Return the Foundry Local OpenAI base URL (…/v1)."""
+    """Return the Foundry Local OpenAI base URL (…/v1).
+
+    Foundry dinamik port kullanır. 0.10 ile komut adı 'service' → 'server' oldu ve
+    JSON çıktı geldi; eski sürümlerde çalışmaya devam etmek için ikisi de denenir.
+    """
     override = os.environ.get("FOUNDRY_BASE_URL")
     if override:
         return override.rstrip("/")
+
+    ham = _foundry_output("server", "status", "-o", "json")
     try:
-        out = subprocess.run(
-            [_foundry_exe(), "service", "status"],
-            capture_output=True, text=True, timeout=20,
-        ).stdout
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        out = ""
-    m = re.search(r"http://127\.0\.0\.1:\d+", out)
+        adresler = json.loads(ham).get("webUrls") or []
+        if adresler:
+            return adresler[0].rstrip("/") + "/v1"
+    except (json.JSONDecodeError, AttributeError):
+        pass
+
+    m = re.search(r"http://127\.0\.0\.1:\d+", ham or _foundry_output("service", "status"))
     if not m:
         raise RuntimeError(
             "Foundry Local servisine ulaşılamadı. Terminalde şunu çalıştırın: "

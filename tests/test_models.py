@@ -1,4 +1,5 @@
 """Model yönetimi: katalog, indirilmişler ve model değişimi."""
+import json
 import subprocess
 
 import pytest
@@ -6,12 +7,10 @@ import pytest
 import app.config as config
 from app import llm, models
 
-CACHE_CIKTISI = """Models cached on device:
-   Alias                                             Model ID
-[10:50:17 ERR] Failed to process model #0 on page 1.
-💾 phi-4-mini                                        Phi-4-mini-instruct-generic-gpu:5
-💾 qwen3-vl-2b-instruct                              qwen3-vl-2b-instruct-generic-cpu:2
-"""
+CACHE_CIKTISI = json.dumps({"models": [
+    {"alias": "phi-4-mini", "cached": True, "loaded": True},
+    {"alias": "qwen3-vl-2b-instruct", "cached": True, "loaded": False},
+]})
 
 
 def sahte_run(kayit, cache_cikti=CACHE_CIKTISI, returncode=0):
@@ -22,7 +21,7 @@ def sahte_run(kayit, cache_cikti=CACHE_CIKTISI, returncode=0):
     return _run
 
 
-def test_downloaded_aliases_parses_cache_output(monkeypatch):
+def test_downloaded_aliases_parses_cache_json(monkeypatch):
     monkeypatch.setattr(subprocess, "run", sahte_run([]))
     assert models.downloaded_aliases() == {"phi-4-mini", "qwen3-vl-2b-instruct"}
 
@@ -46,8 +45,7 @@ def test_switch_unloads_previous_then_loads_new(monkeypatch):
 
     models.switch("qwen2.5-1.5b")
 
-    assert kayit == [["model", "unload", "phi-4-mini"],
-                     ["model", "load", "qwen2.5-1.5b", "--ttl", str(config.MODEL_TTL_SECONDS)]]
+    assert kayit == [["model", "unload", "phi-4-mini"], ["model", "load", "qwen2.5-1.5b"]]
     assert config.CHAT_MODEL == "qwen2.5-1.5b"
     assert sifirlandi["evet"]  # istemci önbelleği temizlenmeli
 
@@ -58,7 +56,7 @@ def test_switch_to_the_same_model_does_not_unload(monkeypatch):
     monkeypatch.setattr(config, "CHAT_MODEL", "phi-4-mini")
     monkeypatch.setattr(llm, "reset", lambda: None)
     models.switch("phi-4-mini")
-    assert kayit == [["model", "load", "phi-4-mini", "--ttl", str(config.MODEL_TTL_SECONDS)]]
+    assert kayit == [["model", "load", "phi-4-mini"]]
 
 
 def test_unknown_model_is_rejected(monkeypatch):
@@ -75,8 +73,9 @@ def test_failed_load_raises(monkeypatch):
         models.switch("qwen2.5-1.5b")
 
 
-def test_vision_flag():
-    assert models.supports_images("qwen3-vl-2b-instruct") is True
+def test_vision_flag_is_off_until_the_runtime_forwards_images():
+    """Foundry uç noktası görseli modele iletmiyor; katalogda hiçbir model görsel değil."""
+    assert models.supports_images("qwen3-vl-2b-instruct") is False
     assert models.supports_images("phi-4-mini") is False
 
 
@@ -101,24 +100,6 @@ def test_failed_load_restores_the_previous_model(monkeypatch):
     assert config.CHAT_MODEL == "phi-4-mini"             # ayar da geri alındı
 
 
-def test_load_uses_the_configured_ttl(monkeypatch):
-    kayit = []
-    monkeypatch.setattr(subprocess, "run", sahte_run(kayit))
-    monkeypatch.setattr(config, "CHAT_MODEL", "phi-4-mini")
-    monkeypatch.setattr(config, "MODEL_TTL_SECONDS", 21600)
-    monkeypatch.setattr(llm, "reset", lambda: None)
-    models.switch("phi-4-mini")
-    assert kayit == [["model", "load", "phi-4-mini", "--ttl", "21600"]]
-
-
-def test_is_loaded_reads_service_ps(monkeypatch):
-    def _run(cmd, capture_output=True, text=True, timeout=None):
-        return subprocess.CompletedProcess(
-            cmd, 0, stdout="Phi-4-mini-instruct-generic-gpu:5 is loaded", stderr="")
-
-    monkeypatch.setattr(subprocess, "run", _run)
-    assert models.is_loaded("phi-4-mini") is True
-    assert models.is_loaded("qwen2.5-1.5b") is False
 
 
 def test_ensure_loaded_skips_when_already_loaded(monkeypatch):
@@ -133,6 +114,5 @@ def test_ensure_loaded_loads_when_missing(monkeypatch):
     kayit = []
     monkeypatch.setattr(models, "is_loaded", lambda alias=None: False)
     monkeypatch.setattr(subprocess, "run", sahte_run(kayit))
-    monkeypatch.setattr(config, "MODEL_TTL_SECONDS", 900)
     assert models.ensure_loaded("phi-4-mini") is True
-    assert kayit == [["model", "load", "phi-4-mini", "--ttl", "900"]]
+    assert kayit == [["model", "load", "phi-4-mini"]]

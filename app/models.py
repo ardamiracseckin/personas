@@ -4,6 +4,7 @@
 yenisini yükle" biçimindedir ve saniyeler sürer. Arayüz bu süreyi kullanıcıya
 gösterebilsin diye işlem tek bir çağrıda toplandı.
 """
+import json
 import subprocess
 
 from app import config, llm
@@ -20,18 +21,32 @@ def _run(*args, timeout=LIST_TIMEOUT):
     return subprocess.run([_foundry(), *args], capture_output=True, text=True, timeout=timeout)
 
 
-def downloaded_aliases():
-    """İndirilmiş model takma adları (`foundry cache ls`)."""
+def cache_entries():
+    """Önbellekteki modeller: [{alias, cached, loaded}].
+
+    0.10 ile `foundry cache ls -o json` geldi; eski sürümlerde metin tablosu
+    ayrıştırılır (orada yüklü bilgisi yoktur).
+    """
     try:
-        cikti = _run("cache", "ls").stdout
+        ham = _run("cache", "ls", "-o", "json").stdout
     except (FileNotFoundError, subprocess.TimeoutExpired):
-        return set()
-    adlar = set()
-    for satir in cikti.splitlines():
+        return []
+    try:
+        return json.loads(ham).get("models", [])
+    except (json.JSONDecodeError, AttributeError):
+        pass
+
+    kayitlar = []
+    for satir in ham.splitlines():
         parcalar = satir.replace("💾", " ").split()
-        if len(parcalar) >= 2 and not satir.strip().startswith(("Models", "Alias", "[")):
-            adlar.add(parcalar[0])
-    return adlar
+        if len(parcalar) >= 2 and not satir.strip().startswith(("Models", "Alias", "[", "+", "|")):
+            kayitlar.append({"alias": parcalar[0], "cached": True, "loaded": False})
+    return kayitlar
+
+
+def downloaded_aliases():
+    """İndirilmiş model takma adları."""
+    return {k["alias"] for k in cache_entries() if k.get("cached", True)}
 
 
 def catalog():
@@ -50,18 +65,14 @@ def current():
 
 
 def _load(alias):
-    return _run("model", "load", alias, "--ttl", str(config.MODEL_TTL_SECONDS),
-                timeout=LOAD_TIMEOUT)
+    return _run("model", "load", alias, timeout=LOAD_TIMEOUT)
 
 
 def is_loaded(alias=None):
     """Yapılandırılan model şu an bellekte mi?"""
-    alias = alias or config.CHAT_MODEL
-    try:
-        cikti = _run("service", "ps").stdout.lower()
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        return False
-    return alias.lower() in cikti
+    alias = (alias or config.CHAT_MODEL).lower()
+    return any(k.get("alias", "").lower() == alias and k.get("loaded")
+               for k in cache_entries())
 
 
 def ensure_loaded(alias=None):

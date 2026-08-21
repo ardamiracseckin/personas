@@ -1,0 +1,381 @@
+{
+  "meta": {
+    "timestamp": "21.08.2026 19:38",
+    "model_id": "Phi-4-mini-instruct-generic-gpu",
+    "k": 3,
+    "threshold": 0.34,
+    "chunks": 58,
+    "sources": 8
+  },
+  "answers": [
+    {
+      "id": "C01",
+      "category": "cevaplanabilir",
+      "question": "Ekran görüntüsünü belirli bir bölgeden nasıl alırım?",
+      "expected_source": "macos-kisayollar.md",
+      "text": "Ekran görüntüsünü belirli bir bölgeden almak için Cmd + Shift + 4 tuşlarına basın, ardından seçilen bölgeyi seçmek için imleçle basın. Seçim sırasında Boşluk tuşuna basın. Bu şekilde, seçilen bölgenin görüntüsü alınır.",
+      "score": 2,
+      "sources": [
+        "macos-kisayollar.md"
+      ],
+      "seconds": 4.9137129578739405,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C02",
+      "category": "cevaplanabilir",
+      "question": "Git'te son commit'i geri alıp değişiklikleri nasıl korurum?",
+      "expected_source": "git-notlari.md",
+      "text": "Son commit'i geri alıp değişiklikleri koruduğunuzda, `git reset --soft HEAD~1` komutunu kullanın. Bu, son commit'i geri alır ama dosyalara dokunmaz. Bu, commit'i açar ama dosyalara dokunmaz.",
+      "score": 2,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "seconds": 5.647320875199512,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C03",
+      "category": "cevaplanabilir",
+      "question": "Yarım kalan değişiklikleri geçici olarak nasıl saklarım?",
+      "expected_source": "git-notlari.md",
+      "text": "`git stash` kullanın.",
+      "score": 2,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "seconds": 2.701660541119054,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C04",
+      "category": "cevaplanabilir",
+      "question": "Klasördeki gizli dosyaları da listeleyen komut nedir?",
+      "expected_source": "terminal-komutlar.md",
+      "text": "`ls -la` komutunu kullanın.",
+      "score": 2,
+      "sources": [
+        "terminal-komutlar.md",
+        "macos-kisayollar.md",
+        "vscode-notlari.md"
+      ],
+      "seconds": 3.3796745829749852,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C05",
+      "category": "cevaplanabilir",
+      "question": "Bir dosyanın içinde metin aramak için hangi komut kullanılır?",
+      "expected_source": "terminal-komutlar.md",
+      "text": "`grep \"aranacak-kelime\" dosya.txt`",
+      "score": 2,
+      "sources": [
+        "terminal-komutlar.md",
+        "terminal-komutlar.md",
+        "terminal-komutlar.md"
+      ],
+      "seconds": 3.312549666967243,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C06",
+      "category": "cevaplanabilir",
+      "question": "Python'da sanal ortam nasıl oluşturulur ve etkinleştirilir?",
+      "expected_source": "python-notlari.md",
+      "text": "Sanal ortam oluşturmak için `python3 -m venv .venv` çalıştırın. Etkinleştirmek için terminalinizi açın, `.venv` dizininde terminali `.venv/bin/activate` komutuyla aktiv edin. Etkinleştirmek için `deactivate` yazın. Etkinleştirilmişde terminali `.venv` dizininde simgeyle simgeleyin ve `which python` komutunu çalıştırın; `.venv/bin/python` yolunu göstermelidir.",
+      "score": 2,
+      "sources": [
+        "python-notlari.md",
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "seconds": 7.04062783299014,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C07",
+      "category": "cevaplanabilir",
+      "question": "requirements.txt içindeki bağımlılıkları nasıl kurarım?",
+      "expected_source": "python-notlari.md",
+      "text": "`pip install -r requirements.txt` kullanın.",
+      "score": 2,
+      "sources": [
+        "python-notlari.md"
+      ],
+      "seconds": 2.1759104589000344,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C08",
+      "category": "cevaplanabilir",
+      "question": "SQLite'ta tablo zaten varsa hata almamak için ne yazılır?",
+      "expected_source": "sqlite-notlari.md",
+      "text": "`CREATE TABLE IF NOT EXISTS`",
+      "score": 2,
+      "sources": [
+        "sqlite-notlari.md",
+        "sqlite-notlari.md",
+        "sqlite-notlari.md"
+      ],
+      "seconds": 3.6469608331099153,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C09",
+      "category": "cevaplanabilir",
+      "question": "Embedding vektörleri SQLite'ta hangi biçimde saklanır?",
+      "expected_source": "sqlite-notlari.md",
+      "text": "JSON metni olarak `TEXT` sütununda veya ikili veri olarak `BLOB` sütununda saklanır.",
+      "score": 2,
+      "sources": [
+        "sqlite-notlari.md",
+        "rag-kavramlari.md",
+        "sqlite-notlari.md"
+      ],
+      "seconds": 5.513115625130013,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C10",
+      "category": "cevaplanabilir",
+      "question": "Foundry Local'de yüklü bir modeli bellekten nasıl boşaltırım?",
+      "expected_source": "foundry-local-notlari.md",
+      "text": "`foundry model unload model-adi` komutunu kullanarak Foundry Local'de yüklü bir modeli bellekten boşaltabilirsiniz. Bu komutu çalıştırmadan önce yüklü olan modeli indirmek için `foundry model load model-adi` komutunu kullanmanız gerekecektir. Bu, bellek alanını boşaltmak için gerekli ön koşuludur.",
+      "score": 2,
+      "sources": [
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "seconds": 7.220122749917209,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C11",
+      "category": "cevaplanabilir",
+      "question": "Foundry Local servisinin adresi neden koda gömülmemeli?",
+      "expected_source": "foundry-local-notlari.md",
+      "text": "Adres koda gömülmemelidir çünkü Foundry Local dinamik bir yerel port kullanır.",
+      "score": 2,
+      "sources": [
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "seconds": 14.859822042053565,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C12",
+      "category": "cevaplanabilir",
+      "question": "RAG'in üç adımı nedir?",
+      "expected_source": "rag-kavramlari.md",
+      "text": "Retrieve, Augment, Generate.",
+      "score": 2,
+      "sources": [
+        "rag-kavramlari.md",
+        "rag-kavramlari.md"
+      ],
+      "seconds": 3.2191085000522435,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C13",
+      "category": "cevaplanabilir",
+      "question": "Benzerlik eşiği çok yüksek olursa ne olur?",
+      "expected_source": "rag-kavramlari.md",
+      "text": "Çok yüksek olursa 'Bilmiyorum' diyor.",
+      "score": 2,
+      "sources": [
+        "rag-kavramlari.md",
+        "rag-kavramlari.md"
+      ],
+      "seconds": 3.294593083905056,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "model"
+    },
+    {
+      "id": "C14",
+      "category": "cevaplanabilir",
+      "question": "VS Code'da projenin tamamında nasıl arama yaparım?",
+      "expected_source": "vscode-notlari.md",
+      "text": "VS Code'da projenin tamamında arama yapmak için Cmd + Shift + F kullanın.",
+      "score": 2,
+      "sources": [
+        "vscode-notlari.md",
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "seconds": 6.009885667124763,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "B01",
+      "category": "cevaplanamaz",
+      "question": "Docker imajı nasıl oluşturulur?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.36540845897980034,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B02",
+      "category": "cevaplanamaz",
+      "question": "Kubernetes'te bir pod nasıl silinir?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.08585208398289979,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B03",
+      "category": "cevaplanamaz",
+      "question": "React'te useEffect kancası ne işe yarar?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.11457937490195036,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B04",
+      "category": "cevaplanamaz",
+      "question": "Excel'de düşeyara formülü nasıl yazılır?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.10041491710580885,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B05",
+      "category": "cevaplanamaz",
+      "question": "Ev kredisi faiz oranları nedir?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.08685070788487792,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B06",
+      "category": "cevaplanamaz",
+      "question": "Fotoğrafta diyafram değeri neyi etkiler?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.09802033309824765,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U01",
+      "category": "uc_durum",
+      "question": "",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "seconds": 0.011307500069960952,
+      "error": null,
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U02",
+      "category": "uc_durum",
+      "question": "git",
+      "expected_source": null,
+      "text": "Sorunun git ile ilgili olduğunu anladım. Lütfen daha fazla ayrıntı veya belirli bir git komutuna ihtiyacınız varsa bana bildirin!",
+      "score": null,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "seconds": 4.374237125040963,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "U03",
+      "category": "uc_durum",
+      "question": "nasıl?",
+      "expected_source": null,
+      "text": "Verilen bağlamda metni vektöre çevirin:\n\nSorun: Nasıl yapılır?\n\nVektörler: [how_to_do_it]\n\n\nVerilen bağlamda embeddin nasıl yapılır:\n\nSorun: Nasıl yapılır?\n\nVektörler: [how_to_do_embedding]",
+      "score": null,
+      "sources": [
+        "rag-kavramlari.md"
+      ],
+      "seconds": 4.465317041845992,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "U04",
+      "category": "uc_durum",
+      "question": "Bilgisayarımda hem git hem python hem sqlite hem de foundry local kullanıyorum ve bunların hepsini aynı anda öğrenmeye çalışırken hangi konudan başlamam gerektiğini, hangi komutları önce ezberlemem gerektiğini, ayrıca sanal ortam kurmadan paket kurmanın neden sorun çıkardığını ve bütün bunların birbiriyle nasıl ilişkili olduğunu uzun uzun anlatır mısın?",
+      "expected_source": null,
+      "text": "Sorunuzun bağlamında hem git hem de python hem sqlite hem de Foundry Local kullanıyorsunuz. Bu araçları öğrenmek için şu sırayı takip edebilirsiniz:\n\n1. Python ile başlayın. Bu, hem git hem de Foundry Local için temel bir dil ve depolama sistemi.\n2. Sonra git'i öğrenin. Bu, depolama sistemini depolayan ve yönetilen kodun depolama ve dağıtımını sağlayan bir araçtır.\n3. Sonra Foundry Local'i öğrenin. Bu, git depolama sistemini depolayan ve yönetilen kodu depolayan ve dağıtımını sağlayan bir araçtır.\n4. Sonra sqlite'yi öğrenin. Bu, depolama sistemini depolayan ve depolama ve erişimle ilgili işlemlere yetenekli olan depolama sistemidir.\n\nSanal ortam kurmadan paket kurmanın neden sorun çıkardığını anlamak için:\n\n- Sanal ortamlar, bağımlılıkları sistem Python'ından ayırır. Bu, depolama sistemini depolayan ve depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur.\n- Etkin ortamda `which python` komutu `.venv/bin/python` yolunu göstermelidir. Bu, sanal ortamda çalışan pythonun doğru yoldan çalıştığından emin olmak için önemlidir.\n\nYani, sanal ortamlar depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur ve depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur. Bu nedenle depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur ve depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur. Bu nedenle depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye",
+      "score": null,
+      "sources": [
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "seconds": 20.968601583037525,
+      "error": null,
+      "abstained": false,
+      "abstained_by": null
+    }
+  ]
+}

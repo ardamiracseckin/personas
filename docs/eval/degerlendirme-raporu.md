@@ -369,3 +369,72 @@ Kaliteyi de yükseltmesi beklenmiyordu: sınır, modeli konudan sapmadan cevapla
 | Ortalama / p50 / p95 süre | 4,60 sn / 4,50 sn / 10,27 sn |
 | Uç durumlarda çökme | 0 |
 | Test paketi | 167 test, tamamı geçiyor |
+
+---
+
+## 12. Kısa sorgular ve Foundry Local yükseltmesi (21 Ağustos 2026)
+
+### 12.1 Ölçülmeyen bir soru biçimi: kısa sorgular
+
+Arayüz kullanılırken "git stash ne işe yarar?" sorusuna asistan **"bilgim yok"** dedi. Doğru parça
+sıralamada birinciydi ama skoru 0,243 ile eşiğin altındaydı: embedding kısa sorgularda zayıf kalıyor
+(kosinüs 0,157), sözlüksel katman ise tek başına eşiği geçmeye yetmiyordu.
+
+Soru setinin tamamı **tam cümlelerden** oluştuğu için bu biçim hiç ölçülmemişti. `kisa_sorgu`
+kategorisi eklendi (6 sorgu: "ls -la", "sanal ortam", "foundry model unload", …) ve iki düzeltme
+yapıldı:
+
+1. **Sözlüksel kurtarma kuralı** (`retriever.accepts`): kelimelerin en az yarısı tutuyorsa ve
+   anlamsal yakınlık tabanın üstündeyse (`dense ≥ 0,10`) parça eşiğin altında da kabul edilir.
+2. **İki harfli kelimeler artık atılmıyor.** `lexical.tokens` en az 3 harfli kelimeleri alıyordu;
+   "ls -la" sorgusunda tüm bilgi iki harfli kelimelerdeydi ve sözlüksel skor sıfır çıkıyordu.
+   Sınır 2 harfe indirildi, anlam taşımayan kısa kelimeler (`de`, `da`, `ki`, `bu`, …) açık bir
+   listeyle elendi.
+
+| Ölçüt | Önce | Sonra |
+|---|---|---|
+| Erişim isabeti | 14/14 | 14/14 |
+| Yazım hatalı sorularda erişim | 13/14 | **14/14** |
+| Kısa sorgularda erişim | (ölçülmüyordu) 4/6 | **6/6** |
+| Cevaplanamazda çekimserlik | 6/6 | 6/6 |
+
+Ders: bir ölçüt kümesi yalnızca içindeki soru biçimlerini korur. Gerçek kullanımda ortaya çıkan
+her yeni biçim, düzeltmeden önce sete eklenmelidir.
+
+### 12.2 Foundry Local 0.8.119 → 0.10.3
+
+Görsel yükleme için yapılan yükseltme üç şey değiştirdi:
+
+- **Görsel modeller artık yükleniyor.** `qwen3-vl-2b-instruct` 0.8'de `genai_config.json`
+  ayrıştırma hatasıyla açılmıyordu; 0.10.3'te sorunsuz yükleniyor.
+- **Boşta kalma davranışı ayara taşındı.** 0.8'de model 600 saniye hareketsizlikte bellekten
+  atılıyor ve sonraki ilk soru ~30 saniye sürüyordu. 0.10.3'te `idle-timeout-minutes` varsayılan
+  olarak **disabled**; sorun kaynağında çözülmüş oldu.
+- **CLI komut yüzeyi kırıldı.** `foundry service status` → `foundry server status`, `--ttl`
+  kaldırıldı, çıktılar `-o json` ile alınabiliyor. Uygulama her iki sürümle de çalışacak biçimde
+  uyarlandı (`llm._discover_base_url`, `models.cache_entries`).
+
+Yükseltme öncesi/sonrası aynı soru setiyle karşılaştırma (phi-4-mini):
+
+| Metrik | 0.8.119 | 0.10.3 |
+|---|---|---|
+| Otomatik kalite | 28/28 | 28/28 |
+| Çekimserlik | 6/6 | 6/6 |
+| Ortalama süre | 4,66 sn | 4,32 sn |
+| p50 | 4,64 sn | **3,38 sn** |
+| p95 | 8,68 sn | 14,86 sn |
+| Hata / çökme | 0 | 0 |
+
+Kalite ve güvenilirlik aynı, tipik gecikme iyileşti; p95 tek bir uzun cevaptan etkilendi.
+
+### 12.3 Görsel yükleme neden hâlâ kapalı
+
+Model yüklendikten sonra görsel gönderildiğinde istek hata vermiyor, ama cevaplar modelin görüntüyü
+değil **gönderilen JSON'u metin olarak** gördüğünü ortaya koydu:
+
+> *"The image contains a list of metadata, including text and an image URL…"*
+
+Kontrol olarak görselsiz, yalnız metinden oluşan aynı istek gönderildiğinde model "sol yarı beyaz"
+diye cevap üretti — yani ortada görüntü yokken de aynı biçimde uyduruyor. Sonuç: Foundry Local'in
+yerel OpenAI uç noktası içerik dizisini düz metne indirgiyor ve görseli modele iletmiyor. Bu bizim
+tarafımızdan kapatılabilecek bir eksik değil; özellik kod tarafında hazır bekletiliyor.
