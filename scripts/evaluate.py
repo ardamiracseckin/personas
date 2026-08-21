@@ -23,7 +23,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from app import assistant, config, llm, retriever, router, store  # noqa: E402
+from app import assistant, config, lexical, llm, retriever, router, store  # noqa: E402
+from app.similarity import cosine  # noqa: E402
 
 QUESTIONS_PATH = ROOT / "eval" / "questions.json"
 OUT_DIR = ROOT / "docs" / "eval"
@@ -88,11 +89,21 @@ def score_questions(questions):
     vectors = llm.embed(texts)
     scored = {}
     for q, qvec in zip(questions, vectors):
-        rows = [(src, retriever.score(q["question"], text, qvec, emb))
-                for (src, text, emb) in chunks]
+        rows = []
+        for (src, text, emb) in chunks:
+            dense = cosine(qvec, emb)
+            lex = lexical.fuzzy_score(q["question"], text)
+            rows.append((src, config.DENSE_WEIGHT * dense + config.LEXICAL_WEIGHT * lex,
+                         dense, lex))
         rows.sort(key=lambda r: r[1], reverse=True)
         scored[q["id"]] = rows
     return scored
+
+
+def _accepted(rows, k, threshold):
+    """Uygulamanın kabul kuralıyla aynı: eşik veya güçlü kelime eşleşmesi."""
+    return [(src, total) for (src, total, dense, lex) in rows
+            if retriever.accepts(total, dense, lex, threshold)][:k]
 
 
 def run_routing(questions):
@@ -110,7 +121,7 @@ def run_routing(questions):
 def _hits(questions, scored, k, threshold, category):
     satirlar = []
     for q in by_category(questions, category):
-        top = [(s, sc) for (s, sc) in scored[q["id"]] if sc >= threshold][:k]
+        top = _accepted(scored[q["id"]], k, threshold)
         satirlar.append({
             "id": q["id"], "question": q["question"],
             "expected": q["expected_source"],
@@ -125,29 +136,31 @@ def run_retrieval(questions, scored, k, threshold):
     """Erişim isabeti (temiz ve yazım hatalı sorular) + cevaplanamazda çekimserlik."""
     hits = _hits(questions, scored, k, threshold, "cevaplanabilir")
     typo = _hits(questions, scored, k, threshold, "yazim_hatasi")
+    kisa = _hits(questions, scored, k, threshold, "kisa_sorgu")
     abstains = []
     for q in by_category(questions, "cevaplanamaz"):
-        top = [(s, sc) for (s, sc) in scored[q["id"]] if sc >= threshold][:k]
+        top = _accepted(scored[q["id"]], k, threshold)
         abstains.append({
             "id": q["id"], "question": q["question"],
             "best_score": scored[q["id"]][0][1],
             "ok": not top,  # eşiği geçen parça yoksa asistan "bilgim yok" der
         })
-    return hits, typo, abstains
+    return hits, typo, kisa, abstains
 
 
 def run_sweep(questions, scored, thresholds, ks):
     rows = []
     for k in ks:
         for t in thresholds:
-            hits, typo, abstains = run_retrieval(questions, scored, k, t)
+            hits, typo, kisa, abstains = run_retrieval(questions, scored, k, t)
             hit_rate = sum(h["ok"] for h in hits) / len(hits)
             typo_rate = sum(h["ok"] for h in typo) / len(typo) if typo else 0.0
+            kisa_rate = sum(h["ok"] for h in kisa) / len(kisa) if kisa else 0.0
             abstain_rate = sum(a["ok"] for a in abstains) / len(abstains)
             rows.append({
                 "k": k, "threshold": t, "hit": hit_rate, "typo": typo_rate,
-                "abstain": abstain_rate,
-                "balance": (hit_rate + typo_rate + abstain_rate) / 3,
+                "kisa": kisa_rate, "abstain": abstain_rate,
+                "balance": (hit_rate + typo_rate + kisa_rate + abstain_rate) / 4,
             })
     return rows
 
@@ -208,7 +221,7 @@ def _table(header, rows):
     return "\n".join(out)
 
 
-def build_report(meta, routing, hits, typo, abstains, answers, sweep):
+def build_report(meta, routing, hits, typo, kisa, abstains, answers, sweep):
     ok = lambda flag: "✅" if flag else "❌"  # noqa: E731
     lines = [
         f"# Değerlendirme sonuçları — {meta['timestamp']}",
@@ -249,6 +262,13 @@ def build_report(meta, routing, hits, typo, abstains, answers, sweep):
                        f"{h['best_score']:.3f}", ok(h["ok"])]
                       for h in typo]), ""]
 
+    if kisa:
+        rate = sum(h["ok"] for h in kisa) / len(kisa)
+        lines += [f"## Kısa sorgularda erişim — {rate:.0%} ({sum(h['ok'] for h in kisa)}/{len(kisa)})",
+                  "", _table(["ID", "Sorgu", "Beklenen kaynak", "En yüksek skor", "Sonuç"], [
+                      [h["id"], h["question"][:40], h["expected"],
+                       f"{h['best_score']:.3f}", ok(h["ok"])] for h in kisa]), ""]
+
     if abstains:
         rate = sum(a["ok"] for a in abstains) / len(abstains)
         lines += [f"## Çekimserlik (cevaplanamaz sorular) — {rate:.0%} ({sum(a['ok'] for a in abstains)}/{len(abstains)})",
@@ -259,12 +279,14 @@ def build_report(meta, routing, hits, typo, abstains, answers, sweep):
     if sweep:
         best = max(sweep, key=lambda r: (r["balance"], -r["threshold"]))
         lines += ["## Eşik / K taraması", "",
-                  _table(["K", "Eşik", "İsabet", "Yazım hatalı isabet", "Çekimserlik", "Denge"], [
+                  _table(["K", "Eşik", "İsabet", "Yazım hatalı", "Kısa sorgu", "Çekimserlik",
+                          "Denge"], [
                       [r["k"], f"{r['threshold']:.2f}", f"{r['hit']:.0%}", f"{r['typo']:.0%}",
-                       f"{r['abstain']:.0%}", f"{r['balance']:.0%}"] for r in sweep]),
+                       f"{r['kisa']:.0%}", f"{r['abstain']:.0%}", f"{r['balance']:.0%}"]
+                      for r in sweep]),
                   "", f"En iyi denge: **K={best['k']}, eşik={best['threshold']:.2f}** "
                       f"(isabet {best['hit']:.0%}, yazım hatalı {best['typo']:.0%}, "
-                      f"çekimserlik {best['abstain']:.0%})", ""]
+                      f"kısa {best['kisa']:.0%}, çekimserlik {best['abstain']:.0%})", ""]
 
     if answers:
         times = [a["seconds"] for a in answers]
@@ -325,18 +347,19 @@ def main():
     print("Deterministik metrikler…", flush=True)
     routing = run_routing(questions)
     scored = score_questions(questions)
-    hits, typo, abstains = run_retrieval(questions, scored, ks[0], thresholds[0])
+    hits, typo, kisa, abstains = run_retrieval(questions, scored, ks[0], thresholds[0])
     sweep = run_sweep(questions, scored, thresholds, ks) if sweeping else []
 
     print(f"  yönlendirme: {sum(r['ok'] for r in routing)}/{len(routing)}"
           f" · erişim: {sum(h['ok'] for h in hits)}/{len(hits)}"
           f" · yazım hatalı: {sum(h['ok'] for h in typo)}/{len(typo)}"
+          f" · kısa sorgu: {sum(h['ok'] for h in kisa)}/{len(kisa)}"
           f" · çekimserlik: {sum(a['ok'] for a in abstains)}/{len(abstains)}", flush=True)
     if sweep:
         best = max(sweep, key=lambda r: (r["balance"], -r["threshold"]))
         print(f"  en iyi denge: K={best['k']} eşik={best['threshold']:.2f} "
               f"(isabet {best['hit']:.0%}, yazım hatalı {best['typo']:.0%}, "
-              f"çekimserlik {best['abstain']:.0%})", flush=True)
+              f"kısa {best['kisa']:.0%}, çekimserlik {best['abstain']:.0%})", flush=True)
 
     answers = []
     if not args.no_llm and not sweeping:
@@ -349,7 +372,7 @@ def main():
         "model_id": model_id, "k": ks[0], "threshold": thresholds[0],
         "chunks": len(chunk_rows), "sources": len({s for (s, _t, _e) in chunk_rows}),
     }
-    report = build_report(meta, routing, hits, typo, abstains, answers, sweep)
+    report = build_report(meta, routing, hits, typo, kisa, abstains, answers, sweep)
 
     out_dir = Path(args.cikti)
     out_dir.mkdir(parents=True, exist_ok=True)

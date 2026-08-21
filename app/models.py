@@ -49,6 +49,32 @@ def current():
     return config.CHAT_MODEL
 
 
+def _load(alias):
+    return _run("model", "load", alias, "--ttl", str(config.MODEL_TTL_SECONDS),
+                timeout=LOAD_TIMEOUT)
+
+
+def is_loaded(alias=None):
+    """Yapılandırılan model şu an bellekte mi?"""
+    alias = alias or config.CHAT_MODEL
+    try:
+        cikti = _run("service", "ps").stdout.lower()
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+    return alias.lower() in cikti
+
+
+def ensure_loaded(alias=None):
+    """Model bellekte değilse yükle. Sunucu açılışında arka planda çağrılır."""
+    alias = alias or config.CHAT_MODEL
+    if is_loaded(alias):
+        return True
+    try:
+        return _load(alias).returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+
+
 def supports_images(alias=None):
     alias = alias or config.CHAT_MODEL
     return any(m["alias"] == alias and m["gorsel"] for m in config.MODEL_CATALOG)
@@ -63,12 +89,12 @@ def switch(alias):
     onceki = config.CHAT_MODEL
     if onceki and onceki != alias:
         _run("model", "unload", onceki, timeout=LOAD_TIMEOUT)
-    sonuc = _run("model", "load", alias, timeout=LOAD_TIMEOUT)
+    sonuc = _load(alias)
     if sonuc.returncode != 0:
         # Yükleme başarısızsa bellekte hiç model kalmaz ve asistan tamamen durur;
         # eski modeli geri yükleyip hatayı öyle bildiriyoruz.
         if onceki and onceki != alias:
-            _run("model", "load", onceki, timeout=LOAD_TIMEOUT)
+            _load(onceki)
         raise RuntimeError(f"'{alias}' yüklenemedi: {(sonuc.stderr or sonuc.stdout).strip()[:200]}")
 
     config.CHAT_MODEL = alias

@@ -181,3 +181,53 @@ def test_index_page_is_served(istemci):
     sayfa = istemci.get("/")
     assert sayfa.status_code == 200
     assert "personas" in sayfa.text
+
+
+def test_status_reports_model_and_warmth(istemci, monkeypatch):
+    from server import main
+
+    monkeypatch.setattr(main.models, "current", lambda: "phi-4-mini")
+    monkeypatch.setattr(main.models, "is_loaded", lambda alias=None: False)
+    durum = istemci.get("/api/status").json()
+    assert durum == {"model": "phi-4-mini", "loaded": False}
+
+
+# --- başlık temizliği -------------------------------------------------------
+
+def test_clean_title_strips_model_noise():
+    from server.main import clean_title
+
+    assert clean_title('"Sanal Ortam Kurulumu"', "soru") == "Sanal Ortam Kurulumu"
+    assert clean_title("Başlık: Git Geri Alma", "soru") == "Git Geri Alma"
+    assert clean_title("Ekran Görünümları Alın | Belirli Bölge", "soru") == \
+        "Ekran Görünümları Alın Belirli Bölge"
+
+
+def test_clean_title_falls_back_when_model_rambles():
+    from server.main import clean_title
+
+    uzun = "Bu soruya uygun bir başlık üretmek gerekirse şöyle diyebiliriz ki kullanıcı"
+    assert clean_title(uzun, "Sanal ortam nasıl kurulur?") == "Sanal ortam nasıl kurulur?"
+    assert clean_title("", "Yedek soru") == "Yedek soru"
+
+
+# --- mesajı düzenleyip yeniden sorma ---------------------------------------
+
+def test_editing_a_message_replaces_it_and_drops_later_messages(istemci, monkeypatch):
+    sahte_akis(monkeypatch)
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    cevap = istemci.post("/api/chat", json={"conversation_id": cid, "message": "ilk hâli"})
+    kullanici_id = next(o for o in sse_olaylari(cevap) if o["type"] == "final")["user_message_id"]
+
+    istemci.post("/api/chat", json={"conversation_id": cid, "message": "düzeltilmiş hâli",
+                                    "edit_message_id": kullanici_id})
+    kayitli = chat_store.get_messages(cid)
+    assert [m["text"] for m in kayitli] == ["düzeltilmiş hâli", "Merhaba"]
+
+
+def test_final_event_carries_the_user_message_id(istemci, monkeypatch):
+    sahte_akis(monkeypatch)
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    cevap = istemci.post("/api/chat", json={"conversation_id": cid, "message": "selam"})
+    final = next(o for o in sse_olaylari(cevap) if o["type"] == "final")
+    assert isinstance(final["user_message_id"], int)

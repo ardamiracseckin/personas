@@ -29,11 +29,15 @@ def init_db():
             "CREATE TABLE IF NOT EXISTS messages ("
             "id INTEGER PRIMARY KEY AUTOINCREMENT, conversation_id INTEGER NOT NULL, "
             "role TEXT NOT NULL, text TEXT NOT NULL, sources_json TEXT NOT NULL, "
-            "created_at TEXT NOT NULL, "
+            "chunks_json TEXT NOT NULL DEFAULT '[]', created_at TEXT NOT NULL, "
             "FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE CASCADE)"
         )
         c.execute("CREATE INDEX IF NOT EXISTS idx_messages_conversation "
                   "ON messages(conversation_id)")
+        # Şema göçü: kaynak parçaları sonradan eklendi, eski veritabanlarında kolon yok.
+        kolonlar = {satir[1] for satir in c.execute("PRAGMA table_info(messages)")}
+        if "chunks_json" not in kolonlar:
+            c.execute("ALTER TABLE messages ADD COLUMN chunks_json TEXT NOT NULL DEFAULT '[]'")
 
 
 def create_conversation(title=None):
@@ -66,23 +70,28 @@ def delete_conversation(conversation_id):
         c.execute("DELETE FROM conversations WHERE id = ?", (conversation_id,))
 
 
-def add_message(conversation_id, role, text, sources=None):
+def add_message(conversation_id, role, text, sources=None, chunks=None):
+    """Mesajı kaydet. `chunks`: kaynak panelinin geçmişte de dolu gelmesi için parça metinleri."""
     zaman = _now()
     with connect() as c:
-        c.execute(
-            "INSERT INTO messages(conversation_id, role, text, sources_json, created_at) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (conversation_id, role, text, json.dumps(sources or [], ensure_ascii=False), zaman))
+        cur = c.execute(
+            "INSERT INTO messages(conversation_id, role, text, sources_json, chunks_json, "
+            "created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            (conversation_id, role, text,
+             json.dumps(sources or [], ensure_ascii=False),
+             json.dumps(chunks or [], ensure_ascii=False), zaman))
         c.execute("UPDATE conversations SET updated_at = ? WHERE id = ?", (zaman, conversation_id))
+        return cur.lastrowid
 
 
 def get_messages(conversation_id):
     with connect() as c:
         rows = c.execute(
-            "SELECT id, role, text, sources_json, created_at FROM messages "
+            "SELECT id, role, text, sources_json, chunks_json, created_at FROM messages "
             "WHERE conversation_id = ? ORDER BY id", (conversation_id,)).fetchall()
-    return [{"id": i, "role": r, "text": t, "sources": json.loads(s), "created_at": ca}
-            for (i, r, t, s, ca) in rows]
+    return [{"id": i, "role": r, "text": t, "sources": json.loads(s),
+             "chunks": json.loads(p), "created_at": ca}
+            for (i, r, t, s, p, ca) in rows]
 
 
 def history(conversation_id):

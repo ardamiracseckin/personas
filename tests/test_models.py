@@ -46,7 +46,8 @@ def test_switch_unloads_previous_then_loads_new(monkeypatch):
 
     models.switch("qwen2.5-1.5b")
 
-    assert kayit == [["model", "unload", "phi-4-mini"], ["model", "load", "qwen2.5-1.5b"]]
+    assert kayit == [["model", "unload", "phi-4-mini"],
+                     ["model", "load", "qwen2.5-1.5b", "--ttl", str(config.MODEL_TTL_SECONDS)]]
     assert config.CHAT_MODEL == "qwen2.5-1.5b"
     assert sifirlandi["evet"]  # istemci önbelleği temizlenmeli
 
@@ -57,7 +58,7 @@ def test_switch_to_the_same_model_does_not_unload(monkeypatch):
     monkeypatch.setattr(config, "CHAT_MODEL", "phi-4-mini")
     monkeypatch.setattr(llm, "reset", lambda: None)
     models.switch("phi-4-mini")
-    assert kayit == [["model", "load", "phi-4-mini"]]
+    assert kayit == [["model", "load", "phi-4-mini", "--ttl", str(config.MODEL_TTL_SECONDS)]]
 
 
 def test_unknown_model_is_rejected(monkeypatch):
@@ -96,5 +97,42 @@ def test_failed_load_restores_the_previous_model(monkeypatch):
     with pytest.raises(RuntimeError):
         models.switch("qwen3-vl-2b-instruct")
 
-    assert kayit[-1] == ["model", "load", "phi-4-mini"]  # eski model geri yüklendi
+    assert kayit[-1][:3] == ["model", "load", "phi-4-mini"]  # eski model geri yüklendi
     assert config.CHAT_MODEL == "phi-4-mini"             # ayar da geri alındı
+
+
+def test_load_uses_the_configured_ttl(monkeypatch):
+    kayit = []
+    monkeypatch.setattr(subprocess, "run", sahte_run(kayit))
+    monkeypatch.setattr(config, "CHAT_MODEL", "phi-4-mini")
+    monkeypatch.setattr(config, "MODEL_TTL_SECONDS", 21600)
+    monkeypatch.setattr(llm, "reset", lambda: None)
+    models.switch("phi-4-mini")
+    assert kayit == [["model", "load", "phi-4-mini", "--ttl", "21600"]]
+
+
+def test_is_loaded_reads_service_ps(monkeypatch):
+    def _run(cmd, capture_output=True, text=True, timeout=None):
+        return subprocess.CompletedProcess(
+            cmd, 0, stdout="Phi-4-mini-instruct-generic-gpu:5 is loaded", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", _run)
+    assert models.is_loaded("phi-4-mini") is True
+    assert models.is_loaded("qwen2.5-1.5b") is False
+
+
+def test_ensure_loaded_skips_when_already_loaded(monkeypatch):
+    kayit = []
+    monkeypatch.setattr(models, "is_loaded", lambda alias=None: True)
+    monkeypatch.setattr(subprocess, "run", sahte_run(kayit))
+    assert models.ensure_loaded("phi-4-mini") is True
+    assert kayit == []
+
+
+def test_ensure_loaded_loads_when_missing(monkeypatch):
+    kayit = []
+    monkeypatch.setattr(models, "is_loaded", lambda alias=None: False)
+    monkeypatch.setattr(subprocess, "run", sahte_run(kayit))
+    monkeypatch.setattr(config, "MODEL_TTL_SECONDS", 900)
+    assert models.ensure_loaded("phi-4-mini") is True
+    assert kayit == [["model", "load", "phi-4-mini", "--ttl", "900"]]

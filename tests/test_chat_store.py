@@ -53,3 +53,31 @@ def test_new_message_bumps_the_conversation_to_the_top():
     chat_store.create_conversation("Yeni")
     chat_store.add_message(eski, "user", "tekrar gündeme geldi")
     assert chat_store.list_conversations()[0]["id"] == eski
+
+
+def test_chunks_are_stored_with_the_message():
+    cid = chat_store.create_conversation()
+    parcalar = [{"source": "git-notlari.md", "text": "## Stash\n\ngit stash", "score": 0.71}]
+    chat_store.add_message(cid, "assistant", "git stash kullan", ["git-notlari.md"], parcalar)
+    mesaj = chat_store.get_messages(cid)[0]
+    assert mesaj["chunks"] == parcalar
+    assert chat_store.get_messages(cid)[0]["sources"] == ["git-notlari.md"]
+
+
+def test_old_databases_get_the_new_column(tmp_path, monkeypatch):
+    """chunks_json sonradan eklendi; eski şemalı veritabanı açılabilmeli."""
+    import sqlite3
+
+    yol = tmp_path / "eski.db"
+    with sqlite3.connect(yol) as c:
+        c.execute("CREATE TABLE conversations (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                  "title TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)")
+        c.execute("CREATE TABLE messages (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                  "conversation_id INTEGER NOT NULL, role TEXT NOT NULL, text TEXT NOT NULL, "
+                  "sources_json TEXT NOT NULL, created_at TEXT NOT NULL)")
+        c.execute("INSERT INTO conversations(title, created_at, updated_at) VALUES ('a','x','x')")
+        c.execute("INSERT INTO messages(conversation_id, role, text, sources_json, created_at) "
+                  "VALUES (1, 'user', 'eski mesaj', '[]', 'x')")
+    monkeypatch.setattr(config, "DB_PATH", yol)
+    chat_store.init_db()
+    assert chat_store.get_messages(1)[0]["chunks"] == []

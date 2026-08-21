@@ -20,8 +20,14 @@ _TR_MAP = str.maketrans({
 })
 
 _NON_WORD_RE = re.compile(r"[^a-z0-9]+")
-MIN_TOKEN_LEN = 3      # "de", "mi" gibi ekler eşleşmeye katkı vermez
+# İki harfli kelimeler atılamaz: "ls", "cd", "rm" gibi komutlar sorgunun tamamı
+# olabiliyor. Bunun yerine anlam taşımayan kısa kelimeler açıkça eleniyor.
+MIN_TOKEN_LEN = 2
 MATCH_THRESHOLD = 0.8  # SequenceMatcher oranı; bunun altı "farklı kelime" sayılır
+STOPWORDS = frozenset({
+    "de", "da", "ki", "mi", "mu", "ne", "ve", "ya", "bu", "su", "bir", "ile",
+    "icin", "gibi", "daha", "cok", "ama", "veya", "yani", "her", "olan",
+})
 
 
 def normalize(text):
@@ -31,7 +37,8 @@ def normalize(text):
 
 
 def tokens(text):
-    return [t for t in normalize(text).split() if len(t) >= MIN_TOKEN_LEN]
+    return [t for t in normalize(text).split()
+            if len(t) >= MIN_TOKEN_LEN and t not in STOPWORDS]
 
 
 def fuzzy_score(query, text):

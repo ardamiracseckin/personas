@@ -1,5 +1,5 @@
 {
-  "description": "personas değerlendirme soru seti — Faz 3 (test & evaluation). Kategoriler: cevaplanabilir (belgelerden yanıtlanmalı), cevaplanamaz (asistan bilmediğini söylemeli), uc_durum (çökmemeli), yonlendirme (doğru araca gitmeli). Cevaplanabilir sorulardaki expected_substrings, otomatik kalite puanı için kullanılır: hepsi geçerse 2, en az biri geçerse 1, hiçbiri geçmezse 0 puan. Karşılaştırmada boşluklar yok sayılır. yazim_hatasi kategorisi, cevaplanabilir soruların bozuk yazımlı hâlleridir: hibrit erişimin (kosinüs + sözlüksel) katkısını ölçer.",
+  "description": "personas değerlendirme soru seti — Faz 3 (test & evaluation). Kategoriler: cevaplanabilir (belgelerden yanıtlanmalı), cevaplanamaz (asistan bilmediğini söylemeli), uc_durum (çökmemeli), yonlendirme (doğru araca gitmeli). Cevaplanabilir sorulardaki expected_substrings, otomatik kalite puanı için kullanılır: hepsi geçerse 2, en az biri geçerse 1, hiçbiri geçmezse 0 puan. Karşılaştırmada boşluklar yok sayılır. yazim_hatasi kategorisi, cevaplanabilir soruların bozuk yazımlı hâlleridir: hibrit erişimin (kosinüs + sözlüksel) katkısını ölçer. kisa_sorgu kategorisi, tam cümle kurmadan yazılan anahtar kelime sorgularını ölçer.",
   "questions": [
     {
       "id": "C01",
@@ -343,6 +343,48 @@
       "question": "VS Codeda projenin tamaminda nasil arama yaparim?",
       "expected_source": "vscode-notlari.md",
       "note": "C14 sorusunun yazım hatalı hâli (harf düşmesi, Türkçe karakter kaybı)"
+    },
+    {
+      "id": "K01",
+      "category": "kisa_sorgu",
+      "question": "git stash ne işe yarar?",
+      "expected_source": "git-notlari.md",
+      "note": "Kısa/anahtar kelime sorgusu: embedding zayıf kalır, sözlüksel katman taşımalı"
+    },
+    {
+      "id": "K02",
+      "category": "kisa_sorgu",
+      "question": "ls -la",
+      "expected_source": "terminal-komutlar.md",
+      "note": "Kısa/anahtar kelime sorgusu: embedding zayıf kalır, sözlüksel katman taşımalı"
+    },
+    {
+      "id": "K03",
+      "category": "kisa_sorgu",
+      "question": "sanal ortam",
+      "expected_source": "python-notlari.md",
+      "note": "Kısa/anahtar kelime sorgusu: embedding zayıf kalır, sözlüksel katman taşımalı"
+    },
+    {
+      "id": "K04",
+      "category": "kisa_sorgu",
+      "question": "foundry model unload",
+      "expected_source": "foundry-local-notlari.md",
+      "note": "Kısa/anahtar kelime sorgusu: embedding zayıf kalır, sözlüksel katman taşımalı"
+    },
+    {
+      "id": "K05",
+      "category": "kisa_sorgu",
+      "question": "kosinüs benzerliği",
+      "expected_source": "rag-kavramlari.md",
+      "note": "Kısa/anahtar kelime sorgusu: embedding zayıf kalır, sözlüksel katman taşımalı"
+    },
+    {
+      "id": "K06",
+      "category": "kisa_sorgu",
+      "question": "ekran görüntüsü kısayolu",
+      "expected_source": "macos-kisayollar.md",
+      "note": "Kısa/anahtar kelime sorgusu: embedding zayıf kalır, sözlüksel katman taşımalı"
     }
   ]
 }

@@ -151,14 +151,54 @@ function thread() {
   return el;
 }
 
-function appendMessage(role, text, sources, chunks, pending) {
+function appendMessage(role, text, sources, chunks, pending, messageId) {
   const el = messageEl(role);
   const body = el.querySelector(".body");
   body.innerHTML = role === "assistant" ? renderMarkdown(text) : escapeHtml(text);
+  if (messageId) el.dataset.messageId = messageId;
   if (role === "assistant") decorateAssistant(body, { text, sources, chunks, pending });
+  else addUserActions(el, text);
   thread().appendChild(el);
   scrollToBottom();
   return el;
+}
+
+function addUserActions(el, text) {
+  const body = el.querySelector(".body");
+  body.querySelector(".msg-actions")?.remove();
+  const actions = document.createElement("div");
+  actions.className = "msg-actions";
+  actions.innerHTML = '<button class="act">düzenle</button>';
+  actions.querySelector("button").onclick = () => startEdit(el, text);
+  body.appendChild(actions);
+}
+
+function startEdit(el, text) {
+  if (state.streaming) return;
+  const body = el.querySelector(".body");
+  const id = Number(el.dataset.messageId || 0);
+  body.innerHTML = "";
+  const alan = document.createElement("textarea");
+  alan.className = "edit-area";
+  alan.value = text;
+  const dugmeler = document.createElement("div");
+  dugmeler.className = "buttons";
+  dugmeler.innerHTML = '<button class="btn primary">Kaydet</button><button class="btn">İptal</button>';
+  body.append(alan, dugmeler);
+  alan.focus();
+  alan.style.height = alan.scrollHeight + "px";
+
+  const [kaydet, iptal] = dugmeler.querySelectorAll("button");
+  kaydet.onclick = () => {
+    const yeni = alan.value.trim();
+    if (!yeni) return;
+    // Düzenlenen mesaj ve sonrasındaki her şey gider; sohbet oradan devam eder.
+    let sonraki = el.nextElementSibling;
+    while (sonraki) { const kalan = sonraki.nextElementSibling; sonraki.remove(); sonraki = kalan; }
+    el.remove();
+    send(yeni, { editId: id });
+  };
+  iptal.onclick = () => { body.textContent = text; addUserActions(el, text); };
 }
 
 function decorateAssistant(body, { text, sources = [], chunks = [], pending }) {
@@ -248,11 +288,11 @@ function scrollToBottom() {
 
 /* ------------------------------------------------------------------ sohbet */
 
-async function send(text, { regenerate = false } = {}) {
+async function send(text, { regenerate = false, editId = null } = {}) {
   if (state.streaming) return;
   if (!state.conversationId) await newConversation({ silent: true });
 
-  if (!regenerate) appendMessage("user", text);
+  const kullaniciEl = regenerate ? null : appendMessage("user", text);
   const el = appendMessage("assistant", "");
   const body = el.querySelector(".body");
   body.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
@@ -271,6 +311,7 @@ async function send(text, { regenerate = false } = {}) {
         conversation_id: state.conversationId,
         message: regenerate ? null : text,
         regenerate,
+        edit_message_id: editId,
       }),
       signal: state.abort.signal,
     });
@@ -294,6 +335,10 @@ async function send(text, { regenerate = false } = {}) {
           scrollToBottom();
         } else if (olay.type === "final") {
           const r = olay.result;
+          if (kullaniciEl && olay.user_message_id) {
+            kullaniciEl.dataset.messageId = olay.user_message_id;
+            addUserActions(kullaniciEl, text);
+          }
           body.innerHTML = renderMarkdown(r.text);
           decorateAssistant(body, {
             text: r.text, sources: r.sources, chunks: r.chunks, pending: r.pending_action,
@@ -371,7 +416,7 @@ async function openConversation(id) {
   const mesajlar = await api(`/api/conversations/${id}/messages`);
   messagesEl.innerHTML = '<div class="thread"></div>';
   if (!mesajlar.length) renderWelcome();
-  for (const m of mesajlar) appendMessage(m.role, m.text, m.sources, [], null);
+  for (const m of mesajlar) appendMessage(m.role, m.text, m.sources, m.chunks, null, m.id);
   await loadConversations();
 }
 
@@ -464,6 +509,21 @@ async function loadModels() {
   }
   const aktif = katalog.find((m) => m.aktif);
   $("#model-note").textContent = aktif ? aktif.not : "";
+  refreshStatus();
+}
+
+async function refreshStatus() {
+  try {
+    const durum = await api("/api/status");
+    const not = $("#model-note");
+    if (!durum.loaded) {
+      not.textContent = "Model belleğe alınıyor… ilk cevap gecikebilir.";
+      clearTimeout(refreshStatus.timer);
+      refreshStatus.timer = setTimeout(refreshStatus, 4000);
+    } else if (not.textContent.startsWith("Model belleğe")) {
+      loadModels();
+    }
+  } catch (_) { /* sunucu durumu okunamadıysa sessiz kal */ }
 }
 
 async function switchModel(alias) {

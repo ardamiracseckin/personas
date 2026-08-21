@@ -14,8 +14,8 @@ def test_normalize(ham, beklenen):
     assert lexical.normalize(ham) == beklenen
 
 
-def test_tokens_drops_very_short_words():
-    assert lexical.tokens("bir de ekran görüntüsü") == ["bir", "ekran", "goruntusu"]
+def test_tokens_drops_filler_but_keeps_content():
+    assert lexical.tokens("bir de ekran görüntüsü") == ["ekran", "goruntusu"]
 
 
 def test_typo_query_matches_the_right_text():
@@ -35,3 +35,13 @@ def test_score_is_bounded():
     metin = "git stash ile değişiklikler saklanır"
     assert 0.0 <= lexical.fuzzy_score("git stash", metin) <= 1.0
     assert lexical.fuzzy_score("", metin) == 0.0
+
+
+def test_two_letter_commands_are_kept():
+    # "ls -la" gibi sorgularda tüm bilgi iki harfli kelimelerde.
+    assert lexical.tokens("ls -la") == ["ls", "la"]
+    assert lexical.fuzzy_score("ls -la", "Gizli dosyalar için `ls -la` kullanılır.") == 1.0
+
+
+def test_filler_words_are_dropped():
+    assert lexical.tokens("bu ve da ki için ekran") == ["ekran"]

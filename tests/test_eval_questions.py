@@ -12,7 +12,8 @@ from app import config, router, store
 
 QUESTIONS_PATH = Path(__file__).resolve().parent.parent / "eval" / "questions.json"
 QUESTIONS = json.loads(QUESTIONS_PATH.read_text(encoding="utf-8"))["questions"]
-CATEGORIES = {"cevaplanabilir", "cevaplanamaz", "uc_durum", "yonlendirme", "yazim_hatasi"}
+CATEGORIES = {"cevaplanabilir", "cevaplanamaz", "uc_durum", "yonlendirme",
+              "yazim_hatasi", "kisa_sorgu"}
 
 
 def by_category(name):
@@ -25,6 +26,7 @@ def test_question_set_is_well_formed():
     assert {q["category"] for q in QUESTIONS} <= CATEGORIES
     assert all(q["expected_source"] for q in by_category("cevaplanabilir"))
     assert all(q["expected_source"] for q in by_category("yazim_hatasi"))
+    assert all(q["expected_source"] for q in by_category("kisa_sorgu"))
     assert all(q["expected_route"] for q in by_category("yonlendirme"))
 
 

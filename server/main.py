@@ -4,7 +4,9 @@
 akıtılır: arayüz ilk kelimeleri saniyenin altında gösterebilsin diye.
 """
 import json
+import re
 import shutil
+import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -25,6 +27,9 @@ TITLE_PROMPT = (
 async def lifespan(_app):
     store.init_db()
     chat_store.init_db()
+    # Modeli arka planda ısıt: Foundry hareketsizlikte modeli bellekten atıyor ve
+    # ilk soru ~30 saniye sürüyordu. Sunucu açılışı bunu beklemesin diye ayrı iş parçacığı.
+    threading.Thread(target=models.ensure_loaded, daemon=True).start()
     yield
 
 
@@ -42,14 +47,25 @@ def _require_conversation(conversation_id):
         raise HTTPException(status_code=404, detail="Sohbet bulunamadı.")
 
 
+def clean_title(raw, fallback):
+    """Model başlığını kullanılabilir hâle getir; saçmalarsa sorunun kendisine düş."""
+    baslik = (raw or "").splitlines()[0] if raw else ""
+    baslik = re.sub(r"[\"'`*#|]+", " ", baslik)          # tırnak, madde imi, boru işareti
+    baslik = re.sub(r"^\s*(başlık|title)\s*[:\-]\s*", "", baslik, flags=re.IGNORECASE)
+    baslik = re.sub(r"\s{2,}", " ", baslik).strip(" .,:;-")
+    kelimeler = baslik.split()
+    if not (1 <= len(kelimeler) <= 6):                  # tek kelimeden kısa ya da cümle gibiyse
+        baslik = ""
+    return (baslik or fallback)[:60]
+
+
 def generate_title(first_message):
     """İlk sorudan kısa bir sohbet başlığı üret; başarısız olursa sorunun kendisi."""
     try:
-        baslik = llm.chat(TITLE_PROMPT, first_message).strip().strip('"').splitlines()[0]
+        ham = llm.chat(TITLE_PROMPT, first_message)
     except Exception:
-        baslik = ""
-    baslik = baslik or first_message
-    return baslik[:60]
+        ham = ""
+    return clean_title(ham, first_message)
 
 
 # ------------------------------------------------------------------- konuşmalar
@@ -94,6 +110,7 @@ class ChatIn(BaseModel):
     conversation_id: int
     message: str | None = None
     regenerate: bool = False
+    edit_message_id: int | None = None
 
 
 def _last_user_message(conversation_id):
@@ -106,16 +123,16 @@ def _last_user_message(conversation_id):
 def _chat_events(conversation_id, message, ilk_mesaj_mi):
     """Token → final → (gerekiyorsa) başlık olaylarını üret."""
     gecmis = chat_store.history(conversation_id)
-    chat_store.add_message(conversation_id, "user", message)
+    kullanici_id = chat_store.add_message(conversation_id, "user", message)
     try:
         for olay in assistant.answer_stream(message, history=gecmis):
             if olay["type"] == "token":
                 yield _sse(olay)
             else:
                 sonuc = olay["result"]
-                chat_store.add_message(conversation_id, "assistant",
-                                       sonuc["text"], sonuc["sources"])
-                yield _sse({"type": "final", "result": sonuc})
+                chat_store.add_message(conversation_id, "assistant", sonuc["text"],
+                                       sonuc["sources"], sonuc.get("chunks"))
+                yield _sse({"type": "final", "result": sonuc, "user_message_id": kullanici_id})
     except Exception as e:  # model kapalı, servis erişilemez vb.
         yield _sse({"type": "error", "message": str(e)})
         return
@@ -130,7 +147,13 @@ def _chat_events(conversation_id, message, ilk_mesaj_mi):
 def chat(body: ChatIn):
     _require_conversation(body.conversation_id)
 
-    if body.regenerate:
+    if body.edit_message_id:
+        # Düzenlenen mesaj ve sonrasındaki her şey silinir; yeni metinle baştan sorulur.
+        chat_store.delete_messages_after(body.conversation_id, body.edit_message_id)
+        mesaj = (body.message or "").strip()
+        if not mesaj:
+            raise HTTPException(status_code=400, detail="Boş mesaj gönderilemez.")
+    elif body.regenerate:
         # Son cevabı at, son soruyu yeniden sor.
         son_soru = _last_user_message(body.conversation_id)
         if not son_soru:
@@ -205,6 +228,12 @@ def delete_document(name: str):
 
 class ModelIn(BaseModel):
     alias: str
+
+
+@app.get("/api/status")
+def status():
+    """Arayüzün model durumunu gösterebilmesi için: hangi model, bellekte mi."""
+    return {"model": models.current(), "loaded": models.is_loaded()}
 
 
 @app.get("/api/models")

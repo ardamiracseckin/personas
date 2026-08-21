@@ -29,6 +29,11 @@ MODEL_CATALOG = [
 # savrulmayı keser.
 MAX_TOKENS = 450
 
+# Foundry Local, yüklü modeli varsayılan 600 saniyelik hareketsizlikten sonra
+# bellekten atıyor; sonraki ilk soru ~30 saniye sürüyordu. Sunucu açıkken model
+# sıcak kalsın diye TTL uzatıldı (bellek karşılığında beklemeyi ortadan kaldırır).
+MODEL_TTL_SECONDS = 21600
+
 # Embedding model — Foundry Local's catalog had no embedding model, so we use a
 # small multilingual model via fastembed (ONNX, CPU-friendly, good Turkish support).
 EMBED_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -44,6 +49,12 @@ TOP_K = 3
 # (bkz. app/lexical.py). Skor = DENSE_WEIGHT x kosinüs + LEXICAL_WEIGHT x sözlüksel.
 DENSE_WEIGHT = 0.75
 LEXICAL_WEIGHT = 0.25
+
+# Kısa/anahtar kelime sorgularında ("git stash ne işe yarar?") embedding skoru
+# düşük kalıyor ve harmanlanmış skor eşiğin altına düşüyordu. Kelimelerin yarısı
+# birebir tutuyorsa ve anlamsal yakınlık tabanın üstündeyse parça yine kabul edilir.
+LEXICAL_RESCUE = 0.5
+DENSE_FLOOR = 0.10
 SIM_THRESHOLD = 0.34  # hibrit skor bunun altındaysa ⇒ "ilgili bilgi yok"
 
 # Chunking
