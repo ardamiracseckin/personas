@@ -34,7 +34,8 @@ Tarayıcıda açılan tek sayfa bir uygulama; hiçbir dış kaynağa (CDN dâhil
 - **Kaynak rozetine tıklayınca** cevabın dayandığı parça metniyle birlikte açılır.
 - **Satır içi atıflar**: her cümlenin sonunda dayandığı parçanın numarası çıkar; tıklanınca o parça
   açılıp vurgulanır. Atıf modele yazdırılmaz — cevap üretildikten sonra sadakat ölçümüyle aynı
-  sözlüksel eşleştirmeden çıkarılır, bu yüzden gecikmeye eklediği süre ~3 ms'dir.
+  sözlüksel eşleştirmeden çıkarılır, bu yüzden gecikmeye eklediği süre ~3 ms'dir. CLI'da aynı
+  bilgi cümle sırasına göre bir harita olarak yazılır.
 - **Belge sürükle-bırak** ile bilgi tabanına anında eklenir (`.md`, `.txt`, `.pdf`).
 - Soldaki menüden **model değiştirilebilir** (8 GB bellekte tek model yüklü kalır, geçiş 20-30 sn).
 - **Durdur / yeniden üret / kopyala**, `Cmd+K` yeni sohbet, `Esc` durdurur.
@@ -92,6 +93,14 @@ uvicorn server.main:app --port 8000      # → http://localhost:8000
 python -m ui.cli
 ```
 
+Terminalde cevap akarak yazıldığı için rozet metnin içine konamaz; atıflar cevabın altına cümle
+sırasına göre yazılır. Numaralar web arayüzündeki rozetlerle aynıdır:
+
+```
+Kaynaklar: [1] python-notlari.md · [2] vscode-notlari.md
+Atıflar: 1→[1] 3→[1] 4→[1] · atıfsız: 2
+```
+
 Örnek sorular: "Ekran görüntüsünü belirli bir bölgeden nasıl alırım?",
 "git'te son commit'i nasıl geri alırım?", "Bugün takvimimde ne var?",
 "Cuma 14:30 dişçi randevusu ekle".
@@ -104,7 +113,7 @@ python -m ui.cli
 ## Testler ve değerlendirme
 
 ```bash
-python -m pytest -q                  # 270 test (birim, HTTP katmanı, soru seti regresyonu)
+python -m pytest -q                  # 275 test (birim, HTTP katmanı, soru seti regresyonu)
 ```
 
 Değerlendirme koşumu `eval/questions.json` içindeki 50 soruyu çalıştırıp `docs/eval/` altına
