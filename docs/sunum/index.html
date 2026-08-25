@@ -169,8 +169,8 @@
         <path d="M0 0 L9 4.5 L0 9 z" fill="#5b6674"/></marker></defs>
       <g font-size="14.5" fill="#e8ecf1">
         <rect x="10" y="118" width="132" height="60" rx="10" fill="#161b22" stroke="#252c36"/>
-        <text x="76" y="144" text-anchor="middle">CLI · Streamlit</text>
-        <text x="76" y="164" text-anchor="middle" fill="#9aa6b4" font-size="12.5">ui/cli.py · ui/web.py</text>
+        <text x="76" y="144" text-anchor="middle">CLI · Web arayüzü</text>
+        <text x="76" y="164" text-anchor="middle" fill="#9aa6b4" font-size="12.5">ui/cli.py · server/</text>
 
         <rect x="196" y="118" width="128" height="60" rx="10" fill="#161b22" stroke="#e3b341"/>
         <text x="260" y="144" text-anchor="middle" fill="#e3b341">ROUTER</text>
@@ -184,7 +184,8 @@
         <text x="497" y="116" text-anchor="middle">Apple Takvim <tspan fill="#9aa6b4" font-size="12.5">(AppleScript)</tspan></text>
 
         <rect x="392" y="152" width="210" height="50" rx="10" fill="#161b22" stroke="#252c36"/>
-        <text x="497" y="182" text-anchor="middle">Apple Mail <tspan fill="#9aa6b4" font-size="12.5">(AppleScript)</tspan></text>
+        <text x="497" y="172" text-anchor="middle">Apple Mail · WhatsApp</text>
+        <text x="497" y="191" text-anchor="middle" fill="#9aa6b4" font-size="12.5">(AppleScript)</text>
 
         <rect x="392" y="218" width="210" height="50" rx="10" fill="#161b22" stroke="#252c36"/>
         <text x="497" y="248" text-anchor="middle">Uygulama açma</text>
@@ -256,12 +257,13 @@
   <!-- 7 -->
   <section class="slide">
     <h2><span class="num">06</span>Nasıl ölçtük</h2>
-    <p class="lead">30 soruluk sabit set (<code>eval/questions.json</code>), tek komutla koşan değerlendirme betiği, markdown rapor çıktısı.</p>
+    <p class="lead">50 soruluk sabit set (<code>eval/questions.json</code>), tek komutla koşan değerlendirme betiği, markdown rapor çıktısı.</p>
     <div class="cols3">
       <div class="card"><div class="stat">14</div><div class="label">Cevaplanabilir</div><p class="dim" style="font-size:15px">Beklenen kaynak dosya adıyla birlikte yazılı</p></div>
       <div class="card"><div class="stat">6</div><div class="label">Cevaplanamaz</div><p class="dim" style="font-size:15px">Docker, Kubernetes, Excel… uydurmamalı</p></div>
       <div class="card"><div class="stat">4</div><div class="label">Uç durum</div><p class="dim" style="font-size:15px">Boş sorgu, tek kelime, çok genel, çok uzun</p></div>
     </div>
+    <p class="dim" style="font-size:15.5px;margin:-4px 0 0">Kalan 26 soru modeli hiç çağırmadan ölçülür: 6 yönlendirme, 14 yazım hatalı, 6 kısa/anahtar kelime sorgusu.</p>
     <div class="cols" style="flex:0">
       <div class="card">
         <h3>Deterministik metrikler — LLM'siz</h3>
@@ -269,7 +271,7 @@
       </div>
       <div class="card">
         <h3>Üretim metrikleri — modelle</h3>
-        <p>Çekimserlik, gecikme (p50/p95) ve elle kalite puanı. Her koşum ısınma turuyla başlar; ilk çağrıdaki model yükleme süresi ölçüme karışmaz.</p>
+        <p>Çekimserlik, gecikme (p50/p95), <strong>otomatik</strong> kalite puanı ve <strong>sadakat</strong>. Her koşum ısınma turuyla başlar; ilk çağrıdaki model yükleme süresi ölçüme karışmaz.</p>
       </div>
     </div>
   </section>
@@ -323,7 +325,9 @@
       <div class="card"><div class="stat good">14/14</div><div class="label">Erişim isabeti (hit@3)</div></div>
       <div class="card"><div class="stat good">6/6</div><div class="label">Cevaplanamazda çekimserlik</div></div>
       <div class="card"><div class="stat good">28/28</div><div class="label">Cevap kalitesi (otomatik)</div></div>
-      <div class="card"><div class="stat">4.50 sn</div><div class="label">p50 yanıt süresi</div></div>
+      <div class="card"><div class="stat good">%80</div><div class="label">Sadakat (ortalama)</div></div>
+      <div class="card"><div class="stat good">10/10</div><div class="label">Kod sadakati</div></div>
+      <div class="card"><div class="stat">3.03 sn</div><div class="label">p50 yanıt süresi</div></div>
       <div class="card"><div class="stat">0</div><div class="label">Uç durumda çökme</div></div>
     </div>
     <div class="card" style="flex:0">
@@ -334,7 +338,40 @@
 
   <!-- 10 -->
   <section class="slide">
-    <h2><span class="num">09</span>Model karşılaştırması</h2>
+    <h2><span class="num">09</span>Sadakat: cevap gerçekten belgeye mi dayanıyor?</h2>
+    <p class="lead">Kalite puanı "doğru bilgi cevapta geçiyor mu" der. Sadakat "bu bilgi getirilen
+      parçadan mı geliyor" der. Model doğru cevabı <strong>kendi ezberinden</strong> de verebilir —
+      o zaman RAG zinciri çalışmamıştır ve başka hiçbir metrik bunu göstermez.</p>
+    <div class="cols3">
+      <div class="card"><div class="stat good">%80</div><div class="label">Ortalama sadakat</div><p class="dim" style="font-size:15px">16 cevapta ölçüldü</p></div>
+      <div class="card"><div class="stat good">10/10</div><div class="label">Kod sadakati</div><p class="dim" style="font-size:15px">Uydurulmuş komut yok</p></div>
+      <div class="card"><div class="stat">2</div><div class="label">Eşiğin altında</div><p class="dim" style="font-size:15px">İkisi de uç durum: model doğaçlıyor</p></div>
+    </div>
+    <div class="cols3" style="flex:0">
+      <div class="card">
+        <h3>Ölçüt önce kendi kusurunu gösterdi</h3>
+        <p style="font-size:15.5px"><code>`ls -la` komutunu kullanın.</code> 0,50 alıyordu: komut
+          bağlamdan geliyor ama "kullanın" geçmiyor. Modelin cümle kurma kelimeleri elenince ortalama
+          <strong>%67'den %80'e</strong> çıktı — değişen cevap değil, ölçütün gürültüsü.</p>
+      </div>
+      <div class="card">
+        <h3>Atıf modele yazdırılmadı</h3>
+        <p style="font-size:15.5px">İsteme "kaynak numarası yaz" demek çıktı token'ı ve gecikme
+          demek. Atıf cevaptan sonra çıkarılıyor: <strong>2,7 ms</strong>. İstem değişmediği için
+          diğer metriklerin hiçbiri bozulmadı.</p>
+      </div>
+      <div class="card">
+        <h3>Eşikler yine taramayla</h3>
+        <p style="font-size:15.5px">Sadakat 0,60 · atıf 0,55 — 7. slayttaki kural. Atıf eşiğinde ilk
+          ölçüt hiçbir değeri ayırt etmedi; <strong>ölçüt değiştirildi</strong>, eşik ondan sonra
+          seçildi.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <h2><span class="num">10</span>Model karşılaştırması</h2>
     <table id="model-table">
       <tr><th>Model</th><th class="mono">Boyut</th><th class="mono">Kalite</th><th class="mono">p50</th><th>Çekimserlik</th><th>Not</th></tr>
       <tr class="win"><td class="mono">phi-4-mini</td><td class="mono">3.7 GB</td><td class="mono">24/28</td><td class="mono">4.72 sn</td><td>5/6</td><td>Seçilen: cevap doğruluğunda açık ara önde</td></tr>
@@ -357,7 +394,7 @@
 
   <!-- 11 -->
   <section class="slide">
-    <h2><span class="num">10</span>Canlı demo akışı</h2>
+    <h2><span class="num">11</span>Canlı demo akışı</h2>
     <div class="cols">
       <div class="card">
         <h3>1 · Belgeden cevap + kaynak</h3>
@@ -384,7 +421,7 @@
 
   <!-- 12 -->
   <section class="slide">
-    <h2><span class="num">11</span>Yetki sınırı: insan onaylı yazma</h2>
+    <h2><span class="num">12</span>Yetki sınırı: insan onaylı yazma</h2>
     <p class="lead">Asistan okumada serbest, yazmada değil. Bu bir arayüz tercihi değil, mimari kural.</p>
     <div class="cols">
       <div class="card">
@@ -404,7 +441,7 @@
 
   <!-- 13 -->
   <section class="slide">
-    <h2><span class="num">12</span>Kod incelemesi: üç sessiz hata</h2>
+    <h2><span class="num">13</span>Kod incelemesi: üç sessiz hata</h2>
     <p class="lead">Ölçümler bittikten sonra yapılan inceleme, soru setinin yakalayamadığı üç hata çıkardı. Üçü de hata vermiyor, yalnızca yanlış davranıyordu.</p>
     <div class="cols3">
       <div class="card">
@@ -427,7 +464,7 @@
 
   <!-- 15 -->
   <section class="slide">
-    <h2><span class="num">13</span>Arayüz: tanıdık his, yerel çalışma</h2>
+    <h2><span class="num">14</span>Arayüz: tanıdık his, yerel çalışma</h2>
     <p class="lead">Streamlit bırakıldı; yerine FastAPI ve tek sayfalık bir web arayüzü geldi. Hiçbir dış kaynağa bağlanmıyor: ne CDN, ne yazı tipi, ne betik kütüphanesi.</p>
     <div class="cols">
       <div class="card">
@@ -454,7 +491,7 @@
 
   <!-- 16 -->
   <section class="slide">
-    <h2><span class="num">14</span>Öğrenilenler ve sınırlar</h2>
+    <h2><span class="num">15</span>Öğrenilenler ve sınırlar</h2>
     <div class="cols">
       <div class="card">
         <h3>Öğrenilenler</h3>
@@ -463,6 +500,7 @@
           <li style="font-size:16.5px"><strong>Parça yapısı erişimden önemli.</strong> Belgeler büyümeden RAG'in çalışıp çalışmadığı görülemiyor.</li>
           <li style="font-size:16.5px"><strong>Büyük model her zaman iyi model değil.</strong> 2.2 GB'lık phi-3.5-mini, 1.5 GB'lık qwen2.5-1.5b'nin gerisinde kaldı; ölçmeden seçilemiyor.</li>
           <li style="font-size:16.5px"><strong>Ölçüm aracı, ölçtüğü kodu çağırmalı.</strong> Değerlendirme betiği skoru kendi hesaplıyordu; uygulama hibrit skora geçince ölçüm sessizce eski formülü ölçmeye devam etti ve yanlış eşik seçildi.</li>
+          <li style="font-size:16.5px"><strong>Yeni ölçüt önce kendine sorulmalı.</strong> Sadakat ölçütü ilk koşumda doğru cevapları düşük puanladı; hata modelde değil ölçütteydi. Bir metriğe karar verdirmeden önce onun neyi cezalandırdığına bakmak gerekiyor.</li>
         </ul>
       </div>
       <div class="card">
@@ -472,6 +510,7 @@
           <li style="font-size:16.5px">Takvim/mail yalnızca Apple uygulamaları (macOS).</li>
           <li style="font-size:16.5px">Bellek içi kosinüs binlerce parçaya kadar yeter; ötesinde vektör indeksi gerekir.</li>
           <li style="font-size:16.5px">Kalite puanı beklenen ifadelere bakıyor; anlamca doğru ama farklı yazılmış cevabı kaçırabilir.</li>
+          <li style="font-size:16.5px">Sadakat da sözlüksel bir vekil: aynı bilgiyi bambaşka kelimelerle yeniden yazan cevabı düşük puanlar. Atıflar da bu yüzden modelin beyanı değil, bizim tahminimiz.</li>
         </ul>
       </div>
     </div>

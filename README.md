@@ -104,7 +104,7 @@ python -m ui.cli
 ## Testler ve değerlendirme
 
 ```bash
-python -m pytest -q                  # 265 test (birim, HTTP katmanı, soru seti regresyonu)
+python -m pytest -q                  # 270 test (birim, HTTP katmanı, soru seti regresyonu)
 ```
 
 Değerlendirme koşumu `eval/questions.json` içindeki 50 soruyu çalıştırıp `docs/eval/` altına
@@ -135,7 +135,7 @@ farklıdır: model doğru cevabı kendi ezberinden de verebilir ve o durumda RAG
 | Dosya | İçerik |
 |---|---|
 | [`docs/eval/degerlendirme-raporu.md`](docs/eval/degerlendirme-raporu.md) | Ölçüm yöntemi, eşik taraması, model karşılaştırması, kalan zayıflıklar |
-| [`docs/rapor/personas-proje-raporu.docx`](docs/rapor/personas-proje-raporu.docx) | Proje raporu (Word). Üreteci: `docs/rapor/rapor_uret.js` |
+| [`docs/rapor/personas-proje-raporu.docx`](docs/rapor/personas-proje-raporu.docx) | Proje raporu (Word). Elle düzenlenmez: metin `docs/rapor/rapor_uret.js` içindedir, `npm install && npm run rapor` ile yeniden üretilir |
 | [`docs/sunum/index.html`](docs/sunum/index.html) | Demo sunumu — çevrimdışı açılır, ok tuşlarıyla gezilir |
 | `docs/eval/sonuclar-*.md` / `.json` | Ham koşum çıktıları |
 

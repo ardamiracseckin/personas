@@ -1,0 +1,11 @@
+{
+  "name": "personas-rapor",
+  "private": true,
+  "description": "Word proje raporunun üreteci. Uygulamanın kendisi Python'dur; node yalnızca rapor için gerekir.",
+  "scripts": {
+    "rapor": "node docs/rapor/rapor_uret.js"
+  },
+  "dependencies": {
+    "docx": "^9.7.1"
+  }
+}

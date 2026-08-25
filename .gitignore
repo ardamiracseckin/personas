@@ -6,3 +6,6 @@ data/assistant.db
 
 # Word geçici kilit dosyaları
 ~$*
+
+# Word raporu üreteci (npm install docx)
+node_modules/
