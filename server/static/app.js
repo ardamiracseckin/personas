@@ -123,6 +123,32 @@ function renderMarkdown(source) {
   return out.join("");
 }
 
+/* Atıflar metnin içine yazılmaz; sunucu (start, end) konumları verir. Markdown
+   render edilmeden önce cümle sonlarına görünmez bir işaret konur, render
+   sonrasında bu işaret rozete dönüşür. Böylece ham cevap (kopyala, yeniden üret)
+   kirlenmez. Sondan başa eklenir, yoksa sonraki konumlar kayar. */
+const CITE_OPEN = "\u2045";
+const CITE_CLOSE = "\u2046";
+
+function withCitationMarks(text, citations) {
+  if (!citations || !citations.length) return text;
+  let out = text;
+  for (const a of [...citations].sort((x, y) => y.end - x.end)) {
+    out = out.slice(0, a.end) + CITE_OPEN + a.chunk + CITE_CLOSE + out.slice(a.end);
+  }
+  return out;
+}
+
+function renderAnswer(text, citations, chunks) {
+  const html = renderMarkdown(withCitationMarks(text, citations));
+  return html.replace(new RegExp(CITE_OPEN + "(\\d+)" + CITE_CLOSE, "g"), (_, i) => {
+    const parca = (chunks || [])[+i];
+    if (!parca) return "";
+    return `<sup class="cite" data-chunk="${i}" title="${escapeHtml(parca.source)}">` +
+      `${+i + 1}</sup>`;
+  });
+}
+
 function codeBlockHtml({ lang, code }) {
   const etiket = lang || "kod";
   return `<pre class="code"><div class="code-head"><span>${etiket}</span>` +
@@ -152,10 +178,11 @@ function thread() {
   return el;
 }
 
-function appendMessage(role, text, sources, chunks, pending, messageId) {
+function appendMessage(role, text, sources, chunks, pending, messageId, citations) {
   const el = messageEl(role);
   const body = el.querySelector(".body");
-  body.innerHTML = role === "assistant" ? renderMarkdown(text) : escapeHtml(text);
+  body.innerHTML = role === "assistant"
+    ? renderAnswer(text, citations, chunks) : escapeHtml(text);
   if (messageId) el.dataset.messageId = messageId;
   if (role === "assistant") decorateAssistant(body, { text, sources, chunks, pending });
   else addUserActions(el, text);
@@ -203,6 +230,9 @@ function startEdit(el, text) {
 }
 
 function decorateAssistant(body, { text, sources = [], chunks = [], pending }) {
+  for (const rozet of body.querySelectorAll(".cite")) {
+    rozet.onclick = () => showChunk(body, chunks, +rozet.dataset.chunk);
+  }
   const benzersiz = [...new Set(sources)];
   if (benzersiz.length) {
     const row = document.createElement("div");
@@ -235,17 +265,36 @@ function decorateAssistant(body, { text, sources = [], chunks = [], pending }) {
 
 function toggleChunks(body, kaynak, chunks) {
   const varolan = body.querySelector(`.chunk-panel[data-source="${CSS.escape(kaynak)}"]`);
-  if (varolan) { varolan.remove(); return; }
-  const ilgili = (chunks || []).filter((c) => c.source === kaynak);
+  if (varolan) { varolan.remove(); return null; }
   const panel = document.createElement("div");
   panel.className = "chunk-panel";
   panel.dataset.source = kaynak;
+  const ilgili = (chunks || [])
+    .map((c, i) => ({ ...c, i }))
+    .filter((c) => c.source === kaynak);
   panel.innerHTML = ilgili.length
     ? ilgili.map((c) =>
-        `<div class="chunk-head"><span>${escapeHtml(c.source)}</span>` +
-        `<span>benzerlik ${c.score}</span></div>${escapeHtml(c.text)}`).join("<hr>")
+        `<div class="chunk-item" data-chunk="${c.i}">` +
+        `<div class="chunk-head"><span>${c.i + 1}. ${escapeHtml(c.source)}</span>` +
+        `<span>benzerlik ${c.score}</span></div>${escapeHtml(c.text)}</div>`).join("")
     : "Bu cevapta gösterilecek parça metni yok.";
   body.appendChild(panel);
+  return panel;
+}
+
+/* Rozete tıklanınca: o parçanın paneli açık değilse açılır, parça vurgulanır. */
+function showChunk(body, chunks, indeks) {
+  const parca = (chunks || [])[indeks];
+  if (!parca) return;
+  let panel = body.querySelector(`.chunk-panel[data-source="${CSS.escape(parca.source)}"]`);
+  if (!panel) panel = toggleChunks(body, parca.source, chunks);
+  if (!panel) return;
+  for (const el of panel.querySelectorAll(".chunk-item.vurgu")) el.classList.remove("vurgu");
+  const hedef = panel.querySelector(`.chunk-item[data-chunk="${indeks}"]`);
+  if (hedef) {
+    hedef.classList.add("vurgu");
+    hedef.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
 }
 
 function confirmCard(pending) {
@@ -357,7 +406,7 @@ async function send(text, { regenerate = false, editId = null } = {}) {
             kullaniciEl.dataset.messageId = olay.user_message_id;
             addUserActions(kullaniciEl, text);
           }
-          body.innerHTML = renderMarkdown(r.text);
+          body.innerHTML = renderAnswer(r.text, r.citations, r.chunks);
           decorateAssistant(body, {
             text: r.text, sources: r.sources, chunks: r.chunks, pending: r.pending_action,
           });
@@ -434,7 +483,9 @@ async function openConversation(id) {
   const mesajlar = await api(`/api/conversations/${id}/messages`);
   messagesEl.innerHTML = '<div class="thread"></div>';
   if (!mesajlar.length) renderWelcome();
-  for (const m of mesajlar) appendMessage(m.role, m.text, m.sources, m.chunks, m.pending, m.id);
+  for (const m of mesajlar) {
+    appendMessage(m.role, m.text, m.sources, m.chunks, m.pending, m.id, m.citations);
+  }
   await loadConversations();
 }
 

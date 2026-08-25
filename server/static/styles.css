@@ -152,6 +152,19 @@ pre.code .c{color:#6B6B6B;font-style:italic}
   display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;
   color:var(--accent-dim);margin-bottom:6px;
 }
+.chunk-item + .chunk-item{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.chunk-item.vurgu{
+  border-left:2px solid var(--accent);padding-left:10px;margin-left:-12px;
+  background:rgba(245,197,24,.05);border-radius:4px;
+}
+
+/* satır içi atıf rozeti: cümlenin dayandığı parçanın numarası */
+.cite{
+  font-family:var(--mono);font-size:9.5px;line-height:1;vertical-align:super;
+  color:var(--accent);cursor:pointer;margin-left:2px;padding:1px 3px;
+  border:1px solid var(--accent-dim);border-radius:4px;user-select:none;
+}
+.cite:hover{background:rgba(245,197,24,.12)}
 
 .msg-actions{display:flex;gap:6px;margin-top:10px;opacity:0;transition:opacity .15s}
 .msg.assistant:hover .msg-actions,.msg.user:hover .msg-actions{opacity:1}

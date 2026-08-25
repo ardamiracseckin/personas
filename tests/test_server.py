@@ -277,3 +277,22 @@ def test_cancel_clears_the_pending_draft(istemci, monkeypatch):
     istemci.post("/api/cancel", json={"conversation_id": cid})
     assert all(m["pending"] is None for m in
                istemci.get(f"/api/conversations/{cid}/messages").json())
+
+
+def test_history_rebuilds_inline_citations(istemci):
+    # Atıflar veritabanında saklanmaz; metin ve parçalar saklandığı için sayfa
+    # yenilendiğinde yeniden hesaplanır (şema değişikliği gerekmez).
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    chat_store.add_message(
+        cid, "assistant", "Değişiklikleri saklamak için `git stash` çalıştırılır.",
+        sources=["git-notlari.md"],
+        chunks=[{"source": "git-notlari.md", "score": 0.6,
+                 "text": "Yarım kalan değişiklikleri saklamak için `git stash` çalıştırılır."}])
+    mesajlar = istemci.get(f"/api/conversations/{cid}/messages").json()
+    assert [a["source"] for a in mesajlar[-1]["citations"]] == ["git-notlari.md"]
+
+
+def test_user_messages_have_no_citations(istemci):
+    cid = istemci.post("/api/conversations", json={}).json()["id"]
+    chat_store.add_message(cid, "user", "Nasıl saklarım?")
+    assert istemci.get(f"/api/conversations/{cid}/messages").json()[-1]["citations"] == []

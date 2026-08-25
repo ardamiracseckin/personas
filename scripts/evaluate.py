@@ -23,12 +23,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from app import assistant, config, lexical, llm, retriever, router, store  # noqa: E402
+from app import (assistant, citations, config, grounding, lexical, llm, retriever,  # noqa: E402
+                 router, store)
 from app.similarity import cosine  # noqa: E402
 
 QUESTIONS_PATH = ROOT / "eval" / "questions.json"
 OUT_DIR = ROOT / "docs" / "eval"
 ANSWER_CATEGORIES = ("cevaplanabilir", "cevaplanamaz", "uc_durum")
+# Bu oranın altındaki cevap, getirilen parçanın dışına çıkmış sayılır ve raporda ayrı listelenir.
+GROUNDING_FLOOR = 0.60
 
 # Çekimserlik iki katmanda oluşabilir: erişim eşiği hiç parça bırakmazsa asistan
 # sabit NO_INFO metnini döndürür; parça geldiği hâlde bağlam yetersizse modelin
@@ -54,6 +57,89 @@ def quality_score(answer_text, expected_substrings):
     if tutan == len(expected_substrings):
         return 2
     return 1 if tutan else 0
+
+
+def measure_grounding(answer_text, chunks, question):
+    """Cevabın getirilen parçalara dayanma oranı; ölçülemiyorsa None.
+
+    Takvim/mail gibi belge dışı akışlarda getirilen parça yoktur — oraya sadakat
+    ölçütü uygulanamaz, 0 yazmak da yanıltıcı olur.
+    """
+    if not chunks:
+        return None
+    return grounding.score(answer_text, [c["text"] for c in chunks], question)
+
+
+def faithfulness_summary(answers):
+    """Ölçülebilen cevaplar üzerinden ortalama sadakat + eşiğin altında kalanlar."""
+    olculen = [a for a in answers if a.get("grounding") is not None]
+    return {
+        "olculen": len(olculen),
+        "ortalama": (sum(a["grounding"] for a in olculen) / len(olculen)) if olculen else None,
+        "dusuk": [a for a in olculen if a["grounding"] < GROUNDING_FLOOR],
+    }
+
+
+def grounding_floor_sweep(answers, floors):
+    """Sadakat eşiğini ölçümle seçmek için: her eşikte yanlış alarm / yakalanan.
+
+    Ayrım şu iki grup üzerinden yapılır: `cevaplanabilir` sorular belgeye dayanmak
+    zorundadır (eşiğin altına düşerlerse yanlış alarm), `uc_durum` cevaplarında ise
+    model belgeye değil kendi bilgisine dayanıp genel tavsiye verir (yakalanmalı).
+    """
+    beklenen = [a for a in answers
+                if a["category"] == "cevaplanabilir" and a.get("grounding") is not None]
+    ucdurum = [a for a in answers
+               if a["category"] == "uc_durum" and a.get("grounding") is not None]
+    return [{"floor": esik,
+             "yanlis_alarm": sum(1 for a in beklenen if a["grounding"] < esik),
+             "beklenen": len(beklenen),
+             "yakalanan": sum(1 for a in ucdurum if a["grounding"] < esik),
+             "ucdurum": len(ucdurum)}
+            for esik in floors]
+
+
+def citation_threshold_sweep(answers, thresholds):
+    """Atıf eşiğini ölçümle seçmek için: kapsama ve beklenen kaynak dışına atıf.
+
+    Asıl denge `dogaclamaya_atif` sütununda: uç durum cevaplarında model belgeye
+    değil kendi bilgisine dayanır, oralarda atıf verilmemelidir. Yanlış atıf,
+    atıfsızlıktan kötüdür.
+
+    `beklenen_disi` ise vekil bir ölçüttür, kesin hata değil: bir cevap gerçekten
+    ikinci bir belgeden de beslenebilir (C06 hem python hem vscode notlarını
+    kullanıyor).
+    """
+    kaynakli = [a for a in answers
+                if a["category"] == "cevaplanabilir" and a.get("chunks")
+                and a.get("expected_source")]
+    dogaclama = [a for a in answers if a["category"] == "uc_durum" and a.get("chunks")]
+    rows = []
+    for esik in thresholds:
+        cumle = kapsanan = disari = 0
+        for a in kaynakli:
+            cumle += len(citations.spans(a["text"]))
+            for atif in citations.attribute(a["text"], a["chunks"], threshold=esik):
+                kapsanan += 1
+                disari += atif["source"] != a["expected_source"]
+        uc_cumle = sum(len(citations.spans(a["text"])) for a in dogaclama)
+        uc_atif = sum(len(citations.attribute(a["text"], a["chunks"], threshold=esik))
+                      for a in dogaclama)
+        rows.append({"threshold": esik, "cumle": cumle, "kapsanan": kapsanan,
+                     "beklenen_disi": disari, "uc_cumle": uc_cumle,
+                     "dogaclamaya_atif": uc_atif})
+    return rows
+
+
+def code_faithfulness(answers):
+    """Kod sadakati: bağlamda bulunmayan komut üreten cevaplar.
+
+    Sözlüksel oran bulanıktır; komut uydurmak ikili bir hatadır ve kullanıcının
+    çalıştıracağı yanlış komut demektir. Bu yüzden ayrı sayılır.
+    """
+    kodlu = [a for a in answers if a.get("chunks") and grounding.code_spans(a["text"])]
+    return {"kodlu": len(kodlu),
+            "uyduran": [a for a in kodlu if a.get("invented_code")]}
 
 
 def load_questions():
@@ -179,6 +265,23 @@ def apply_model(alias):
     return model_id
 
 
+def answer_row(question, res, elapsed, error):
+    """Bir sorunun rapor satırı. `res`: assistant.answer() sonucu (hata varsa boş)."""
+    text, parcalar = res["text"], res["chunks"]
+    return {
+        "id": question["id"], "category": question["category"],
+        "question": question["question"], "expected_source": question.get("expected_source"),
+        "text": text, "score": quality_score(text, question.get("expected_substrings")),
+        "sources": res["sources"], "chunks": parcalar, "seconds": elapsed, "error": error,
+        "grounding": measure_grounding(text, parcalar, question["question"]),
+        "invented_code": grounding.unsupported_code_spans(
+            text, [c["text"] for c in parcalar]),
+        "abstained": is_abstention(text),
+        "abstained_by": ("erişim" if text.strip() == assistant.NO_INFO
+                         else "model" if is_abstention(text) else None),
+    }
+
+
 def run_answers(questions, categories):
     print("  ısınma turu…", flush=True)
     try:
@@ -191,23 +294,17 @@ def run_answers(questions, categories):
             continue
         started = time.perf_counter()
         try:
-            res = assistant.answer(q["question"])
-            text, sources, error = res["text"], res["sources"], None
+            res, error = assistant.answer(q["question"]), None
         except Exception as e:  # uç durumlar çökmemeli; çökerse rapora yazılır
-            text, sources, error = "", [], f"{type(e).__name__}: {e}"
+            res = {"text": "", "sources": [], "chunks": []}
+            error = f"{type(e).__name__}: {e}"
         elapsed = time.perf_counter() - started
-        rows.append({
-            "id": q["id"], "category": q["category"], "question": q["question"],
-            "expected_source": q.get("expected_source"), "text": text,
-            "score": quality_score(text, q.get("expected_substrings")),
-            "sources": sources, "seconds": elapsed, "error": error,
-            "abstained": is_abstention(text),
-            "abstained_by": ("erişim" if text.strip() == assistant.NO_INFO
-                             else "model" if is_abstention(text) else None),
-        })
+        rows.append(answer_row(q, res, elapsed, error))
+        text = rows[-1]["text"]
         flag = "!" if error else ("~" if is_abstention(text) else "+")
-        puan = rows[-1]["score"]
+        puan, dayanak = rows[-1]["score"], rows[-1]["grounding"]
         etiket = "" if puan is None else f" puan={puan}"
+        etiket += "" if dayanak is None else f" dayanak={dayanak:.2f}"
         print(f"  [{flag}] {q['id']} {elapsed:5.2f}s{etiket}  {q['question'][:44]}", flush=True)
     return rows
 
@@ -293,6 +390,8 @@ def build_report(meta, routing, hits, typo, kisa, abstains, answers, sweep):
         errors = [a for a in answers if a["error"]]
         unans = [a for a in answers if a["category"] == "cevaplanamaz"]
         puanlar = [a["score"] for a in answers if a.get("score") is not None]
+        sadakat = faithfulness_summary(answers)
+        kod = code_faithfulness(answers)
         abst = sum(a["abstained"] for a in unans)
         by_model = sum(a["abstained_by"] == "model" for a in unans)
         lines += ["## Üretim (uçtan uca cevaplar)", "",
@@ -307,21 +406,116 @@ def build_report(meta, routing, hits, typo, kisa, abstains, answers, sweep):
                       ["Hata / çökme", len(errors)],
                   ] + ([["Otomatik kalite puanı",
                          f"{sum(puanlar)}/{2 * len(puanlar)} (%{100 * sum(puanlar) / (2 * len(puanlar)):.0f})"]]
-                       if puanlar else [])), "",
+                       if puanlar else [])
+                    + ([["Sadakat (ortalama)",
+                         f"%{100 * sadakat['ortalama']:.0f} — {sadakat['olculen']} cevapta ölçüldü"]]
+                       if sadakat["olculen"] else [])
+                    + ([["Kod sadakati",
+                         f"{kod['kodlu'] - len(kod['uyduran'])}/{kod['kodlu']} "
+                         f"cevapta uydurulmuş komut yok"]] if kod["kodlu"] else [])), "",
                   "Otomatik puan beklenen ifadelere bakar (2 = hepsi, 1 = bir kısmı, 0 = hiçbiri); "
                   "elle puan sütunu gerekirse insan değerlendirmesi için boş bırakılmıştır.",
-                  "", _table(["ID", "Kategori", "Soru", "Cevap", "Kaynaklar", "Süre", "Oto", "Elle"], [
+                  "", _table(["ID", "Kategori", "Soru", "Cevap", "Kaynaklar", "Süre", "Oto",
+                              "Sadakat", "Elle"], [
                       [a["id"], a["category"], a["question"][:40] or "(boş)",
                        (a["error"] or a["text"]).replace("\n", " ")[:110],
                        ", ".join(dict.fromkeys(a["sources"])) or "—",
                        f"{a['seconds']:.2f}",
-                       "—" if a.get("score") is None else a["score"], " "]
+                       "—" if a.get("score") is None else a["score"],
+                       "—" if a.get("grounding") is None else f"{a['grounding']:.2f}", " "]
                       for a in answers]), ""]
+
+        lines += ["### Sadakat (cevap getirilen parçaya mı dayanıyor)", ""]
+        if not sadakat["olculen"]:
+            lines += ["Belge akışıyla üretilmiş ölçülebilir cevap yok.", ""]
+        else:
+            lines += [
+                "Kalite puanı doğru bilginin cevapta geçip geçmediğine bakar; sadakat ise cevabın "
+                "getirilen parçalardan mı yoksa modelin ezberinden mi geldiğini ölçer. Ölçüt "
+                "sözlükseldir: cevaptaki içerik kelimelerinin kaçının bağlamda karşılığı var "
+                f"(sorudan gelen kelimeler sayılmaz). {GROUNDING_FLOOR:.2f} altı ayrıca listelenir.",
+                ""]
+            if sadakat["dusuk"]:
+                lines += [f"Eşiğin altında kalan {len(sadakat['dusuk'])} cevap:", "",
+                          _table(["ID", "Soru", "Sadakat", "Bağlamda karşılığı olmayan kelimeler"], [
+                              [a["id"], a["question"][:40] or "(boş)", f"{a['grounding']:.2f}",
+                               ", ".join(grounding.unsupported_tokens(
+                                   a["text"], [c["text"] for c in a.get("chunks", [])],
+                                   a["question"])[:8]) or "—"]
+                              for a in sadakat["dusuk"]]), ""]
+            else:
+                lines += [f"Ölçülen cevapların hepsi {GROUNDING_FLOOR:.2f} eşiğinin üzerinde.", ""]
+
+        if kod["kodlu"]:
+            lines += ["### Kod sadakati (uydurulmuş komut var mı)", "",
+                      "Ters tırnak içindeki her ifade bağlamda birebir geçmeli. Geçmiyorsa model "
+                      "komutu kendisi türetmiştir — kullanıcının çalıştıracağı yanlış komut budur.",
+                      ""]
+            if kod["uyduran"]:
+                lines += [_table(["ID", "Soru", "Bağlamda olmayan komut"], [
+                    [a["id"], a["question"][:40] or "(boş)", ", ".join(f"`{c}`" for c in
+                                                                      a["invented_code"])]
+                    for a in kod["uyduran"]]), ""]
+            else:
+                lines += [f"Komut içeren {kod['kodlu']} cevabın hepsinde komutlar bağlamdan "
+                          f"geliyor; uydurulmuş komut yok.", ""]
 
     return "\n".join(lines) + "\n"
 
 
+def build_sweep_report(meta, floor_rows, cite_rows):
+    """Sadakat ve atıf eşiklerinin taraması. Kayıtlı bir koşum JSON'undan üretilir."""
+    return "\n".join([
+        f"# Sadakat ve atıf eşiği taraması — {meta['timestamp']}",
+        "",
+        f"Kaynak koşum: `{meta['kaynak']}` (model `{meta['model_id']}`). Model çağrılmaz; "
+        "kayıtlı cevaplar ve parçalar üzerinden yeniden hesaplanır.",
+        "",
+        "## Sadakat eşiği (raporda 'düşük' sayılma sınırı)",
+        "",
+        "`cevaplanabilir` cevaplar belgeye dayanmak zorundadır — eşiğin altına düşerlerse yanlış "
+        "alarm. `uc_durum` cevaplarında model belgeye değil kendi bilgisine dayanır — yakalanmalı.",
+        "",
+        _table(["Eşik", "Yanlış alarm", "Yakalanan"],
+               [[f"{r['floor']:.2f}", f"{r['yanlis_alarm']}/{r['beklenen']}",
+                 f"{r['yakalanan']}/{r['ucdurum']}"] for r in floor_rows]),
+        "",
+        "## Atıf eşiği (cümleye atıf verme sınırı)",
+        "",
+        "Asıl denge ortadaki sütunda: `cevaplanabilir` cevaplarda kapsama yüksek olmalı, "
+        "`uc_durum` cevaplarında model doğaçlama yaptığı için atıf verilmemeli. Yanlış atıf, "
+        "atıfsızlıktan kötüdür. `beklenen kaynak dışı` vekil bir ölçüttür: bir cevap gerçekten "
+        "ikinci bir belgeden de beslenebilir.",
+        "",
+        _table(["Eşik", "Kapsama (cevaplanabilir)", "Doğaçlamaya atıf (uç durum)",
+                "Beklenen kaynak dışı"],
+               [[f"{r['threshold']:.2f}",
+                 f"{r['kapsanan']}/{r['cumle']}" +
+                 (f" (%{100 * r['kapsanan'] / r['cumle']:.0f})" if r["cumle"] else ""),
+                 f"{r.get('dogaclamaya_atif', 0)}/{r.get('uc_cumle', 0)}",
+                 r["beklenen_disi"]] for r in cite_rows]),
+        "",
+    ]) + "\n"
+
+
 # ----------------------------------------------------------------------- akış
+
+def run_sweep_report(json_path, out_dir):
+    """Kayıtlı koşumdan eşik taraması. LLM çağrılmaz, saniyeler sürer."""
+    kayit = json.loads(Path(json_path).read_text(encoding="utf-8"))
+    answers = kayit["answers"]
+    floors = [0.40, 0.50, 0.55, 0.60, 0.65, 0.70, 0.80]
+    cite = [0.40, 0.50, 0.55, 0.60, 0.70, 0.80]
+    meta = {"timestamp": datetime.now().strftime("%d.%m.%Y %H:%M"),
+            "model_id": kayit["meta"]["model_id"], "kaynak": Path(json_path).name}
+    rapor = build_sweep_report(meta, grounding_floor_sweep(answers, floors),
+                               citation_threshold_sweep(answers, cite))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"esik-taramasi-{datetime.now().strftime('%Y%m%d-%H%M')}.md"
+    out_path.write_text(rapor, encoding="utf-8")
+    print(rapor)
+    print(f"Rapor yazıldı: {os.path.relpath(out_path, ROOT)}")
+
 
 def main():
     ap = argparse.ArgumentParser(description="personas değerlendirme koşumu")
@@ -331,7 +525,12 @@ def main():
     ap.add_argument("--llm-yok", action="store_true", dest="no_llm",
                     help="sohbet modelini çağırma, yalnızca deterministik metrikler")
     ap.add_argument("--cikti", default=str(OUT_DIR), help="rapor klasörü")
+    ap.add_argument("--sadakat-tarama", dest="sadakat_tarama", metavar="JSON",
+                    help="kayıtlı koşum JSON'u üzerinden sadakat/atıf eşiği taraması")
     args = ap.parse_args()
+
+    if args.sadakat_tarama:
+        return run_sweep_report(args.sadakat_tarama, Path(args.cikti))
 
     questions = load_questions()
     thresholds = [float(x) for x in args.esik.split(",")] if args.esik else [config.SIM_THRESHOLD]

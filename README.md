@@ -32,6 +32,9 @@ Tarayıcıda açılan tek sayfa bir uygulama; hiçbir dış kaynağa (CDN dâhil
 - **Sohbetler kalıcıdır**: soldaki listeden geçmiş sohbetlere dönülür, yeniden adlandırılır, silinir.
   Başlığı ilk cevaptan sonra model üretir.
 - **Kaynak rozetine tıklayınca** cevabın dayandığı parça metniyle birlikte açılır.
+- **Satır içi atıflar**: her cümlenin sonunda dayandığı parçanın numarası çıkar; tıklanınca o parça
+  açılıp vurgulanır. Atıf modele yazdırılmaz — cevap üretildikten sonra sadakat ölçümüyle aynı
+  sözlüksel eşleştirmeden çıkarılır, bu yüzden gecikmeye eklediği süre ~3 ms'dir.
 - **Belge sürükle-bırak** ile bilgi tabanına anında eklenir (`.md`, `.txt`, `.pdf`).
 - Soldaki menüden **model değiştirilebilir** (8 GB bellekte tek model yüklü kalır, geçiş 20-30 sn).
 - **Durdur / yeniden üret / kopyala**, `Cmd+K` yeni sohbet, `Esc` durdurur.
@@ -101,7 +104,7 @@ python -m ui.cli
 ## Testler ve değerlendirme
 
 ```bash
-python -m pytest -q                  # 225 test (birim, HTTP katmanı, soru seti regresyonu)
+python -m pytest -q                  # 265 test (birim, HTTP katmanı, soru seti regresyonu)
 ```
 
 Değerlendirme koşumu `eval/questions.json` içindeki 50 soruyu çalıştırıp `docs/eval/` altına
@@ -112,13 +115,20 @@ python scripts/evaluate.py                        # tam koşum (model gerekir)
 python scripts/evaluate.py --llm-yok              # sadece deterministik metrikler, saniyeler sürer
 python scripts/evaluate.py --esik 0.30,0.34,0.40  # eşik taraması
 python scripts/evaluate.py --model qwen2.5-1.5b   # başka modelle karşılaştırma
+python scripts/evaluate.py --sadakat-tarama docs/eval/sonuclar-....json   # eşik taraması
 ```
 
 Ölçülen metrikler: yönlendirme doğruluğu, erişim isabeti (hit@K), **yazım hatalı sorularda erişim**,
 **kısa/anahtar kelime sorgularında erişim**,
-cevaplanamaz sorularda çekimserlik, gecikme (p50/p95) ve **otomatik kalite puanı** —
-cevaplanabilir sorulardaki `expected_substrings` alanına göre 0–2 puan. Model değiştirip koşumu
+cevaplanamaz sorularda çekimserlik, gecikme (p50/p95), **otomatik kalite puanı** —
+cevaplanabilir sorulardaki `expected_substrings` alanına göre 0–2 puan — ve **sadakat**:
+cevaptaki bilgi getirilen parçadan mı geliyor, yoksa modelin ezberinden mi. Model değiştirip koşumu
 tekrarlamak yeterli, elle puanlama gerekmez.
+
+Kalite puanı "doğru bilgi cevapta geçiyor mu" der; sadakat "cevap bağlamdan mı geliyor" der. İkisi
+farklıdır: model doğru cevabı kendi ezberinden de verebilir ve o durumda RAG zinciri aslında
+çalışmamıştır. Rapor iki sayı üretir — cümle bazlı **sadakat oranı** ve ikili **kod sadakati**
+(ters tırnak içindeki her komut bağlamda birebir geçiyor mu).
 
 ## Teslimler
 
@@ -128,6 +138,25 @@ tekrarlamak yeterli, elle puanlama gerekmez.
 | [`docs/rapor/personas-proje-raporu.docx`](docs/rapor/personas-proje-raporu.docx) | Proje raporu (Word). Üreteci: `docs/rapor/rapor_uret.js` |
 | [`docs/sunum/index.html`](docs/sunum/index.html) | Demo sunumu — çevrimdışı açılır, ok tuşlarıyla gezilir |
 | `docs/eval/sonuclar-*.md` / `.json` | Ham koşum çıktıları |
+
+## Sorun giderme
+
+**"Connection error" alıyorsan, önce daemon'ın gerçekten dinlediğini doğrula.** Foundry Local uzun
+süre ayakta kalınca HTTP ucu ölebiliyor; `foundry server status` yine de `Ready`, PID ve uptime
+gösteriyor — ama porta bakınca dinleyen yok:
+
+```bash
+foundry server status                       # bildirdiği adresi al
+curl -s http://127.0.0.1:<port>/v1/models   # boş dönüyorsa uç ölü
+foundry server restart && foundry model load phi-4-mini
+```
+
+Yeniden başlatınca **port değişir**. `llm._discover_base_url()` adresi süreç başına bir kez okuyup
+sakladığı için, çalışan `uvicorn` süreci eski portta takılı kalır; sunucuyu da yeniden başlat.
+
+Foundry 0.10 ile komut adları değişti: `foundry service status` → **`foundry server status`**,
+`foundry service ps` → **`foundry server status`**. Eski sürümün `Inference.Service.Agent` süreci
+yükseltmeden sonra da ayakta kalabiliyor; zararsız ama kafa karıştırıcı.
 
 ## Sınırlar
 

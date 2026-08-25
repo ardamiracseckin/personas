@@ -73,3 +73,20 @@ def test_app_open_flow_calls_opener():
     assert res["pending_action"] is None
     assert captured["name"] == "Spotify"
     assert "Spotify" in res["text"]
+
+
+# --- satır içi atıflar -------------------------------------------------------
+
+def test_document_answer_carries_inline_citations():
+    # Atıf model istemine değil, cevabın kendisine sonradan bakılarak çıkarılır.
+    res = assistant.answer(
+        "Kireç nasıl temizlenir?",
+        deps=deps(retrieve=lambda q: [("faq.md", "Kireç için sirke kullanın.", 0.9)],
+                  chat=lambda system, user: "Kireç için sirke kullanılır."))
+    assert [a["source"] for a in res["citations"]] == ["faq.md"]
+
+
+def test_answers_without_chunks_have_no_citations():
+    res = assistant.answer(
+        "Bugün ne var?", deps=deps(route=lambda q: {"tool": "calendar", "action": "read"}))
+    assert res["citations"] == []

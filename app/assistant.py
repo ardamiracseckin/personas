@@ -7,7 +7,7 @@ import json
 import re
 from datetime import datetime, timedelta
 
-from app import config, llm, retriever, router
+from app import citations, config, llm, retriever, router
 from app.tools import app_launcher, calendar_tool, contacts, mail_tool, whatsapp
 
 SYSTEM_PROMPT = (
@@ -65,9 +65,13 @@ def retrieval_query(query, history=None):
 
 
 def _result(text, sources=None, pending=None, chunks=None):
-    """Arayüz sözleşmesi. `chunks`: kaynak panelinde gösterilecek parça metinleri."""
+    """Arayüz sözleşmesi. `chunks`: kaynak panelinde gösterilecek parça metinleri.
+
+    `citations`: hangi cümlenin hangi parçadan geldiği — metin üretildikten
+    sonra çıkarılır, modele ek yük bindirmez (bkz. app/citations.py).
+    """
     return {"text": text, "sources": sources or [], "pending_action": pending,
-            "chunks": chunks or []}
+            "chunks": chunks or [], "citations": citations.attribute(text, chunks or [])}
 
 
 def _prepare(query, d, history):

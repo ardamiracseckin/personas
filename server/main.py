@@ -15,7 +15,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from app import assistant, chat_store, config, ingest, llm, models, store
+from app import assistant, chat_store, citations, config, ingest, llm, models, store
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 TITLE_PROMPT = (
@@ -100,8 +100,13 @@ def delete_conversation(conversation_id: int):
 
 @app.get("/api/conversations/{conversation_id}/messages")
 def get_messages(conversation_id: int):
+    """Geçmiş mesajlar. Atıflar saklanmaz, metin ve parçalardan yeniden çıkarılır."""
     _require_conversation(conversation_id)
-    return chat_store.get_messages(conversation_id)
+    mesajlar = chat_store.get_messages(conversation_id)
+    for m in mesajlar:
+        m["citations"] = (citations.attribute(m["text"], m["chunks"])
+                          if m["role"] == "assistant" else [])
+    return mesajlar
 
 
 # ------------------------------------------------------------------ sohbet akışı

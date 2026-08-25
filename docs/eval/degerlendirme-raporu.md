@@ -41,6 +41,14 @@ dil modeli hiç çalıştırılmadan ölçülebilir.
   yok sayılır). Böylece model değiştirmek insan puanlaması gerektirmiyor. İki yöntem aynı
   sıralamayı verdi (Bölüm 5).
 
+- **Sadakat** — cevaptaki içerik kelimelerinin kaçı getirilen parçalarda geçiyor (0–1). Kalite
+  puanından farklıdır: o "doğru bilgi cevapta var mı" der, sadakat "bilgi bağlamdan mı geliyor"
+  der. Model doğru cevabı ezberinden de verebilir; o durumda RAG zinciri çalışmamıştır. Sorudan
+  gelen kelimeler ve modelin kendi cümle kurma kelimeleri sayılmaz. Çekimser cevaplarda ölçülmez.
+- **Kod sadakati** — cevapta ters tırnak içinde geçen her komut bağlamda birebir var mı. İkili bir
+  ölçüt: sözlüksel oran bulanıktır ama komut uydurmak, kullanıcının çalıştıracağı yanlış komut
+  demektir.
+
 Ölçümden önce her koşumda bir **ısınma turu** yapılır; ilk çağrıda model belleğe yüklendiği ve
 embedding modeli ilk kez başlatıldığı için bu süre ölçüme karışmamalıdır.
 
@@ -438,3 +446,113 @@ Kontrol olarak görselsiz, yalnız metinden oluşan aynı istek gönderildiğind
 diye cevap üretti — yani ortada görüntü yokken de aynı biçimde uyduruyor. Sonuç: Foundry Local'in
 yerel OpenAI uç noktası içerik dizisini düz metne indirgiyor ve görseli modele iletmiyor. Bu bizim
 tarafımızdan kapatılabilecek bir eksik değil; özellik kod tarafında hazır bekletiliyor.
+
+
+---
+
+## 13. Sadakat ölçümü ve satır içi atıflar (25 Ağustos 2026)
+
+Bölüm 7'nin birinci maddesi, phi-4-mini'nin bağlam dışına çıkabildiğini ama kullanıcının bunu
+"kaynak gösterilmemesinden" anlayacağını söylüyordu. Bu bir varsayımdı: kaynak gösterilen bir cevap
+da bağlam dışından gelebilir. Ölçülmeyen tek şey RAG'in asıl iddiasıydı — *cevap getirilen parçaya
+dayanıyor mu*. Bu bölüm o boşluğu kapatıyor.
+
+### 13.1 Ölçüt
+
+`app/grounding.py`, cevaptaki içerik kelimelerinin kaçının bağlamda (yaklaşık olarak) geçtiğini
+hesaplar. Model gerektirmez, koşum süresine eklenmez. İki eleme yapılır:
+
+- **Sorudan gelen kelimeler** sayılmaz; yoksa soruyu tekrarlayan cevap haksız yere yüksek alır.
+- **Modelin kendi cümle kurma kelimeleri** sayılmaz ("kullanın", "komutunu", "yapmak"…). Türkçe
+  çekim ekleri yüzünden tam kelime yerine gövde başlangıcı eşleştirilir.
+
+İkinci eleme ilk koşumdan sonra eklendi ve ölçütün kendi kusurunu düzeltti: C04'ün cevabı
+``` `ls -la` komutunu kullanın. ``` — komut bağlamdan geliyor, ama "komutunu/kullanın" bağlamda
+geçmediği için 0,50 alıyordu. Ortalama sadakat, bu düzeltmeyle **%67'den %80'e** çıktı; değişen
+model ya da cevap değil, ölçütün gürültüsüydü.
+
+### 13.2 Sonuçlar (phi-4-mini, 58 parça, 25 Ağustos)
+
+| Metrik | Değer |
+|---|---|
+| Sadakat (ortalama) | %80 — 16 cevapta ölçüldü |
+| Kod sadakati | 10/10 cevapta uydurulmuş komut yok |
+| Eşik (0,60) altında | 2 cevap |
+
+Diğer metrikler değişmedi: yönlendirme 6/6, erişim 14/14, yazım hatalı 14/14, kısa sorgu 6/6,
+çekimserlik 6/6, kalite 28/28, p50 3,0 sn, p95 6,7 sn.
+
+Eşiğin altında kalan iki cevap da uç durum kategorisinden:
+
+| ID | Soru | Sadakat | Bağlamda karşılığı olmayan kelimeler |
+|---|---|---|---|
+| U02 | "git" (tek kelime) | 0,17 | ilgili, olduğunu, fazla, varsa, bildirin |
+| U04 | "hem git hem python hem sqlite… nereden başlayayım" | 0,31 | araçları, öğrenmek, sırayı, takip, temel |
+
+İkisinde de model belgeye değil kendi bilgisine dayanıp genel tavsiye veriyor — yani ölçüt tam
+olarak yakalaması gerekeni yakalıyor. %100'lük kalite puanının arkasında görünmeyen tek gerçek
+boşluk buydu.
+
+### 13.3 Satır içi atıflar ve neden isteme yazdırılmadı
+
+Arayüzde her cümlenin sonunda dayandığı parçanın numarası çıkar; tıklanınca o parça açılıp
+vurgulanır. İki yol vardı:
+
+1. **İsteme kural eklemek** — model her cümleye `[1]` yazsın. Bedeli: istem uzar, çıktı token'ı
+   artar, gecikme büyür. `max_tokens`'ı geniş bırakmanın p95'i 48 saniyeye çıkardığı bu projede
+   ölçülmüştü (Bölüm 10). Ayrıca phi-4-mini boyutunda bir model numaraları karıştırır ve istem
+   değiştiği için tüm kalite/çekimserlik koşumu geçersiz olurdu.
+2. **Cevap üretildikten sonra çıkarmak** — `app/citations.py`, her cümleyi sadakat ölçümünün
+   kullandığı aynı sözlüksel eşleştirmeyle en çok örtüşen parçaya bağlar.
+
+İkincisi seçildi. Ölçülen maliyet: **cevap başına ~2,7 ms** (p50'nin binde biri); istem, çıktı ve
+tüm ölçüm sonuçları değişmedi. Atıflar veritabanına yazılmaz — metin ve parçalar zaten saklandığı
+için sayfa yenilendiğinde yeniden hesaplanır, şema değişikliği gerekmedi.
+
+Bedeli dürüstçe: atıf modelin beyanı değil, bizim tahminimizdir. Eşiği geçemeyen cümle atıfsız
+bırakılır — yanlış atıf, atıfsızlıktan kötüdür.
+
+### 13.4 İki eşiğin ölçümle seçilmesi
+
+İlk yazımda `GROUNDING_FLOOR` ve `CITE_THRESHOLD` benim kararımdı. Bu, projenin kendi kuralına
+aykırıydı: `SIM_THRESHOLD` ve `TOP_K` tahminle değil taramayla seçilmişti ve raporun tamamı bunun
+üzerine kurulu. Kayıtlı bir koşum JSON'u üzerinden her iki eşik de tarandı (model çağrılmaz):
+
+```bash
+python scripts/evaluate.py --sadakat-tarama docs/eval/sonuclar-20260825-1413-phi-4-mini.json
+```
+
+**Sadakat eşiği.** Ayrım iki grup üzerinden yapılır: `cevaplanabilir` cevaplar belgeye dayanmak
+zorundadır (altına düşerse yanlış alarm), `uc_durum` cevaplarında model kendi bilgisine dayanır
+(yakalanmalı).
+
+| Eşik | Yanlış alarm | Yakalanan |
+|---|---|---|
+| 0,40 – 0,60 | 0/13 | 2/3 |
+| 0,65 – 0,70 | 2/13 | 3/3 |
+| 0,80 | 3/13 | 3/3 |
+
+**0,60** seçildi: yanlış alarm vermeyen en yüksek değer. 0,65'e çıkmak üçüncü uç durumu yakalıyor
+ama bedeli iki doğru cevabı düşük işaretlemek — dayanaksızlık iddiası yanlışsa ölçüt güvenilirliğini
+kaybeder, o yüzden yanlış alarm sıfırda tutuldu.
+
+**Atıf eşiği.** İlk denenen vekil ölçüt (atıfın beklenen kaynak dışına gitmesi) hiçbir eşikte
+ayırt etmedi — her satırda 0. Erişim isabeti 14/14 olduğu için ilk parça neredeyse her zaman
+beklenen kaynak; ölçüt kör. Yerine gerçek denge ölçüldü: `cevaplanabilir` cevaplarda kapsama
+yüksek olmalı, `uc_durum` cevaplarında model doğaçlama yaptığı için atıf verilmemeli.
+
+| Eşik | Kapsama (cevaplanabilir) | Doğaçlamaya atıf (uç durum) |
+|---|---|---|
+| 0,40 | 23/23 (%100) | 10/26 |
+| 0,50 | 21/23 (%91) | 7/26 |
+| **0,55** | **21/23 (%91)** | **6/26** |
+| 0,60 | 21/23 (%91) | 6/26 |
+| 0,70 | 18/23 (%78) | 6/26 |
+| 0,80 | 15/23 (%65) | 6/26 |
+
+**0,55** seçildi: eğrinin dirseği. 0,40'a inmek kapsamayı iki cümle artırıyor ama doğaçlama
+cümlelerine verilen atıfı 6'dan 10'a çıkarıyor; 0,70'e çıkmak ise kapsamayı %78'e düşürüyor,
+karşılığında doğaçlamaya atıf hiç azalmıyor. 0,55 ile 0,60 aynı sonucu verdiği için ikisinden
+düşük olanı — yani daha kapsayıcı olanı — alındı.
+
+Tarama çıktısı `docs/eval/esik-taramasi-*.md` altına yazılır.

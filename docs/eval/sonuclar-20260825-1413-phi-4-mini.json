@@ -1,0 +1,670 @@
+{
+  "meta": {
+    "timestamp": "25.08.2026 14:13",
+    "model_id": "phi-4-mini",
+    "k": 3,
+    "threshold": 0.34,
+    "chunks": 58,
+    "sources": 8
+  },
+  "answers": [
+    {
+      "id": "C01",
+      "category": "cevaplanabilir",
+      "question": "Ekran görüntüsünü belirli bir bölgeden nasıl alırım?",
+      "expected_source": "macos-kisayollar.md",
+      "text": "Ekran görüntüsünü belirli bir bölgeden almak için Cmd + Shift + 4 tuşlarına basın, ardından seçilen bölgeyi seçmek için imleçle basın. Seçim sırasında Boşluk tuşuna basın. Bu şekilde, seçilen bölgenin görüntüsü alınır.",
+      "score": 2,
+      "sources": [
+        "macos-kisayollar.md"
+      ],
+      "chunks": [
+        {
+          "source": "macos-kisayollar.md",
+          "text": "## Ekran görüntüsü alma\n\nEkranın belirli bir bölgesinin görüntüsünü almak için Cmd + Shift + 4 tuşlarına basılır, ardından imleçle istenen bölge seçilir. Seçim sırasında Boşluk tuşuna basılırsa imleç kamera simgesine döner ve tek bir pencerenin görüntüsü alınır.\n\nTüm ekranın görüntüsünü almak için Cmd + Shift + 3 kullanılır. Görüntü varsayılan olarak masaüstüne PNG dosyası olarak kaydedilir.\n\nEkran görüntüsü ve kayıt seçeneklerini içeren araç çubuğunu açmak için Cmd + Shift + 5 kullanılır; buradan ekran videosu da kaydedilebilir ve kayıt yeri değiştirilebilir.\n\nGörüntüyü dosyaya kaydetmek yerine doğrudan panoya kopyalamak için kısayola Control tuşu eklenir: Cmd + Control + Shift + 4.",
+          "score": 0.634
+        }
+      ],
+      "seconds": 5.044557083863765,
+      "error": null,
+      "grounding": 0.8235294117647058,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C02",
+      "category": "cevaplanabilir",
+      "question": "Git'te son commit'i geri alıp değişiklikleri nasıl korurum?",
+      "expected_source": "git-notlari.md",
+      "text": "Son commit'i geri alıp değişiklikleri koruduğunuzda, `git reset --soft HEAD~1` komutunu kullanın. Bu, son commit'i geri alır ama dosyalara dokunmaz. Bu, commit'i açar ama dosyalara dokunmaz.",
+      "score": 2,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "git-notlari.md",
+          "text": "## Geri alma\n\nSon commit'i geri al ama değişiklikleri çalışma alanında koru: `git reset --soft HEAD~1`. Bu, commit'i açar ama dosyalara dokunmaz.\n\nSon commit'i ve değişiklikleri tamamen sil: `git reset --hard HEAD~1`. Bu komut geri alınamaz, dikkatli kullanılmalıdır.\n\nTek bir dosyadaki kaydedilmemiş değişiklikleri geri almak için `git restore dosya-adi` kullanılır. Sahnelemeyi geri almak için `git restore --staged dosya-adi` yazılır.\n\nZaten push edilmiş bir commit'i güvenli şekilde geri almak için `git revert commit-hash` kullanılır; bu, geçmişi silmek yerine ters bir commit ekler.",
+          "score": 0.671
+        },
+        {
+          "source": "git-notlari.md",
+          "text": "## Değişiklikleri kaydetme\n\nBir dosyayı sahnelemek için `git add dosya-adi`, tüm değişiklikleri sahnelemek için `git add .` yazılır. Sahnelenen değişiklikler `git commit -m \"mesaj\"` ile kaydedilir.\n\nSon commit'in mesajını düzeltmek veya unutulan bir dosyayı ona eklemek için `git commit --amend` kullanılır. Bu komut geçmişi değiştirdiği için yalnızca henüz push edilmemiş commit'lerde güvenlidir.",
+          "score": 0.469
+        },
+        {
+          "source": "git-notlari.md",
+          "text": "## Temel durum ve geçmiş\n\nHangi dosyaların değiştiğini, hangilerinin sahnelendiğini (staged) görmek için `git status` çalıştırılır. Kısa çıktı isteniyorsa `git status --short` daha okunaklıdır.\n\nCommit geçmişini tek satırlık özet halinde görmek için `git log --oneline` kullanılır. Son beş commit için `git log --oneline -5`, hangi dosyaların değiştiğini de görmek için `git log --stat` yazılır.\n\nHenüz sahnelenmemiş değişiklikleri görmek için `git diff`, sahnelenmiş olanları görmek için `git diff --staged` kullanılır.",
+          "score": 0.382
+        }
+      ],
+      "seconds": 5.888460999820381,
+      "error": null,
+      "grounding": 0.75,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C03",
+      "category": "cevaplanabilir",
+      "question": "Yarım kalan değişiklikleri geçici olarak nasıl saklarım?",
+      "expected_source": "git-notlari.md",
+      "text": "`git stash` kullanın.",
+      "score": 2,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "git-notlari.md",
+          "text": "## Stash — geçici saklama\n\nYarım kalan değişiklikleri geçici olarak saklamak için `git stash` çalıştırılır; çalışma alanı temizlenir. Saklananı geri getirmek için `git stash pop`, listelemek için `git stash list` kullanılır.\n\nTakipsiz (untracked) dosyaların da saklanması isteniyorsa `git stash -u` yazılır.",
+          "score": 0.423
+        },
+        {
+          "source": "git-notlari.md",
+          "text": "## Geri alma\n\nSon commit'i geri al ama değişiklikleri çalışma alanında koru: `git reset --soft HEAD~1`. Bu, commit'i açar ama dosyalara dokunmaz.\n\nSon commit'i ve değişiklikleri tamamen sil: `git reset --hard HEAD~1`. Bu komut geri alınamaz, dikkatli kullanılmalıdır.\n\nTek bir dosyadaki kaydedilmemiş değişiklikleri geri almak için `git restore dosya-adi` kullanılır. Sahnelemeyi geri almak için `git restore --staged dosya-adi` yazılır.\n\nZaten push edilmiş bir commit'i güvenli şekilde geri almak için `git revert commit-hash` kullanılır; bu, geçmişi silmek yerine ters bir commit ekler.",
+          "score": 0.358
+        }
+      ],
+      "seconds": 3.20858637499623,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C04",
+      "category": "cevaplanabilir",
+      "question": "Klasördeki gizli dosyaları da listeleyen komut nedir?",
+      "expected_source": "terminal-komutlar.md",
+      "text": "`ls -la` komutunu kullanın.",
+      "score": 2,
+      "sources": [
+        "terminal-komutlar.md",
+        "macos-kisayollar.md",
+        "vscode-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "terminal-komutlar.md",
+          "text": "## Gezinme\n\nBulunduğun klasörün tam yolunu göstermek için `pwd` çalıştırılır.\n\nKlasördeki dosyaları listelemek için `ls`, gizli dosyalar ve ayrıntılarla birlikte listelemek için `ls -la` kullanılır. Boyutları okunabilir biçimde görmek için `ls -lh` yazılır.\n\nBaşka bir klasöre geçmek için `cd klasor-yolu` kullanılır. Bir üst klasöre çıkmak için `cd ..`, ev klasörüne dönmek için tek başına `cd` yeterlidir.",
+          "score": 0.535
+        },
+        {
+          "source": "macos-kisayollar.md",
+          "text": "## Finder\n\nYeni bir Finder penceresi açmak için Cmd + N, yeni klasör oluşturmak için Cmd + Shift + N kullanılır.\n\nGizli dosyaları göstermek veya gizlemek için Cmd + Shift + Nokta (.) kullanılır.\n\nBir klasöre doğrudan gitmek için Cmd + Shift + G ile \"Klasöre Git\" kutusu açılır ve yol yazılır.\n\nSeçili dosyayı çöpe taşımak için Cmd + Delete, çöpü boşaltmak için Cmd + Shift + Delete kullanılır. macOS'te kes-yapıştır için önce Cmd + C ile kopyalanır, sonra Cmd + Option + V ile taşınır.",
+          "score": 0.485
+        },
+        {
+          "source": "vscode-notlari.md",
+          "text": "## Git entegrasyonu\n\nSol kenardaki kaynak denetimi panelinde değişen dosyalar listelenir; dosyaya tıklandığında değişiklikler yan yana karşılaştırmalı görünür.\n\nDosyanın yanındaki artı simgesi değişikliği sahneler, üstteki kutuya mesaj yazıp onay tuşuna basmak commit eder.\n\nBir satırın hangi commit'te değiştiğini görmek için GitLens gibi bir uzantı kullanılır.",
+          "score": 0.411
+        }
+      ],
+      "seconds": 3.5826859169173986,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C05",
+      "category": "cevaplanabilir",
+      "question": "Bir dosyanın içinde metin aramak için hangi komut kullanılır?",
+      "expected_source": "terminal-komutlar.md",
+      "text": "`grep \"aranacak-kelime\" dosya.txt`",
+      "score": 2,
+      "sources": [
+        "terminal-komutlar.md",
+        "terminal-komutlar.md",
+        "terminal-komutlar.md"
+      ],
+      "chunks": [
+        {
+          "source": "terminal-komutlar.md",
+          "text": "## Arama\n\nBir dosya içinde metin aramak için `grep \"aranacak-kelime\" dosya.txt` kullanılır. Klasörün tamamında, alt klasörler dahil aramak için `grep -r \"kelime\" .` yazılır.\n\nBüyük-küçük harf ayrımı olmadan aramak için `-i`, eşleşmenin satır numarasını görmek için `-n` seçeneği eklenir: `grep -rin \"kelime\" .`\n\nAda göre dosya bulmak için `find . -name \"*.md\"` kullanılır.",
+          "score": 0.453
+        },
+        {
+          "source": "terminal-komutlar.md",
+          "text": "## Süreçler\n\nÇalışan işlemleri canlı izlemek için `top` kullanılır; daha okunaklı bir alternatif `htop` programıdır.\n\nBelirli bir işlemi aramak için `ps aux | grep isim` kullanılır. Bir işlemi sonlandırmak için `kill PID`, yanıt vermiyorsa `kill -9 PID` yazılır.\n\nBir portu hangi işlemin dinlediğini bulmak için `lsof -i :8501` kullanılır.",
+          "score": 0.441
+        },
+        {
+          "source": "terminal-komutlar.md",
+          "text": "## Borular ve yönlendirme\n\nKomut çıktısını başka bir komuta aktarmak için boru işareti kullanılır: `ls -la | grep \".md\"`.\n\nÇıktıyı dosyaya yazmak için `>` (üzerine yazar), sonuna eklemek için `>>` kullanılır: `ls > liste.txt`.\n\nÇıktıyı hem ekranda görmek hem dosyaya yazmak için `komut | tee dosya.txt` kullanılır.",
+          "score": 0.408
+        }
+      ],
+      "seconds": 3.041470624972135,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C06",
+      "category": "cevaplanabilir",
+      "question": "Python'da sanal ortam nasıl oluşturulur ve etkinleştirilir?",
+      "expected_source": "python-notlari.md",
+      "text": "Sanal ortam oluşturmak için `python3 -m venv .venv` çalıştırın. Etkinleştirmek için terminalinizi açın, `.venv` dizininde terminali `.venv/bin/activate` komutuyla aktiv edin. Etkinleştirmek için `deactivate` yazın. Etkinleştirilmişde terminali `.venv` dizininde simgeyle simgeleyin ve `which python` komutunu çalıştırın; `.venv/bin/python` yolunu göstermelidir.",
+      "score": 2,
+      "sources": [
+        "python-notlari.md",
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "python-notlari.md",
+          "text": "## Sanal ortam\n\nProjeye özel bir sanal ortam oluşturmak için `python3 -m venv .venv` çalıştırılır. Ortamı etkinleştirmek için `source .venv/bin/activate` kullanılır; çıkmak için `deactivate` yazılır.\n\nSanal ortam, projenin bağımlılıklarını sistem Python'ından ayırır. Etkin ortamda `which python` komutu `.venv/bin/python` yolunu göstermelidir.",
+          "score": 0.639
+        },
+        {
+          "source": "vscode-notlari.md",
+          "text": "## Python ile çalışma\n\nPython uzantısı kurulduğunda sağ alt köşedeki yorumlayıcı göstergesinden sanal ortam seçilir. Projede `.venv` varsa VS Code genellikle onu otomatik önerir.\n\nTest paneli pytest testlerini keşfeder ve tek tek çalıştırmayı sağlar. Bir testin yanındaki oynat simgesiyle yalnızca o test çalıştırılabilir.\n\nHata ayıklamak için satır numarasının soluna tıklanarak kesme noktası konur ve F5 ile hata ayıklayıcı başlatılır. Adım adım ilerlemek için F10, fonksiyonun içine girmek için F11 kullanılır.",
+          "score": 0.493
+        },
+        {
+          "source": "python-notlari.md",
+          "text": "## Proje yapısı\n\nBir Python paketi, içinde `__init__.py` bulunan klasördür. Modüller `from paket import modul` biçiminde içe aktarılır.\n\nBir dosya hem içe aktarılabilir hem doğrudan çalıştırılabilir olsun isteniyorsa `if __name__ == \"__main__\":` bloğu kullanılır. Modülü paket olarak çalıştırmak için `python -m paket.modul` yazılır.",
+          "score": 0.373
+        }
+      ],
+      "seconds": 6.624465124914423,
+      "error": null,
+      "grounding": 0.631578947368421,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C07",
+      "category": "cevaplanabilir",
+      "question": "requirements.txt içindeki bağımlılıkları nasıl kurarım?",
+      "expected_source": "python-notlari.md",
+      "text": "`pip install -r requirements.txt` kullanın.",
+      "score": 2,
+      "sources": [
+        "python-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "python-notlari.md",
+          "text": "## Paket yönetimi\n\nPaket kurmak için `pip install paket-adi` kullanılır. Bir dosyadaki tüm bağımlılıkları kurmak için `pip install -r requirements.txt` yazılır.\n\nKurulu paketleri ve sürümlerini görmek için `pip list`, bunları dosyaya dökmek için `pip freeze > requirements.txt` kullanılır.\n\nBir paketi kaldırmak için `pip uninstall paket-adi` çalıştırılır.",
+          "score": 0.484
+        }
+      ],
+      "seconds": 1.8206913331523538,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C08",
+      "category": "cevaplanabilir",
+      "question": "SQLite'ta tablo zaten varsa hata almamak için ne yazılır?",
+      "expected_source": "sqlite-notlari.md",
+      "text": "`CREATE TABLE IF NOT EXISTS`",
+      "score": 2,
+      "sources": [
+        "sqlite-notlari.md",
+        "sqlite-notlari.md",
+        "sqlite-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "sqlite-notlari.md",
+          "text": "## Tablo oluşturma\n\nTablo `CREATE TABLE` ile oluşturulur. Tablo zaten varsa hata almamak için `CREATE TABLE IF NOT EXISTS` yazılır.\n\nÖrnek: `CREATE TABLE IF NOT EXISTS chunks (id INTEGER PRIMARY KEY AUTOINCREMENT, source TEXT NOT NULL, text TEXT NOT NULL, embedding TEXT NOT NULL);`\n\n`INTEGER PRIMARY KEY AUTOINCREMENT` sütunu her yeni kayıtta otomatik artan benzersiz bir kimlik verir.",
+          "score": 0.627
+        },
+        {
+          "source": "sqlite-notlari.md",
+          "text": "## Komut satırı\n\nBir veritabanını komut satırında açmak için `sqlite3 veritabani.db` çalıştırılır. Dosya yoksa oluşturulur.\n\nTabloları listelemek için `.tables`, bir tablonun şemasını görmek için `.schema tablo_adi` kullanılır. Çıkmak için `.quit` yazılır.\n\nSonuçları sütun başlıklarıyla okunaklı görmek için `.headers on` ve `.mode column` komutları verilir.",
+          "score": 0.519
+        },
+        {
+          "source": "sqlite-notlari.md",
+          "text": "## Python ile kullanım\n\nPython'da SQLite için ek kurulum gerekmez, `import sqlite3` yeterlidir.\n\nBağlantı `sqlite3.connect(\"veritabani.db\")` ile açılır. `with baglanti:` bloğu kullanıldığında blok başarıyla biterse işlem otomatik olarak kaydedilir (commit), hata olursa geri alınır (rollback).\n\nSorgu `baglanti.execute(\"SELECT ...\")` ile çalıştırılır; sonuçları almak için `fetchall()` (tüm satırlar) veya `fetchone()` (tek satır) kullanılır.\n\nParametreli sorgu her zaman tercih edilmelidir: `c.execute(\"INSERT INTO chunks(source, text) VALUES (?, ?)\", (kaynak, metin))`. Değerleri metin birleştirmeyle sorguya gömmek SQL enjeksiyonuna açık kapı bırakır.",
+          "score": 0.453
+        }
+      ],
+      "seconds": 3.130659749964252,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C09",
+      "category": "cevaplanabilir",
+      "question": "Embedding vektörleri SQLite'ta hangi biçimde saklanır?",
+      "expected_source": "sqlite-notlari.md",
+      "text": "JSON metni olarak `TEXT` sütununda veya ikili veri olarak `BLOB` sütununda saklanır.",
+      "score": 2,
+      "sources": [
+        "sqlite-notlari.md",
+        "rag-kavramlari.md",
+        "sqlite-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "sqlite-notlari.md",
+          "text": "## Vektör saklama\n\nSQLite'ın yerleşik bir vektör tipi yoktur. Embedding vektörleri ya JSON metni olarak `TEXT` sütununda ya da ikili veri olarak `BLOB` sütununda saklanır.\n\nJSON yöntemi okunaklıdır ve hata ayıklaması kolaydır: kaydederken `json.dumps(vektor)`, okurken `json.loads(satir)` kullanılır.\n\nKüçük veri kümelerinde benzerlik hesabı SQL'de değil Python tarafında yapılır: tüm vektörler belleğe okunur, kosinüs benzerliği hesaplanır ve en yüksek skorlu kayıtlar seçilir. Binlerce kaydın üzerine çıkıldığında özel vektör veritabanları veya SQLite eklentileri gerekir.",
+          "score": 0.631
+        },
+        {
+          "source": "rag-kavramlari.md",
+          "text": "## Embedding\n\nEmbedding, bir metni anlamını temsil eden sayı dizisine (vektöre) çeviren modeldir. Anlamca yakın metinler vektör uzayında birbirine yakın düşer.\n\nBu sayede arama, kelime eşleşmesi yerine anlam eşleşmesiyle yapılabilir: \"ekran görüntüsü nasıl alınır\" sorusu, içinde bu kelimeler birebir geçmese de ilgili notu bulabilir.\n\nSoru ve belgeler mutlaka aynı embedding modeliyle vektöre çevrilmelidir; farklı modellerin vektörleri karşılaştırılamaz.",
+          "score": 0.433
+        },
+        {
+          "source": "sqlite-notlari.md",
+          "text": "## SQLite nedir\n\nSQLite, sunucusuz ve tek dosyalı bir SQL veritabanı motorudur. Ayrı bir servis kurmayı, port açmayı veya kullanıcı yönetmeyi gerektirmez; tüm veri tek bir `.db` dosyasında durur.\n\nBu özellikleri onu yerel uygulamalar, masaüstü araçları ve küçük veri kümeleri için ideal kılar. Dünyada en yaygın kullanılan veritabanı motorudur ve Python ile birlikte hazır gelir.",
+          "score": 0.358
+        }
+      ],
+      "seconds": 3.798060250002891,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C10",
+      "category": "cevaplanabilir",
+      "question": "Foundry Local'de yüklü bir modeli bellekten nasıl boşaltırım?",
+      "expected_source": "foundry-local-notlari.md",
+      "text": "`foundry model unload model-adi` komutunu kullanarak Foundry Local'de yüklü bir modeli bellekten boşaltabilirsiniz. Bu komutu çalıştırmadan önce yüklü olan modeli indirmek için `foundry model load model-adi` komutunu kullanmanız gerekecektir. Bu, bellek alanını boşaltmak için gerekli ön koşuludur.",
+      "score": 2,
+      "sources": [
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "foundry-local-notlari.md",
+          "text": "## Model yönetimi\n\nKatalogdaki modelleri listelemek için `foundry model list` çalıştırılır. Çıktıda takma ad (alias), cihaz, görev tipi, dosya boyutu ve lisans sütunları bulunur.\n\nBir modeli indirmek için `foundry model download model-adi`, belleğe yüklemek için `foundry model load model-adi` kullanılır. Yükleme komutu servis kapalıysa servisi de başlatır.\n\nBelleği boşaltmak için `foundry model unload model-adi` çalıştırılır. 8 GB bellekli bir makinede aynı anda tek bir model yüklü tutulmalı, model karşılaştırması yaparken önceki model mutlaka boşaltılmalıdır.\n\nServisin durumunu ve dinlediği adresi görmek için `foundry service status` kullanılır.",
+          "score": 0.464
+        },
+        {
+          "source": "foundry-local-notlari.md",
+          "text": "## Foundry Local nedir\n\nFoundry Local, Microsoft'un büyük dil modellerini tamamen kullanıcının cihazında çalıştırmayı sağlayan yerel çalışma zamanı ve SDK'sıdır. Bulut hesabı, abonelik veya internet bağlantısı gerektirmez.\n\nModelleri kendi kataloğundan indirir, cihazdaki donanıma (CPU, GPU veya NPU) göre en uygun sürümü seçer ve yerel bir HTTP servisi üzerinden sunar. Böylece veri cihazdan hiç çıkmadan çıkarım yapılabilir.\n\nAzure AI Foundry'den farkı şudur: Azure AI Foundry bulutta çalışır, Foundry Local ise aynı model ailelerini yerelde çalıştırır. Bu projede yalnızca yerel sürüm kullanılır.",
+          "score": 0.456
+        },
+        {
+          "source": "foundry-local-notlari.md",
+          "text": "## Model seçimi\n\nKüçük modeller (0.5–2 GB) hızlı yanıt verir ama karmaşık akıl yürütmede zayıftır. Büyük modeller daha iyi cevap üretir ama belleğe sığmayabilir ve yanıt süresi uzar.\n\nSınırlı bellekte RAG uygulaması için 1–4 GB aralığındaki sohbet modelleri iyi bir dengedir; bağlam zaten belgelerden geldiği için modelin genel bilgisinden çok talimatı izleme becerisi önemlidir.\n\nKatalogda `chat` görevi olan modeller sohbet için kullanılır. Katalogda embedding görevine sahip bir model bulunmuyorsa embedding'ler ayrı bir yerel kütüphaneyle üretilmelidir.",
+          "score": 0.422
+        }
+      ],
+      "seconds": 6.364242957904935,
+      "error": null,
+      "grounding": 0.6363636363636364,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C11",
+      "category": "cevaplanabilir",
+      "question": "Foundry Local servisinin adresi neden koda gömülmemeli?",
+      "expected_source": "foundry-local-notlari.md",
+      "text": "Adres koda gömülmemelidir çünkü Foundry Local dinamik bir yerel port kullanır.",
+      "score": 2,
+      "sources": [
+        "foundry-local-notlari.md",
+        "foundry-local-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "foundry-local-notlari.md",
+          "text": "## Yerel API'ye bağlanma\n\nFoundry Local servisi sabit bir port kullanmaz; her başlatmada dinamik bir yerel port seçer. Bu yüzden adres koda gömülmemeli, `foundry service status` çıktısından okunmalı veya SDK'nın verdiği uç nokta kullanılmalıdır.\n\nServis OpenAI uyumludur: `openai` istemcisi `base_url` olarak `http://127.0.0.1:<port>/v1` adresiyle kurulur. API anahtarı gerekmez, istemci zorunlu tuttuğu için yer tutucu bir değer verilir.\n\nYüklü model kimliklerini görmek için istemcinin `models.list()` çağrısı kullanılır. Dönen kimlikler takma adın tam sürümüdür, örneğin `qwen2.5-1.5b-instruct-generic-gpu`.\n\nSohbet isteği standart `chat.completions.create` çağrısıyla yapılır; `system` ve `user` rolleri OpenAI API'sindeki gibi çalışır.",
+          "score": 0.642
+        },
+        {
+          "source": "foundry-local-notlari.md",
+          "text": "## Foundry Local nedir\n\nFoundry Local, Microsoft'un büyük dil modellerini tamamen kullanıcının cihazında çalıştırmayı sağlayan yerel çalışma zamanı ve SDK'sıdır. Bulut hesabı, abonelik veya internet bağlantısı gerektirmez.\n\nModelleri kendi kataloğundan indirir, cihazdaki donanıma (CPU, GPU veya NPU) göre en uygun sürümü seçer ve yerel bir HTTP servisi üzerinden sunar. Böylece veri cihazdan hiç çıkmadan çıkarım yapılabilir.\n\nAzure AI Foundry'den farkı şudur: Azure AI Foundry bulutta çalışır, Foundry Local ise aynı model ailelerini yerelde çalıştırır. Bu projede yalnızca yerel sürüm kullanılır.",
+          "score": 0.503
+        }
+      ],
+      "seconds": 3.402874708874151,
+      "error": null,
+      "grounding": 0.8333333333333334,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C12",
+      "category": "cevaplanabilir",
+      "question": "RAG'in üç adımı nedir?",
+      "expected_source": "rag-kavramlari.md",
+      "text": "Retrieve, Augment, Generate.",
+      "score": 2,
+      "sources": [
+        "rag-kavramlari.md",
+        "rag-kavramlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "rag-kavramlari.md",
+          "text": "## RAG nedir\n\nRAG (Retrieval-Augmented Generation, Erişimle Zenginleştirilmiş Üretim), bir dil modelinin cevabını kendi ezberine değil, dışarıdan getirilen belgelere dayandıran tasarım desenidir.\n\nÜç adımdan oluşur: Retrieve (soruya en ilgili belge parçalarını bul), Augment (bu parçaları modelin istemine bağlam olarak ekle), Generate (model cevabı bu bağlamdan üretir).",
+          "score": 0.561
+        },
+        {
+          "source": "rag-kavramlari.md",
+          "text": "## İstem (prompt) tasarımı\n\nSistem istemi modele rolünü ve kurallarını söyler. RAG için üç kural kritiktir: yalnızca verilen bağlamı kullan, bağlamda yoksa bilmediğini söyle, kullanılan kaynağı belirt.\n\nKullanıcı istemi genellikle \"BAĞLAM: ...\\n\\nSORU: ...\" biçiminde kurulur; bağlamın soruyla karışmaması için açık etiketler kullanılır.\n\nKüçük modellerde talimatlar kısa, net ve emir kipinde olmalıdır; uzun ve koşullu talimatlar takip edilmez.",
+          "score": 0.386
+        }
+      ],
+      "seconds": 2.1658631248865277,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "C13",
+      "category": "cevaplanabilir",
+      "question": "Benzerlik eşiği çok yüksek olursa ne olur?",
+      "expected_source": "rag-kavramlari.md",
+      "text": "Çok yüksek olursa 'Bilmiyorum' diyor.",
+      "score": 2,
+      "sources": [
+        "rag-kavramlari.md",
+        "rag-kavramlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "rag-kavramlari.md",
+          "text": "## Top-K ve benzerlik eşiği\n\nArama sonucunda en yüksek skorlu K parça alınır; küçük bilgi tabanlarında K genellikle 2 ile 5 arasındadır.\n\nSkoru belirlenen eşiğin altında kalan parçalar tamamen elenir. Eşik, asistanın \"bilmiyorum\" diyebilmesini sağlayan mekanizmadır: eşiği geçen parça yoksa modele hiç soru sorulmadan bilgi bulunamadığı bildirilir.\n\nEşik çok yüksek olursa asistan bildiği şeylere de bilmiyorum der; çok düşük olursa alakasız parçalarla uydurma cevap üretir. Doğru değer tahminle değil, hazırlanan soru setiyle ölçülerek belirlenir.",
+          "score": 0.626
+        },
+        {
+          "source": "rag-kavramlari.md",
+          "text": "## Parçalama (chunking)\n\nBelgeler bütün halinde değil, parçalar halinde saklanır. Tipik parça boyutu bir ila üç paragraftır.\n\nParça çok büyük olursa içine konuyla ilgisiz metin karışır ve modelin dikkati dağılır. Çok küçük olursa cevabı vermeye yetecek bağlam kalmaz.\n\nParçanın hangi başlık altında olduğunu parçaya eklemek, hem benzerlik skorunu hem de cevabın bağlamını güçlendirir.",
+          "score": 0.363
+        }
+      ],
+      "seconds": 2.618647041032091,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "model"
+    },
+    {
+      "id": "C14",
+      "category": "cevaplanabilir",
+      "question": "VS Code'da projenin tamamında nasıl arama yaparım?",
+      "expected_source": "vscode-notlari.md",
+      "text": "VS Code'da projenin tamamında arama yapmak için Cmd + Shift + F kullanın.",
+      "score": 2,
+      "sources": [
+        "vscode-notlari.md",
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "vscode-notlari.md",
+          "text": "## Arama\n\nAçık dosyada aramak için Cmd + F, değiştirmek için Cmd + Option + F kullanılır.\n\nProjenin tamamında aramak için Cmd + Shift + F kullanılır. Arama kutusundaki simgelerle büyük-küçük harf duyarlılığı, tam kelime eşleşmesi ve düzenli ifade modu açılabilir.\n\nBelirli klasörleri aramanın dışında tutmak için arama panelindeki \"files to exclude\" alanına örneğin `.venv, node_modules` yazılır.",
+          "score": 0.467
+        },
+        {
+          "source": "vscode-notlari.md",
+          "text": "## Python ile çalışma\n\nPython uzantısı kurulduğunda sağ alt köşedeki yorumlayıcı göstergesinden sanal ortam seçilir. Projede `.venv` varsa VS Code genellikle onu otomatik önerir.\n\nTest paneli pytest testlerini keşfeder ve tek tek çalıştırmayı sağlar. Bir testin yanındaki oynat simgesiyle yalnızca o test çalıştırılabilir.\n\nHata ayıklamak için satır numarasının soluna tıklanarak kesme noktası konur ve F5 ile hata ayıklayıcı başlatılır. Adım adım ilerlemek için F10, fonksiyonun içine girmek için F11 kullanılır.",
+          "score": 0.411
+        },
+        {
+          "source": "python-notlari.md",
+          "text": "## Proje yapısı\n\nBir Python paketi, içinde `__init__.py` bulunan klasördür. Modüller `from paket import modul` biçiminde içe aktarılır.\n\nBir dosya hem içe aktarılabilir hem doğrudan çalıştırılabilir olsun isteniyorsa `if __name__ == \"__main__\":` bloğu kullanılır. Modülü paket olarak çalıştırmak için `python -m paket.modul` yazılır.",
+          "score": 0.376
+        }
+      ],
+      "seconds": 3.28236116678454,
+      "error": null,
+      "grounding": 1.0,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "B01",
+      "category": "cevaplanamaz",
+      "question": "Docker imajı nasıl oluşturulur?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.10848487494513392,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B02",
+      "category": "cevaplanamaz",
+      "question": "Kubernetes'te bir pod nasıl silinir?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.09209170797839761,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B03",
+      "category": "cevaplanamaz",
+      "question": "React'te useEffect kancası ne işe yarar?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.09765933291055262,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B04",
+      "category": "cevaplanamaz",
+      "question": "Excel'de düşeyara formülü nasıl yazılır?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.09650495904497802,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B05",
+      "category": "cevaplanamaz",
+      "question": "Ev kredisi faiz oranları nedir?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.0779282080475241,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "B06",
+      "category": "cevaplanamaz",
+      "question": "Fotoğrafta diyafram değeri neyi etkiler?",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.0911439589690417,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U01",
+      "category": "uc_durum",
+      "question": "",
+      "expected_source": null,
+      "text": "Belgelerimde bu konuda bilgi yok.",
+      "score": null,
+      "sources": [],
+      "chunks": [],
+      "seconds": 0.009814624907448888,
+      "error": null,
+      "grounding": null,
+      "invented_code": [],
+      "abstained": true,
+      "abstained_by": "erişim"
+    },
+    {
+      "id": "U02",
+      "category": "uc_durum",
+      "question": "git",
+      "expected_source": null,
+      "text": "Sorunun git ile ilgili olduğunu anladım. Lütfen daha fazla ayrıntı veya belirli bir git komutuna ihtiyacınız varsa bana bildirin!",
+      "score": null,
+      "sources": [
+        "git-notlari.md",
+        "git-notlari.md",
+        "git-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "git-notlari.md",
+          "text": "## Dallar\n\nYeni bir dal oluşturup ona geçmek için `git checkout -b yeni-dal-adi` veya modern karşılığı `git switch -c yeni-dal-adi` kullanılır.\n\nVar olan bir dala geçmek için `git switch dal-adi`, dalları listelemek için `git branch` yazılır. İşi biten bir dalı silmek için `git branch -d dal-adi` kullanılır.\n\nBir dalı ana dala birleştirmek için önce hedef dala geçilir, sonra `git merge dal-adi` çalıştırılır.",
+          "score": 0.402
+        },
+        {
+          "source": "git-notlari.md",
+          "text": "## Stash — geçici saklama\n\nYarım kalan değişiklikleri geçici olarak saklamak için `git stash` çalıştırılır; çalışma alanı temizlenir. Saklananı geri getirmek için `git stash pop`, listelemek için `git stash list` kullanılır.\n\nTakipsiz (untracked) dosyaların da saklanması isteniyorsa `git stash -u` yazılır.",
+          "score": 0.385
+        },
+        {
+          "source": "git-notlari.md",
+          "text": "## Geri alma\n\nSon commit'i geri al ama değişiklikleri çalışma alanında koru: `git reset --soft HEAD~1`. Bu, commit'i açar ama dosyalara dokunmaz.\n\nSon commit'i ve değişiklikleri tamamen sil: `git reset --hard HEAD~1`. Bu komut geri alınamaz, dikkatli kullanılmalıdır.\n\nTek bir dosyadaki kaydedilmemiş değişiklikleri geri almak için `git restore dosya-adi` kullanılır. Sahnelemeyi geri almak için `git restore --staged dosya-adi` yazılır.\n\nZaten push edilmiş bir commit'i güvenli şekilde geri almak için `git revert commit-hash` kullanılır; bu, geçmişi silmek yerine ters bir commit ekler.",
+          "score": 0.367
+        }
+      ],
+      "seconds": 3.7705791250336915,
+      "error": null,
+      "grounding": 0.16666666666666666,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "U03",
+      "category": "uc_durum",
+      "question": "nasıl?",
+      "expected_source": null,
+      "text": "Verilen bağlamda metni vektöre çevirin:\n\nSorun: Nasıl yapılır?\n\nVektörler: [how_to_do_it]\n\n\nVerilen bağlamda embeddin nasıl yapılır:\n\nSorun: Nasıl yapılır?\n\nVektörler: [how_to_do_embedding]",
+      "score": null,
+      "sources": [
+        "rag-kavramlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "rag-kavramlari.md",
+          "text": "## Embedding\n\nEmbedding, bir metni anlamını temsil eden sayı dizisine (vektöre) çeviren modeldir. Anlamca yakın metinler vektör uzayında birbirine yakın düşer.\n\nBu sayede arama, kelime eşleşmesi yerine anlam eşleşmesiyle yapılabilir: \"ekran görüntüsü nasıl alınır\" sorusu, içinde bu kelimeler birebir geçmese de ilgili notu bulabilir.\n\nSoru ve belgeler mutlaka aynı embedding modeliyle vektöre çevrilmelidir; farklı modellerin vektörleri karşılaştırılamaz.",
+          "score": 0.452
+        }
+      ],
+      "seconds": 3.7924748330842704,
+      "error": null,
+      "grounding": 0.6,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    },
+    {
+      "id": "U04",
+      "category": "uc_durum",
+      "question": "Bilgisayarımda hem git hem python hem sqlite hem de foundry local kullanıyorum ve bunların hepsini aynı anda öğrenmeye çalışırken hangi konudan başlamam gerektiğini, hangi komutları önce ezberlemem gerektiğini, ayrıca sanal ortam kurmadan paket kurmanın neden sorun çıkardığını ve bütün bunların birbiriyle nasıl ilişkili olduğunu uzun uzun anlatır mısın?",
+      "expected_source": null,
+      "text": "Sorunuzun bağlamında hem git hem de python hem sqlite hem de Foundry Local kullanıyorsunuz. Bu araçları öğrenmek için şu sırayı takip edebilirsiniz:\n\n1. Python ile başlayın. Bu, hem git hem de Foundry Local için temel bir dil ve depolama sistemi.\n2. Sonra git'i öğrenin. Bu, depolama sistemini depolayan ve yönetilen kodun depolama ve dağıtımını sağlayan bir araçtır.\n3. Sonra Foundry Local'i öğrenin. Bu, git depolama sistemini depolayan ve yönetilen kodu depolayan ve dağıtımını sağlayan bir araçtır.\n4. Sonra sqlite'yi öğrenin. Bu, depolama sistemini depolayan ve depolama ve erişimle ilgili işlemlere yetenekli olan depolama sistemidir.\n\nSanal ortam kurmadan paket kurmanın neden sorun çıkardığını anlamak için:\n\n- Sanal ortamlar, bağımlılıkları sistem Python'ından ayırır. Bu, depolama sistemini depolayan ve depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur.\n- Etkin ortamda `which python` komutu `.venv/bin/python` yolunu göstermelidir. Bu, sanal ortamda çalışan pythonun doğru yoldan çalıştığından emin olmak için önemlidir.\n\nYani, sanal ortamlar depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur ve depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur. Bu nedenle depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur ve depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye yardımcı olur. Bu nedenle depolama sistemini depolayan depolama sistemleri arasında potansiyel çakışmaları önlemeye",
+      "score": null,
+      "sources": [
+        "vscode-notlari.md",
+        "python-notlari.md"
+      ],
+      "chunks": [
+        {
+          "source": "vscode-notlari.md",
+          "text": "## Python ile çalışma\n\nPython uzantısı kurulduğunda sağ alt köşedeki yorumlayıcı göstergesinden sanal ortam seçilir. Projede `.venv` varsa VS Code genellikle onu otomatik önerir.\n\nTest paneli pytest testlerini keşfeder ve tek tek çalıştırmayı sağlar. Bir testin yanındaki oynat simgesiyle yalnızca o test çalıştırılabilir.\n\nHata ayıklamak için satır numarasının soluna tıklanarak kesme noktası konur ve F5 ile hata ayıklayıcı başlatılır. Adım adım ilerlemek için F10, fonksiyonun içine girmek için F11 kullanılır.",
+          "score": 0.369
+        },
+        {
+          "source": "python-notlari.md",
+          "text": "## Sanal ortam\n\nProjeye özel bir sanal ortam oluşturmak için `python3 -m venv .venv` çalıştırılır. Ortamı etkinleştirmek için `source .venv/bin/activate` kullanılır; çıkmak için `deactivate` yazılır.\n\nSanal ortam, projenin bağımlılıklarını sistem Python'ından ayırır. Etkin ortamda `which python` komutu `.venv/bin/python` yolunu göstermelidir.",
+          "score": 0.356
+        }
+      ],
+      "seconds": 19.123550083022565,
+      "error": null,
+      "grounding": 0.3076923076923077,
+      "invented_code": [],
+      "abstained": false,
+      "abstained_by": null
+    }
+  ]
+}
