@@ -16,6 +16,20 @@ CATEGORIES = {"cevaplanabilir", "cevaplanamaz", "uc_durum", "yonlendirme",
               "yazim_hatasi", "kisa_sorgu"}
 
 
+def _teknik_notlar_yuklu():
+    """Bu dosyadaki erişim regresyonları teknik not korpusuna bağlıdır.
+
+    Bilgi tabanına başka bir korpus (örneğin mevzuat) yüklendiğinde bu testler
+    "veritabanı dolu" diye koşup yanlış alarm veriyordu. Doğru koruma, beklenen
+    belgelerin gerçekten yüklü olup olmadığına bakmaktır.
+    """
+    if not config.DB_PATH.exists() or store.count() == 0:
+        return False
+    yuklu = {kaynak for (kaynak, _adet) in store.sources()}
+    beklenen = {q["expected_source"] for q in QUESTIONS if q.get("expected_source")}
+    return bool(beklenen & yuklu)
+
+
 def by_category(name):
     return [q for q in QUESTIONS if q["category"] == name]
 
@@ -43,8 +57,9 @@ def test_documents_questions_are_not_hijacked_by_tools(q):
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(not config.DB_PATH.exists() or store.count() == 0,
-                    reason="ingest edilmiş veritabanı yok ('python -m app.ingest')")
+@pytest.mark.skipif(not _teknik_notlar_yuklu(),
+                    reason="bu regresyon teknik not bilgi tabanını gerektirir "
+                           "('python -m app.ingest'); şu an başka bir korpus yüklü")
 def test_expected_source_is_retrieved_for_every_answerable_question():
     from app import retriever
 
@@ -54,8 +69,9 @@ def test_expected_source_is_retrieved_for_every_answerable_question():
 
 
 @pytest.mark.slow
-@pytest.mark.skipif(not config.DB_PATH.exists() or store.count() == 0,
-                    reason="ingest edilmiş veritabanı yok ('python -m app.ingest')")
+@pytest.mark.skipif(not _teknik_notlar_yuklu(),
+                    reason="bu regresyon teknik not bilgi tabanını gerektirir "
+                           "('python -m app.ingest'); şu an başka bir korpus yüklü")
 def test_misspelled_questions_still_reach_their_source():
     """Hibrit erişimin varlık sebebi: bozuk yazım doğru belgeyi bulmalı."""
     from app import retriever
