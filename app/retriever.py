@@ -25,8 +25,9 @@ ADAY_HAVUZU = 60
 def get_top_chunks(query, k=None, embed_fn=None):
     """Return up to k (source, text, score) chunks most similar to query, above threshold."""
     k = k or config.TOP_K
-    embed_fn = embed_fn or llm.embed
-    qvec = embed_fn([query])[0]
+    # Sorgu, belge gömme yolundan değil sorgu yolundan geçer: E5 gibi modellerde
+    # ikisi farklı ön ek ister ve karıştırılırsa model yanlış işte kullanılır.
+    qvec = embed_fn([query])[0] if embed_fn else llm.embed_query(query)
 
     # 1) Ucuz katman: bütün parçalarda kosinüs.
     yogun = [(cosine(qvec, emb), src, txt) for (src, txt, emb) in store.all_chunks()]

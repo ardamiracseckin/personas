@@ -88,3 +88,42 @@ def test_reset_clears_cached_client(monkeypatch):
     monkeypatch.setattr(llm, "_model_id", "eski-model")
     llm.reset()
     assert llm._openai is None and llm._model_id is None
+
+
+# --- sorgu / belge ayrımı ----------------------------------------------------
+
+def test_e5_models_get_their_required_prefixes(monkeypatch):
+    """E5 ailesi sorguyu ve belgeyi farklı ön eklerle bekler.
+
+    Bu asimetri modelin erişim gücünün yarısıdır: aynı metin "query:" ile
+    sorulduğunda ve "passage:" ile saklandığında farklı vektörler üretir.
+    Ön ek verilmezse model, eğitildiğinden başka bir işte kullanılmış olur.
+    """
+    from app import config, llm
+
+    gonderilen = []
+    monkeypatch.setattr(config, "EMBED_MODEL", "intfloat/multilingual-e5-large")
+    monkeypatch.setattr(llm, "_embed_raw", lambda metinler: gonderilen.extend(metinler) or
+                        [[0.0] for _ in metinler])
+    llm.embed_passages(["kanun metni"])
+    llm.embed_query("soru")
+    assert gonderilen == ["passage: kanun metni", "query: soru"]
+
+
+def test_models_without_prefix_convention_are_left_alone(monkeypatch):
+    from app import config, llm
+
+    gonderilen = []
+    monkeypatch.setattr(config, "EMBED_MODEL",
+                        "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+    monkeypatch.setattr(llm, "_embed_raw", lambda metinler: gonderilen.extend(metinler) or
+                        [[0.0] for _ in metinler])
+    llm.embed_passages(["kanun metni"])
+    llm.embed_query("soru")
+    assert gonderilen == ["kanun metni", "soru"]
+
+
+def test_embed_query_returns_a_flat_vector(monkeypatch):
+    from app import llm
+    monkeypatch.setattr(llm, "_embed_raw", lambda metinler: [[1.0, 2.0] for _ in metinler])
+    assert llm.embed_query("soru") == [1.0, 2.0]

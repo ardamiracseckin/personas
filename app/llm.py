@@ -167,6 +167,36 @@ def _embedder():
     return _embedder_obj
 
 
-def embed(texts):
+def _embed_raw(texts):
     model = _embedder()
     return [vec.tolist() for vec in model.embed(list(texts))]
+
+
+# E5 ailesi sorguyu ve belgeyi farklı ön eklerle bekler ("query:" / "passage:").
+# Bu asimetri modelin erişim gücünün yarısıdır; ön ek verilmezse model
+# eğitildiğinden başka bir işte kullanılmış olur. Diğer modellerde ön ek yoktur.
+_ON_EKLI_AILELER = ("e5",)
+
+
+def _on_ek(tur):
+    ad = config.EMBED_MODEL.lower()
+    if any(f"{aile}-" in ad or f"/{aile}" in ad or f"-{aile}" in ad for aile in _ON_EKLI_AILELER):
+        return f"{tur}: "
+    return ""
+
+
+def embed_passages(texts):
+    """Bilgi tabanına yazılacak metinleri göm."""
+    ek = _on_ek("passage")
+    return _embed_raw([f"{ek}{t}" for t in texts])
+
+
+def embed_query(text):
+    """Tek bir sorguyu göm; düz vektör döner."""
+    ek = _on_ek("query")
+    return _embed_raw([f"{ek}{text}"])[0]
+
+
+def embed(texts):
+    """Geriye dönük uyumluluk: belge gömme yolu."""
+    return embed_passages(texts)
