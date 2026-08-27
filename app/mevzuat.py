@@ -105,7 +105,10 @@ def maddeleri_ayir(text):
         bas = m.start()
         son = eslesmeler[i + 1].start() if i + 1 < len(eslesmeler) else len(metin)
         govde = metin[bas:son].strip()
-        on = (m.group("on") or "").lower()
+        # Küçültme Türkçe kurallarıyla yapılmalı: "GEÇİCİ".lower() Python'da
+        # "geçi̇ci̇" verir ve arama tutmaz. Bu hata geçici maddeyi normal madde
+        # gibi numaralandırıyordu.
+        on = turkce_kucult(m.group("on") or "")
         numara = f"{_ON_EK[on]} {m.group('no')}" if on in _ON_EK else m.group("no")
         maddeler.append(Madde(numara=numara,
                               baslik=_baslik_bul(metin[:bas]),

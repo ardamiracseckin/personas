@@ -162,3 +162,22 @@ def test_turkish_title_case_handles_dotted_and_dotless_i():
 
 def test_turkish_title_case_keeps_short_words_lowercase():
     assert mevzuat.turkce_baslik("İŞ MAHKEMELERİ KANUNU") == "İş Mahkemeleri Kanunu"
+
+
+def test_uppercase_temporary_article_is_not_confused_with_a_normal_one():
+    """GEÇİCİ MADDE 2 ile MADDE 2 bambaşka hükümlerdir.
+
+    Bu hata gerçekten oluştu: "GEÇİCİ".lower() Python'da "geçi̇ci̇" veriyor
+    (birleşik noktalı i), sözlük araması tutmuyordu ve geçici madde normal madde
+    gibi atıf alıyordu. Hukukta bu, yanlış hükme gönderme demektir.
+    """
+    metin = ("KANUN\nKanun Numarası : 6098\n\n"
+             "MADDE 2- Normal ikinci madde.\n\n"
+             "GEÇİCİ MADDE 2- (Ek: 14/7/2023-7456/23 md.) Konut kiralarına ilişkin geçici hüküm.\n")
+    numaralar = [m.numara for m in mevzuat.maddeleri_ayir(metin)]
+    assert numaralar == ["2", "Geçici 2"]
+
+
+def test_uppercase_additional_article_is_recognised():
+    metin = "KANUN\nKanun Numarası : 4857\n\nEK MADDE 1 - Ek hüküm.\n"
+    assert [m.numara for m in mevzuat.maddeleri_ayir(metin)] == ["Ek 1"]
