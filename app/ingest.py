@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app import chunking, config, llm, store
+from app import chunking, config, llm, mevzuat, store
 
 TEXT_SUFFIXES = (".txt", ".md")
 SUPPORTED_SUFFIXES = TEXT_SUFFIXES + (".pdf",)
@@ -61,3 +61,47 @@ def ingest_folder(folder=None, embed_fn=None):
 if __name__ == "__main__":
     n = ingest_folder()
     print(f"{n} parça veritabanına eklendi.")
+
+
+# --- mevzuat: madde bazlı yükleme -------------------------------------------
+#
+# Kanun metni genel parçalayıcıya verilemez: karakter sınırıyla bölmek maddeyi
+# ortasından keser ve atıf anlamını yitirir. Bu yol maddeyi birim alır ve atfı
+# parçanın ilk satırına yazar — böylece modele giden bağlamda madde numarası
+# hep bulunur ve model onu uydurmak zorunda kalmaz.
+
+
+def mevzuat_parcalari(text, kaynak, max_chars=None):
+    """Kanun metnini (kaynak, text, madde) sözlüklerine çevir."""
+    parcalar = []
+    for p in mevzuat.parcala(text, max_chars=max_chars or mevzuat.MAX_PARCA):
+        basli = p.atif if not p.baslik else f"{p.atif} — {p.baslik}"
+        if p.parca_adet > 1:
+            basli += f" ({p.parca_no}/{p.parca_adet})"
+        parcalar.append({"source": kaynak, "madde": p.madde,
+                         "text": f"{basli}\n\n{p.metin}"})
+    return parcalar
+
+
+def ingest_mevzuat_text(text, kaynak, embed_fn=None):
+    """Bir kanunun metnini bilgi tabanına yaz. Eski parçaları değiştirir."""
+    embed_fn = embed_fn or llm.embed
+    store.init_db()
+    store.delete_by_source(kaynak)
+    parcalar = mevzuat_parcalari(text, kaynak)
+    if not parcalar:
+        return {"source": kaynak, "chunks": 0}
+    vektorler = embed_fn([p["text"] for p in parcalar])
+    for p, v in zip(parcalar, vektorler):
+        store.add_chunk(p["source"], p["text"], v)
+    return {"source": kaynak, "chunks": len(parcalar)}
+
+
+def ingest_mevzuat_file(path, kaynak=None, embed_fn=None):
+    """Kanun PDF'ini oku ve yükle."""
+    path = Path(path)
+    metin = read_document(path)
+    bilgi = mevzuat.kanun_bilgisi(metin)
+    ad = kaynak or (f"{bilgi.numara} sayılı {mevzuat.turkce_baslik(bilgi.ad)}" if bilgi.numara
+                    else path.stem)
+    return ingest_mevzuat_text(metin, kaynak=ad, embed_fn=embed_fn)
