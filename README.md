@@ -37,7 +37,7 @@ yazılmadı ya da özetlenmedi.
 | 6698 Kişisel Verilerin Korunması Kanunu | 33 |
 | 7036 İş Mahkemeleri Kanunu | 13 |
 
-Toplam 2.574 madde → 3.055 parça. Parçalama birimi maddedir: uzun maddeler fıkra sınırından
+Toplam 2.607 madde → 3.175 parça. Parçalama birimi maddedir: uzun maddeler fıkra sınırından
 bölünür, her parça kendi kanun ve madde numarasını taşır. Ek ve geçici maddeler ayrı numaralandırılır
 (`GEÇİCİ MADDE 2` ile `MADDE 2` bambaşka hükümlerdir). `(Değişik:2/3/2024-7499/33 md.)` gibi
 ibareler korunur — maddenin hangi tarihli hâli olduğunu yalnızca onlar söyler.
@@ -60,6 +60,12 @@ soru
 Üç sinyal de gerekli. Yalnız kosinüs doğru maddeyi ilk sırada 2/10 buluyordu; BM25 eklenince 4/10
 oldu. Türkçe eklemeli olduğu için BM25 gövde bazlıdır: sorguda "tahliye taahhüdü", kanunda
 "tahliye taahhüdünde".
+
+Erişimden önce soru, **kanun terimleriyle genişletilir** (`app/terimler.py`). Kullanıcı "tahliye"
+diyor, kanun "boşaltma" diyor; kullanıcı "ev sahibi" diyor, kanun "kiraya veren" diyor. Elle
+kurulmuş, korpustan doğrulanmış bir sözlük bu boşluğu kapatıyor: doğru madde ilk beşte bulunma
+oranı %67'den %89'a çıktı. Sözlükteki her terimin kanun metninde birebir geçtiğini bir test her
+koşumda denetler.
 
 ## Kurulum
 
@@ -101,9 +107,10 @@ bir test bunu her koşumda kontrol eder.
 
 | Ölçüt | Sonuç |
 |---|---|
-| Doğru madde 1. sırada | 15/27 (%56) |
-| Doğru madde ilk 5'te | 18/27 (%67) |
-| **Doğru kanundan aday geldi** | **25/27 (%93)** |
+| Doğru madde 1. sırada | 16/27 (%59) |
+| Doğru madde ilk 3'te | 22/27 (%81) |
+| **Doğru madde ilk 5'te** | **24/27 (%89)** |
+| **Doğru kanundan aday geldi** | **27/27 (%100)** |
 | Hukuk dışı soruda çekimserlik | 6/6 |
 | Tavsiye isteyen soruda ret | 5/5 |
 | Ortalama süre | 0,38 sn |
@@ -113,10 +120,9 @@ Ayrıntılı çözümleme, denenip elenen sekiz yaklaşım ve ölçümün kendi 
 
 ## Sınırlar
 
-- **Doğru madde ilk sırada %56.** Soruların yarısında beş adayı gözden geçirmek gerekir; üçte
-  birinde doğru madde beş adayın içinde de yoktur. Arayüz bu yüzden "cevap budur" demez.
-- Kira ve tüketici alanları zayıf (1/4 ve 2/4): gündelik dil ile kanun dili bu alanlarda en çok
-  ayrışıyor.
+- **Doğru madde ilk sırada %59.** Beş adayın içinde bulunma oranı %89; yine de her on sorudan
+  birinde doğru madde listede hiç yoktur. Arayüz bu yüzden "cevap budur" demez.
+- En zayıf alan usul (1/3). Kira ve tüketici, terim sözlüğüyle 1/4 ve 2/4'ten 2/4 ve 3/4'e çıktı.
 - Yalnız sekiz kanun yüklü; dışındaki her konu kapsam dışıdır ve asistan bunu söyler.
 - Metinler indirildiği tarihteki hâldir. Mevzuat değişir.
 
@@ -128,6 +134,7 @@ app/
   mevzuat_yanit.py     aday maddeleri hazırlar, en yakın cümleyi çıkarır
   hukuki_kapsam.py     tavsiye/tahmin isteyen soruları yakalar
   bm25.py              gövde bazlı kelime araması
+  terimler.py          gündelik dil → kanun terimi sözlüğü
   retriever.py         kosinüs + BM25 + bulanık eşleşme harmanı
   ingest.py            kanun PDF'lerini bilgi tabanına yazar
 server/

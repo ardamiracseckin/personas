@@ -7,10 +7,19 @@ SUPPORTED_SUFFIXES = TEXT_SUFFIXES + (".pdf",)
 
 
 def _read_pdf(path):
-    """PDF metnini çıkar. Sayfalar boş satırla ayrılır ki parçalama sınır bulabilsin."""
+    """PDF metnini çıkar. Sayfalar boş satırla ayrılır ki parçalama sınır bulabilsin.
+
+    `layout` kipi ölçümle seçildi. Varsayılan kip kanun metninde kelimeleri
+    bölüyordu ("sözle şmesini", "t arihinden"); sekiz kanunda 533 yerde. Bu hem
+    kelime aramasını hem embedding'i bozar ve metni onarmak güvenli değildir:
+    kırılma kelimenin başında da olabiliyor sonunda da, sözlük olmadan hangi
+    tarafa ekleneceği bilinemez. Layout kipi kırılmaları 59'a indiriyor (%89) ve
+    üstelik 20 madde daha buluyor.
+    """
     from pypdf import PdfReader
 
-    sayfalar = [(sayfa.extract_text() or "").strip() for sayfa in PdfReader(str(path)).pages]
+    sayfalar = [(sayfa.extract_text(extraction_mode="layout") or "").strip()
+                for sayfa in PdfReader(str(path)).pages]
     return "\n\n".join(s for s in sayfalar if s)
 
 
@@ -75,11 +84,8 @@ def mevzuat_parcalari(text, kaynak, max_chars=None):
     """Kanun metnini (kaynak, text, madde) sözlüklerine çevir."""
     parcalar = []
     for p in mevzuat.parcala(text, max_chars=max_chars or mevzuat.MAX_PARCA):
-        basli = p.atif if not p.baslik else f"{p.atif} — {p.baslik}"
-        if p.parca_adet > 1:
-            basli += f" ({p.parca_no}/{p.parca_adet})"
         parcalar.append({"source": kaynak, "madde": p.madde,
-                         "text": f"{basli}\n\n{p.metin}"})
+                         "text": f"{p.kunye}\n\n{p.metin}"})
     return parcalar
 
 

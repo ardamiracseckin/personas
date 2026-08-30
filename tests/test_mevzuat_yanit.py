@@ -147,3 +147,27 @@ def test_displayed_text_and_extracted_sentence_use_the_same_spacing():
     yanit = mevzuat_yanit.hazirla("cayma hakkı kaç gün", [(ham, 0.7)])
     assert yanit.birincil.one_cikan in yanit.birincil.metin
     assert "\n" not in yanit.birincil.metin
+
+
+def test_query_is_expanded_with_statutory_terms_before_retrieval(monkeypatch):
+    """Erişime giden sorgu genişletilir; kullanıcıya gösterilen soru değişmez."""
+    from app import mevzuat_yanit as my, retriever
+
+    gonderilen = []
+    monkeypatch.setattr(retriever, "get_top_chunks",
+                        lambda q, k=None, embed_fn=None: gonderilen.append(q) or [])
+    my.sor("Tahliye taahhüdü verdim")
+    assert "boşaltma" in gonderilen[0].lower()
+    assert "Tahliye taahhüdü verdim" in gonderilen[0]
+
+
+def test_extracted_sentence_is_matched_against_the_original_question(monkeypatch):
+    """Öne çıkan cümle özgün soruya göre seçilir; genişletme terimleri
+    cümle seçimini kendi kelimeleriyle saptırmamalı."""
+    from app import mevzuat_yanit as my, retriever
+
+    parca = ("6098 sayılı X md. 352 — Başlık\n\nMADDE 352 - Kiracı boşaltmayı üstlenmişse "
+             "kiraya veren sözleşmeyi sona erdirebilir. Ayrıca kira bedeli ödenmezse.")
+    monkeypatch.setattr(retriever, "get_top_chunks", lambda q, k=None, embed_fn=None: [(parca, 0.6)])
+    yanit = my.sor("Tahliye taahhüdü verdim, ev sahibi ne yapabilir")
+    assert "boşaltmayı üstlenmişse" in yanit.birincil.one_cikan

@@ -1,0 +1,744 @@
+{
+  "k": 5,
+  "satirlar": [
+    {
+      "id": "IS01",
+      "category": "cevaplanabilir",
+      "question": "İşten çıkarılırken kaç hafta önce haber verilmesi gerekiyor?",
+      "seconds": 0.563694667071104,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4857 sayılı İş Kanunu md. 17 — İKİNCİ BÖLÜM İş Sözleşmesi, Türleri ve Feshi · Süreli fesih",
+        "6098 sayılı Türk Borçlar Kanunu md. 432 — BİRİNCİ AYIRIM Genel Hizmet Sözleşmesi · G. Sözleşmenin sona ermesi · II. Belirsiz süreli sözleşmede · 2. Fesih bildirim süresi · a. Genel olarak",
+        "4857 sayılı İş Kanunu md. 74 — DÖRDÜNCÜ BÖLÜM İşin Düzenlenmesi · Analık halinde çalışma ve süt izni",
+        "4857 sayılı İş Kanunu md. 46 — ÜÇÜNCÜ BÖLÜM Ücret · Hafta tatili ücreti",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 243 — DÖRDÜNCÜ BÖLÜM Tanık · Tanığın davet edilmesi"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4857",
+      "madde": "17",
+      "alan": "is",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "Madde 17 - Belirsiz süreli iş sözleşmelerinin feshinden önce durumun diğer tarafa bildirilmesi gerekir."
+    },
+    {
+      "id": "IS02",
+      "category": "cevaplanabilir",
+      "question": "Bir yıldır çalışan bir işçinin kaç gün yıllık izni olur?",
+      "seconds": 0.5053670001216233,
+      "aday_sayisi": 4,
+      "adaylar": [
+        "4857 sayılı İş Kanunu md. 54 — ÜÇÜNCÜ BÖLÜM Ücret · Yıllık ücretli izne hak kazanma ve izni kullanma dönemi",
+        "6098 sayılı Türk Borçlar Kanunu md. 421 — BİRİNCİ AYIRIM Genel Hizmet Sözleşmesi · D. İşverenin borçları · VI. Tatil ve izinler · 1. Hafta tatili ve iş arama izni",
+        "4857 sayılı İş Kanunu md. 55 — ÜÇÜNCÜ BÖLÜM Ücret · Yıllık izin bakımından çalışılmış gibi sayılan haller",
+        "4857 sayılı İş Kanunu md. 57 — ÜÇÜNCÜ BÖLÜM Ücret · Yıllık izin ücreti"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4857",
+      "madde": "53",
+      "alan": "is",
+      "sira": null,
+      "dogru_kanun": true,
+      "one_cikan": "İşçi yukarıdaki fıkralar ve 55 inci madde hükümlerine göre hesaplanacak her hizmet yılına karşılık, yıllık iznini gelecek hizmet yılı içinde kullanır."
+    },
+    {
+      "id": "IS03",
+      "category": "cevaplanabilir",
+      "question": "Fazla mesai ücreti normal saatlik ücretin kaç katı ödenir?",
+      "seconds": 0.49812545883469284,
+      "aday_sayisi": 3,
+      "adaylar": [
+        "4857 sayılı İş Kanunu md. 41 — ÜÇÜNCÜ BÖLÜM Ücret · Fazla çalışma ücreti",
+        "4857 sayılı İş Kanunu md. 50 — ÜÇÜNCÜ BÖLÜM Ücret · Tatil ücretine girmeyen kısımlar",
+        "4857 sayılı İş Kanunu md. 46 — ÜÇÜNCÜ BÖLÜM Ücret · Hafta tatili ücreti"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4857",
+      "madde": "41",
+      "alan": "is",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "(Ek fıkra: 10/9/2014-6552/4 md.) Yer altında maden işlerinde çalışan işçilere, bu Kanunun 42 nci ve 43 üncü maddelerinde sayılan hâllerde haftalık otuz yedi buçuk saati aşan her bir saat fazla çalışma için verilecek ücret, normal çalışma ücretinin saat başına düşen miktarının yüzde yüzden az olmamak üzere arttırılması suretiyle ödenir.15 15 4/4/2015 tarihli ve 6645 sayılı Kanunun 34 üncü maddesiyle, bu fıkrada yer alan “haftalık otuz altı saati aşan” ibaresi “haftalık otuz yedi buçuk saati aşan” şeklinde değiştirilmiştir."
+    },
+    {
+      "id": "IS04",
+      "category": "cevaplanabilir",
+      "question": "Deneme süresi en fazla ne kadar olabilir?",
+      "seconds": 0.44896695809438825,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4857 sayılı İş Kanunu md. 15 — İKİNCİ BÖLÜM İş Sözleşmesi, Türleri ve Feshi · Deneme süreli iş sözleşmesi",
+        "4857 sayılı İş Kanunu md. 53 — ÜÇÜNCÜ BÖLÜM Ücret · Yıllık ücretli izin hakkı ve izin süreleri",
+        "4857 sayılı İş Kanunu md. 68 — DÖRDÜNCÜ BÖLÜM İşin Düzenlenmesi · Ara dinlenmesi",
+        "6098 sayılı Türk Borçlar Kanunu md. 432 — BİRİNCİ AYIRIM Genel Hizmet Sözleşmesi · G. Sözleşmenin sona ermesi · II. Belirsiz süreli sözleşmede · 2. Fesih bildirim süresi · a. Genel olarak",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 63 — ALTINCI KISIM Ticari Reklam ve Haksız Ticari Uygulamalar · Reklam Kurulu"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4857",
+      "madde": "15",
+      "alan": "is",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "Madde 15 - Taraflarca iş sözleşmesine bir deneme kaydı konulduğunda, bunun süresi en çok iki ay olabilir."
+    },
+    {
+      "id": "KR01",
+      "category": "cevaplanabilir",
+      "question": "Ev sahibi kirayı ne kadar artırabilir?",
+      "seconds": 0.4309318750165403,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6098 sayılı Türk Borçlar Kanunu md. 345 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · E. Kira bedeli · III. Dava açma süresi ve kararın etkisi",
+        "6098 sayılı Türk Borçlar Kanunu md. 418 — BİRİNCİ AYIRIM Genel Hizmet Sözleşmesi · D. İşverenin borçları · IV. İşçinin kişiliğinin korunması · 2. Ev düzeni içinde çalışmada",
+        "6098 sayılı Türk Borçlar Kanunu md. 349 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · F. Konut ve çatılı işyeri kiralarında sözleşmenin sona ermesi · I. Bildirim yoluyla · 2. Bildirimin geçerliliği · b. Aile konutu",
+        "6098 sayılı Türk Borçlar Kanunu md. 323 — BİRİNCİ AYIRIM Genel Hükümler · E. Özel durumlar · III. Kira ilişkisinin devri 2",
+        "6098 sayılı Türk Borçlar Kanunu md. 355 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · F. Konut ve çatılı işyeri kiralarında sözleşmenin sona ermesi · II. Dava yoluyla · 5. Yeniden kiralama yasağı"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6098",
+      "madde": "344",
+      "alan": "kira",
+      "sira": null,
+      "dogru_kanun": true,
+      "one_cikan": "Ancak, bu dava, yeni dönemin başlangıcından en ge ç otuz gün önceki bir tarihte açıldığı ya da kiraya veren tarafından bu süre içinde kira bedelinin artırılacağına ilişkin olarak kiracıya yazılı bildirimde bulunulmuş olması koşuluyla, izleyen yeni kira dönemi sonuna kadar açıldığı takdirde, mahkemece belirlenecek kira bedeli, bu yeni kira döneminin başlangıcından itibaren kiracıyı bağlar."
+    },
+    {
+      "id": "KR02",
+      "category": "cevaplanabilir",
+      "question": "Tahliye taahhüdü verdim, ev sahibi beni çıkarabilir mi?",
+      "seconds": 0.4780293751973659,
+      "aday_sayisi": 1,
+      "adaylar": [
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 34 — ÜÇÜNCÜ BÖLÜM Konut Finansmanı · Temerrüt"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6098",
+      "madde": "352",
+      "alan": "kira",
+      "sira": null,
+      "dogru_kanun": false,
+      "one_cikan": "Konutun tahliye edilmemesi hâlinde konut sahibi, 9/6/1932 tarihli ve 2004 sayılı İcra ve İflâs Kanununun 26 ncı ve 27 nci maddeleri uyarınca tüketici veya zilyetliği elinde bulunduran üçüncü şahıslar aleyhine icra yoluna başvurabilir."
+    },
+    {
+      "id": "KR03",
+      "category": "cevaplanabilir",
+      "question": "Ev sahibi kendi ihtiyacım var diyerek kiracıyı çıkarabilir mi?",
+      "seconds": 0.4950694169383496,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4721 sayılı Türk Medeni Kanunu md. 824 — İKİNCİ AYIRIM İNTİFA HAKKI VE DİĞER İRTİFAK HAKLARI · B. Oturma hakkı · II. Oturma hakkının kapsamı",
+        "6098 sayılı Türk Borçlar Kanunu md. 322 — BİRİNCİ AYIRIM Genel Hükümler · E. Özel durumlar · II. Alt kira ve kullanım hakkının devri",
+        "6098 sayılı Türk Borçlar Kanunu md. 342 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · D. Kiracının güvence vermesi",
+        "6098 sayılı Türk Borçlar Kanunu md. 355 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · F. Konut ve çatılı işyeri kiralarında sözleşmenin sona ermesi · II. Dava yoluyla · 5. Yeniden kiralama yasağı",
+        "6098 sayılı Türk Borçlar Kanunu md. 349 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · F. Konut ve çatılı işyeri kiralarında sözleşmenin sona ermesi · I. Bildirim yoluyla · 2. Bildirimin geçerliliği · b. Aile konutu"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6098",
+      "madde": "350",
+      "alan": "kira",
+      "sira": null,
+      "dogru_kanun": false,
+      "one_cikan": "Oturma hakkı sahibi, hakkın şahsına özgülendiği açıkça belirtilmedikçe, bina veya onun bir bölümünde ailesi ve ev halkı ile birlikte oturabilir."
+    },
+    {
+      "id": "KR04",
+      "category": "cevaplanabilir",
+      "question": "Kira bedelinin tespiti davası ne zaman açılabilir?",
+      "seconds": 0.4441142501309514,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6098 sayılı Türk Borçlar Kanunu md. 345 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · E. Kira bedeli · III. Dava açma süresi ve kararın etkisi",
+        "6098 sayılı Türk Borçlar Kanunu md. 344 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · E. Kira bedeli · II. Belirlenmesi",
+        "6098 sayılı Türk Borçlar Kanunu md. 314 — BİRİNCİ AYIRIM Genel Hükümler · D. Kiracının borçları · I. Kira bedelini ödeme borcu · 2. İfa zamanı",
+        "4721 sayılı Türk Medeni Kanunu md. 492 — ÜÇÜNCÜ AYIRIM VESAYETİN SONA ERMESİNİN SONUÇLARI · D. Sorumluluk davasında zamanaşımı · I. Olağan zamanaşımı",
+        "6098 sayılı Türk Borçlar Kanunu md. 363 — ÜÇÜNCÜ AYIRIM Ürün Kirası · E. Kiracının borçları · I. Kira bedelini ve yan giderleri ödeme borcu · 2. Olağanüstü durumlarda kira bedelinden indirim"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6098",
+      "madde": "345",
+      "alan": "kira",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 345- Kira bedelinin belirlenmesine ilişkin dava her zaman açılabilir."
+    },
+    {
+      "id": "TU01",
+      "category": "cevaplanabilir",
+      "question": "Aldığım ürün ayıplı çıktı, hangi haklarım var?",
+      "seconds": 0.4464371658395976,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 10 — BİRİNCİ BÖLÜM Ayıplı Mallar · İspat yükü",
+        "6098 sayılı Türk Borçlar Kanunu md. 226 — İKİNCİ AYIRIM Taşınır Satışı · B. Satıcının borçları · III. Ayıptan sorumluluk · 6. Satılanın başka yerden gönderilmesi",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 11 — BİRİNCİ BÖLÜM Ayıplı Mallar · Tüketicinin seçimlik hakları",
+        "4721 sayılı Türk Medeni Kanunu md. 671 — ÜÇÜNCÜ AYIRIM MİRASTA DENKLEŞTİRME · C. Denkleştirme şekli · I. Geri verme veya mahsup",
+        "6098 sayılı Türk Borçlar Kanunu md. 541 — ONBİRİNCİ BÖLÜM Komisyon Sözleşmesi · A. Alım veya satım komisyonculuğu · III. Komisyoncunun hakları · 3. Hapis hakkı"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6502",
+      "madde": "11",
+      "alan": "tuketici",
+      "sira": 3,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 10- (1) Teslim tarihinden itibaren altı ay içinde ortaya çıkan ayıpların, teslim tarihinde var olduğu kabul edilir."
+    },
+    {
+      "id": "TU02",
+      "category": "cevaplanabilir",
+      "question": "İnternetten aldığım ürünü kaç gün içinde iade edebilirim?",
+      "seconds": 0.5311098750680685,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 45 — DÖRDÜNCÜ BÖLÜM Ön Ödemeli Konut Satışı · Sözleşmeden dönme",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 43 — DÖRDÜNCÜ BÖLÜM Ön Ödemeli Konut Satışı · Cayma hakkı",
+        "6098 sayılı Türk Borçlar Kanunu md. 255 — DÖRDÜNCÜ AYIRIM Bazı Satış Türleri · C. Kısmi ödemeli satışlar · I. Taksitle satış · 3. Sözleşmenin hüküm ve sonuçlarını doğurması ve geri alma açıklaması",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 77 — SEKİZİNCİ KISIM Yargılama, Denetim ve Cezaya İlişkin Hükümler · Yaptırım hükümleri252627",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 50 — BEŞİNCİ BÖLÜM Diğer Tüketici Sözleşmeleri · Devre tatil ve uzun süreli tatil hizmeti sözleşmeleri"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6502",
+      "madde": "48",
+      "alan": "tuketici",
+      "sira": null,
+      "dogru_kanun": true,
+      "one_cikan": "Satıcının aldığı bedeli ve tüketiciyi borç altına sokan her türlü belgeyi iade ettiği tarihten itibaren, tüketici on gün içinde edinimlerini iade eder.8"
+    },
+    {
+      "id": "TU03",
+      "category": "cevaplanabilir",
+      "question": "Satıcı garanti belgesi vermek zorunda mı?",
+      "seconds": 0.4459083750844002,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 56 — BEŞİNCİ KISIM Tüketicinin Bilgilendirilmesi ve Menfaatlerinin Korunması · Garanti belgesi",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 57 — BEŞİNCİ KISIM Tüketicinin Bilgilendirilmesi ve Menfaatlerinin Korunması · İhtiyari garanti",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 41 — DÖRDÜNCÜ BÖLÜM Ön Ödemeli Konut Satışı · Şekil şartı",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 58 — BEŞİNCİ KISIM Tüketicinin Bilgilendirilmesi ve Menfaatlerinin Korunması · Satış sonrası hizmetler",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 52 — BEŞİNCİ BÖLÜM Diğer Tüketici Sözleşmeleri · Abonelik sözleşmeleri"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6502",
+      "madde": "56",
+      "alan": "tuketici",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 56- (1) Üretici ve ithalatçılar, tüketiciye yönelik üretilen veya ithal edilen mallar için içeriği yönetmelikle belirlenen bir garanti belgesi düzenlemek zorundadır."
+    },
+    {
+      "id": "TU04",
+      "category": "cevaplanabilir",
+      "question": "Tüketici hakem heyetine hangi durumlarda başvurulur?",
+      "seconds": 0.4642354999668896,
+      "aday_sayisi": 4,
+      "adaylar": [
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 68 — İKİNCİ BÖLÜM Tüketici Hakem Heyeti · Başvuru",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 70 — İKİNCİ BÖLÜM Tüketici Hakem Heyeti · Karar ve karara itiraz",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 69 — İKİNCİ BÖLÜM Tüketici Hakem Heyeti · İnceleme",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 66 — İKİNCİ BÖLÜM Tüketici Hakem Heyeti · Kuruluşu ve görev alanı"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6502",
+      "madde": "68",
+      "alan": "tuketici",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 68- (1) (Değişik cümle:24/3/2022-7392/13 md.) Tarafların İcra ve İflas Kanunundaki hakları saklı kalmak kaydıyla; değeri otuz bin Türk Lirasının altında bulunan uyuşmazlıklarda tüketici hakem heyetlerine başvuru zorunludur."
+    },
+    {
+      "id": "KV01",
+      "category": "cevaplanabilir",
+      "question": "Kişisel verilerimle ilgili haklarım neler?",
+      "seconds": 0.396786583121866,
+      "aday_sayisi": 4,
+      "adaylar": [
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 11 — ÜÇÜNCÜ BÖLÜM Haklar ve Yükümlülükler · İlgili kişinin hakları",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 10 — ÜÇÜNCÜ BÖLÜM Haklar ve Yükümlülükler · Veri sorumlusunun aydınlatma yükümlülüğü",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 9 — İKİNCİ BÖLÜM Kişisel Verilerin İşlenmesi · Kişisel verilerin yurt dışına aktarılması",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 12 — ÜÇÜNCÜ BÖLÜM Haklar ve Yükümlülükler · Veri güvenliğine ilişkin yükümlülükler"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6698",
+      "madde": "11",
+      "alan": "kvkk",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 11- (1) Herkes, veri sorumlusuna başvurarak kendisiyle ilgili; a) Kişisel veri işlenip işlenmediğini öğrenme, b) Kişisel verileri işlenmişse buna ilişkin bilgi talep etme, c) Kişisel verilerin işlenme amacını ve bunların amacına uygun kullanılıp kullanılmadığını öğrenme, ç) Yurt içinde veya yurt dışında kişisel verilerin aktarıldığı üçüncü kişileri bilme, d) Kişisel verilerin eksik veya yanlış işlenmiş olması hâlinde bunların düzeltilmesini isteme, e) 7 nci maddede öngörülen şartlar çerçevesinde kişisel verilerin silinmesini veya yok edilmesini isteme, f) (d) ve (e) bentleri uyarınca yapılan işlemlerin, kişisel verilerin aktarıldığı üçüncü kişilere bildirilmesini isteme, g) İşlenen verilerin münhasıran otomatik sistemler vasıtasıyla analiz edilmesi suretiyle kişinin kendisi aleyhine bir sonucun ortaya çıkmasına itiraz etme, ğ) Kişisel verilerin kanuna aykırı olarak işlenmesi sebebiyle zarara uğraması hâlinde zararın giderilmesini talep etme, haklarına sahiptir."
+    },
+    {
+      "id": "KV02",
+      "category": "cevaplanabilir",
+      "question": "Bir şirkete kişisel verilerim hakkında nasıl başvururum?",
+      "seconds": 0.4604394589550793,
+      "aday_sayisi": 3,
+      "adaylar": [
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 9 — İKİNCİ BÖLÜM Kişisel Verilerin İşlenmesi · Kişisel verilerin yurt dışına aktarılması",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 16 — DÖRDÜNCÜ BÖLÜM Başvuru, Şikâyet ve Veri Sorumluları Sicili · Veri Sorumluları Sicili",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 6 — İKİNCİ BÖLÜM Kişisel Verilerin İşlenmesi · Özel nitelikli kişisel verilerin işlenme şartları"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6698",
+      "madde": "13",
+      "alan": "kvkk",
+      "sira": null,
+      "dogru_kanun": true,
+      "one_cikan": "b) Ortak ekonomik faaliyette bulunan teşebbüs grubu bünyesindeki şirketlerin uymakla yükümlü oldukları, kişisel verilerin korunmasına ilişkin hükümler ihtiva eden ve Kurul tarafından onaylanan bağlayıcı şirket kurallarının varlığı."
+    },
+    {
+      "id": "KV03",
+      "category": "cevaplanabilir",
+      "question": "Verilerimin silinmesini isteyebilir miyim?",
+      "seconds": 0.43101266701705754,
+      "aday_sayisi": 1,
+      "adaylar": [
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 7 — İKİNCİ BÖLÜM Kişisel Verilerin İşlenmesi · Kişisel verilerin silinmesi, yok edilmesi veya anonim hâle getirilmesi"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6698",
+      "madde": "7",
+      "alan": "kvkk",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "(2) Kişisel verilerin silinmesi, yok edilmesi veya anonim hâle getirilmesine ilişkin diğer kanunlarda yer alan hükümler saklıdır."
+    },
+    {
+      "id": "KV04",
+      "category": "cevaplanabilir",
+      "question": "Şirketler veri toplarken beni bilgilendirmek zorunda mı?",
+      "seconds": 0.5061873749364167,
+      "aday_sayisi": 4,
+      "adaylar": [
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 16 — DÖRDÜNCÜ BÖLÜM Başvuru, Şikâyet ve Veri Sorumluları Sicili · Veri Sorumluları Sicili",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 9 — İKİNCİ BÖLÜM Kişisel Verilerin İşlenmesi · Kişisel verilerin yurt dışına aktarılması",
+        "2918 sayılı Karayolları Trafik Kanunu md. Ek 8 — ONBİRİNCİ KISIM Çeşitli Hükümler · Sigortalılar bilgi merkezi:",
+        "6698 sayılı Kişisel Verilerin Korunması Kanunu md. 10 — ÜÇÜNCÜ BÖLÜM Haklar ve Yükümlülükler · Veri sorumlusunun aydınlatma yükümlülüğü"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6698",
+      "madde": "10",
+      "alan": "kvkk",
+      "sira": 4,
+      "dogru_kanun": true,
+      "one_cikan": "(2) Kişisel verileri işleyen gerçek ve tüzel kişiler, veri işlemeye başlamadan önce Veri Sorumluları Siciline kaydolmak zorundadır."
+    },
+    {
+      "id": "AI01",
+      "category": "cevaplanabilir",
+      "question": "Şiddetli geçimsizlik boşanma sebebi sayılır mı?",
+      "seconds": 0.39846495795063674,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4721 sayılı Türk Medeni Kanunu md. 170 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · I. Boşanma veya ayrılık",
+        "4721 sayılı Türk Medeni Kanunu md. 161 — İKİNCİ BÖLÜM BOŞANMA · A. Boşanma sebepleri · I. Zina",
+        "4721 sayılı Türk Medeni Kanunu md. 162 — İKİNCİ BÖLÜM BOŞANMA · A. Boşanma sebepleri · II. Hayata kast, pek kötü veya onur kırıcı davranış",
+        "4721 sayılı Türk Medeni Kanunu md. 175 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · V. Boşanmada tazminat ve nafaka · 2. Yoksulluk nafakası",
+        "4721 sayılı Türk Medeni Kanunu md. 178 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · V. Boşanmada tazminat ve nafaka · 5. Zamanaşımı"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4721",
+      "madde": "166",
+      "alan": "aile",
+      "sira": null,
+      "dogru_kanun": true,
+      "one_cikan": "Madde 170- Boşanma sebebi ispatlanmış olursa, hâkim boşanmaya veya ayrılığa karar verir."
+    },
+    {
+      "id": "AI02",
+      "category": "cevaplanabilir",
+      "question": "Boşanmada yoksulluk nafakası kime bağlanır?",
+      "seconds": 0.4180329160299152,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4721 sayılı Türk Medeni Kanunu md. 175 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · V. Boşanmada tazminat ve nafaka · 2. Yoksulluk nafakası",
+        "4721 sayılı Türk Medeni Kanunu md. 176 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · V. Boşanmada tazminat ve nafaka · 3. Tazminat ve nafakanın ödenme biçimi",
+        "4721 sayılı Türk Medeni Kanunu md. 174 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · V. Boşanmada tazminat ve nafaka · 1. Maddî ve manevî tazminat",
+        "4721 sayılı Türk Medeni Kanunu md. 364 — BİRİNCİ AYIRIM NAFAKA YÜKÜMLÜLÜĞÜ · A. Nafaka yükümlüleri",
+        "4721 sayılı Türk Medeni Kanunu md. 178 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · V. Boşanmada tazminat ve nafaka · 5. Zamanaşımı"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4721",
+      "madde": "175",
+      "alan": "aile",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "Madde 175- Boşanma yüzünden yoksulluğa düşecek taraf, kusuru daha ağır olmamak koşuluyla geçimi için diğer taraftan malî gücü oranında süresiz olarak nafaka isteyebilir."
+    },
+    {
+      "id": "AI03",
+      "category": "cevaplanabilir",
+      "question": "Evlilik içinde edinilen mallar nelerdir?",
+      "seconds": 0.4088247090112418,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4721 sayılı Türk Medeni Kanunu md. 262 — BEŞİNCİ AYIRIM MAL ORTAKLIĞI · B. Yönetim ve tasarruf · I. Ortaklık mallarında · 1. Olağan yönetim",
+        "4721 sayılı Türk Medeni Kanunu md. 218 — İKİNCİ AYIRIM EDİNİLMİŞ MALLARA KATILMA · A. Mülkiyet · I. Kapsamı",
+        "4721 sayılı Türk Medeni Kanunu md. 230 — İKİNCİ AYIRIM EDİNİLMİŞ MALLARA KATILMA · D. Mal rejiminin sona ermesi ve tasfiye · III. Eşlerin paylarının hesaplanması · 3. Kişisel mallar ile edinilmiş mallar arasında denkleştirme",
+        "4721 sayılı Türk Medeni Kanunu md. 221 — İKİNCİ AYIRIM EDİNİLMİŞ MALLARA KATILMA · A. Mülkiyet · III. Kişisel mallar · 2. Sözleşmeye göre",
+        "4721 sayılı Türk Medeni Kanunu md. 219 — İKİNCİ AYIRIM EDİNİLMİŞ MALLARA KATILMA · A. Mülkiyet · II. Edinilmiş mallar"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4721",
+      "madde": "219",
+      "alan": "aile",
+      "sira": 5,
+      "dogru_kanun": true,
+      "one_cikan": "Madde 262- Eşler, ortaklık mallarını evlilik birliğinin yararına uygun olarak yönetirler."
+    },
+    {
+      "id": "AI04",
+      "category": "cevaplanabilir",
+      "question": "Boşanmada velayet ve çocukla kişisel ilişki nasıl düzenlenir?",
+      "seconds": 0.4401220411527902,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4721 sayılı Türk Medeni Kanunu md. 182 — İKİNCİ BÖLÜM BOŞANMA · C. Karar · VIII. Çocuklar bakımından ana ve babanın hakları · 1. Hâkimin takdir yetkisi",
+        "4721 sayılı Türk Medeni Kanunu md. 326 — BEŞİNCİ AYIRIM SOYBAĞININ HÜKÜMLERİ · C. Çocuk ile kişisel ilişki · III. Yetki",
+        "4721 sayılı Türk Medeni Kanunu md. 323 — BEŞİNCİ AYIRIM SOYBAĞININ HÜKÜMLERİ · C. Çocuk ile kişisel ilişki · I. Ana ve baba ile · 1. Kural",
+        "4721 sayılı Türk Medeni Kanunu md. 336 — ALTINCI AYIRIM VELÂYET · A. Genel olarak · II. Ana ve baba evli ise",
+        "4721 sayılı Türk Medeni Kanunu md. 324 — BEŞİNCİ AYIRIM SOYBAĞININ HÜKÜMLERİ · C. Çocuk ile kişisel ilişki · I. Ana ve baba ile · 2. Sınırları"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "4721",
+      "madde": "182",
+      "alan": "aile",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "Madde 182 - Mahkeme boşanma veya ayrılığa karar verirken, olanak bulundukça ana ve babayı dinledikten ve çocuk vesayet altında ise vasinin ve vesayet makamının düşüncesini aldıktan sonra, ana ve babanın haklarını ve çocuk ile olan kişisel ilişkilerini düzenler."
+    },
+    {
+      "id": "TR01",
+      "category": "cevaplanabilir",
+      "question": "Trafik kazasına karışan sürücünün yükümlülükleri nelerdir?",
+      "seconds": 0.4990759580396116,
+      "aday_sayisi": 4,
+      "adaylar": [
+        "2918 sayılı Karayolları Trafik Kanunu md. Ek 4 — ONBİRİNCİ KISIM Çeşitli Hükümler · Trafik kazalarına karışan otobüs işleticisi teşebbüslerin adlarının teşhiri:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 81 — YEDİNCİ KISIM Trafik Kazaları · Trafik kazalarına karışanlar ile ilgili kurallar:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 84 — YEDİNCİ KISIM Trafik Kazaları · Trafik kazalarında sürücü kusurlarının tespiti ve asli kusur sayılan haller:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 82 — YEDİNCİ KISIM Trafik Kazaları · Trafik kazalarında yükümlülük:"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "2918",
+      "madde": "81",
+      "alan": "trafik",
+      "sira": 2,
+      "dogru_kanun": true,
+      "one_cikan": "Ek Madde 4 – (Ek: 17/10/1996-4199/43 md.) Karayollarında yolcu taşımacılığı yapan otobüs ve benzeri taşıtların karışmış olduğu ölümlü trafik kazası sonuçlarının; kusurlu araç veya araçları kullanan sürücü ve araca ait plaka numaraları ile birlikte otobüs işleticisi teşebbüsün unvanının, televizyon ve basın organları aracılığı ile kamuoyuna görüntülü ve yazılı olarak, kusur oranlarından söz edilmeksizin ilanı, sırrın ifşaı ve ticari itibarın ihlali sayılmaz."
+    },
+    {
+      "id": "TR02",
+      "category": "cevaplanabilir",
+      "question": "Trafik sigortası yaptırmak zorunlu mu?",
+      "seconds": 0.4012588751502335,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "2918 sayılı Karayolları Trafik Kanunu md. 91 — İKİNCİ BÖLÜM · Mali sorumluluk sigortası yaptırma zorunluluğu:",
+        "2918 sayılı Karayolları Trafik Kanunu md. Ek 8 — ONBİRİNCİ KISIM Çeşitli Hükümler · Sigortalılar bilgi merkezi:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 104 — ÜÇÜNCÜ BÖLÜM Özel Durumlar · Motorlu araçlarla ilgili mesleki faaliyette bulunanlar:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 101 — İKİNCİ BÖLÜM · Sigorta sözleşmesi yapmaya yetkili sigorta şirketleri ve sigorta yapma zorunluluğu:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 34 — ÜÇÜNCÜ BÖLÜM Araçların Muayenesi ve Muayeneye Yetkili Kuruluşlar · Araçların muayenesi:"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "2918",
+      "madde": "91",
+      "alan": "trafik",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "(Mülga dördüncü fıkra: 13/2/2011 -6111/58 md.) Geçerli teminat tutarları üzerinden zorunlu mali sorumluluk sigortası bulunmayan araçlar trafikten men edilir."
+    },
+    {
+      "id": "TR03",
+      "category": "cevaplanabilir",
+      "question": "Alkollü araç kullanmanın yasal sınırı nedir?",
+      "seconds": 0.47477600001730025,
+      "aday_sayisi": 1,
+      "adaylar": [
+        "2918 sayılı Karayolları Trafik Kanunu md. 48 — BİRİNCİ BÖLÜM Genel Kurallar · Alkol, uyuşturucu veya uyarıcı maddelerin etkisi altında araç sürme yasağı:"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "2918",
+      "madde": "48",
+      "alan": "trafik",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "Hususi otomobil dışındaki araçları alkollü olarak kullanan sürücüler bakımından promil alt sınırı 0.21 olarak uygulanır."
+    },
+    {
+      "id": "TR04",
+      "category": "cevaplanabilir",
+      "question": "Kazada zarar gören kişi sigorta şirketine doğrudan başvurabilir mi?",
+      "seconds": 0.509189167059958,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "2918 sayılı Karayolları Trafik Kanunu md. 97 — İKİNCİ BÖLÜM · Doğrudan doğruya talep ve dava hakkı:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 96 — İKİNCİ BÖLÜM · Zarar görenlerin çokluğu:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 89 — SEKİZİNCİ KISIM Hukuki Sorumluluk ve Sigorta · tazmini:71",
+        "2918 sayılı Karayolları Trafik Kanunu md. 105 — ÜÇÜNCÜ BÖLÜM Özel Durumlar · Yarışlar:",
+        "2918 sayılı Karayolları Trafik Kanunu md. 88 — SEKİZİNCİ KISIM Hukuki Sorumluluk ve Sigorta · Zarar verenlerin birden fazla olması:"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "2918",
+      "madde": "97",
+      "alan": "trafik",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "Sigorta kuruluşunun başvuru tarihinden itibaren en geç 15 gün içinde başvuruyu yazılı olarak cevaplamaması veya verilen cevabın talebi karşılamadığına ilişkin uyuşmazlık olması hâlinde, zarar gören dava açabilir veya 5684 sayılı Kanun çerçevesinde tahkime başvurabilir."
+    },
+    {
+      "id": "US01",
+      "category": "cevaplanabilir",
+      "question": "İş davası açmadan önce arabulucuya gitmek zorunlu mu?",
+      "seconds": 0.47658941708505154,
+      "aday_sayisi": 3,
+      "adaylar": [
+        "7036 sayılı İş Mahkemeleri Kanunu md. 3 — Dava şartı olarak arabuluculuk",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 73/A — SEKİZİNCİ KISIM Yargılama, Denetim ve Cezaya İlişkin Hükümler · Dava şartı olarak arabuluculuk",
+        "4857 sayılı İş Kanunu md. 20 — İKİNCİ BÖLÜM İş Sözleşmesi, Türleri ve Feshi · Fesih bildirimine itiraz ve usulü"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "7036",
+      "madde": "3",
+      "alan": "usul",
+      "sira": 1,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 3- (1) Kanuna, bireysel veya toplu iş sözleşmesine dayanan işçi veya işveren alacağı ve tazminatı ile işe iade talebiyle açılan davalarda, arabulucuya başvurulmuş olması dava şartıdır."
+    },
+    {
+      "id": "US02",
+      "category": "cevaplanabilir",
+      "question": "Dava şartları nelerdir?",
+      "seconds": 0.38117145793512464,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 115 — BİRİNCİ AYIRIM Dava Şartları · Dava şartlarının incelenmesi",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 114 — BİRİNCİ AYIRIM Dava Şartları · Dava şartları",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 132 — İKİNCİ BÖLÜM Cevap Dilekçesi · Karşı dava açılabilmesinin şartları",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 320 — ALTINCI KISIM Basit Yargılama Usulü · Ön inceleme ve tahkikat",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 138 — DÖRDÜNCÜ BÖLÜM Ön İnceleme · Dava şartları ve ilk itirazlar hakkında karar"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6100",
+      "madde": "114",
+      "alan": "usul",
+      "sira": 2,
+      "dogru_kanun": true,
+      "one_cikan": "MADDE 115- (1) Mahkeme, dava şartlarının mevcut olup olmadığını, davanın her aşamasında kendiliğinden araştırır."
+    },
+    {
+      "id": "US03",
+      "category": "cevaplanabilir",
+      "question": "Dava dilekçesinde neler bulunmak zorundadır?",
+      "seconds": 0.4177818330936134,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 390 — BİRİNCİ BÖLÜM İhtiyati Tedbir · İhtiyati tedbir talebi",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 54 — BİRİNCİ AYIRIM Tarafların Ehliyetleri · Temsil veya izin belgelerinin verilmesi",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 111 — BİRİNCİ BÖLÜM Dava Çeşitleri · Terditli dava",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 121 — BİRİNCİ BÖLÜM Davanın Açılması",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 132 — İKİNCİ BÖLÜM Cevap Dilekçesi · Karşı dava açılabilmesinin şartları"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false,
+      "kanun": "6100",
+      "madde": "119",
+      "alan": "usul",
+      "sira": null,
+      "dogru_kanun": true,
+      "one_cikan": "(3) Tedbir talep eden taraf, dilekçesinde dayandığı ihtiyati tedbir sebebini ve türünü açıkça belirtmek ve davanın esası yönünden kendisinin haklılığını yaklaşık olarak ispat etmek zorundadır."
+    },
+    {
+      "id": "DI01",
+      "category": "cevaplanamaz",
+      "question": "Docker konteyneri nasıl silinir?",
+      "seconds": 0.389207208994776,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "DI02",
+      "category": "cevaplanamaz",
+      "question": "Mercimek çorbası tarifi nedir?",
+      "seconds": 0.3814536251593381,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "DI03",
+      "category": "cevaplanamaz",
+      "question": "Bugün hava nasıl olacak?",
+      "seconds": 0.3897756659425795,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "DI04",
+      "category": "cevaplanamaz",
+      "question": "React'te useEffect ne işe yarar?",
+      "seconds": 0.4022197921294719,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "DI05",
+      "category": "cevaplanamaz",
+      "question": "Grip aşısı ne zaman yaptırılır?",
+      "seconds": 0.3959482500795275,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "DI06",
+      "category": "cevaplanamaz",
+      "question": "Fotoğrafta diyafram değeri neyi etkiler?",
+      "seconds": 0.4104212080128491,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "TA01",
+      "category": "tahmin",
+      "question": "Bu davayı kazanır mıyım?",
+      "seconds": 1.4042016118764877e-05,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": false,
+      "tavsiye_reddi": true
+    },
+    {
+      "id": "TA02",
+      "category": "tahmin",
+      "question": "Ev sahibime dava açmalı mıyım?",
+      "seconds": 3.3748801797628403e-06,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": false,
+      "tavsiye_reddi": true
+    },
+    {
+      "id": "TA03",
+      "category": "tahmin",
+      "question": "Benim durumumda ne kadar tazminat alırım?",
+      "seconds": 4.958827048540115e-06,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": false,
+      "tavsiye_reddi": true
+    },
+    {
+      "id": "TA04",
+      "category": "tahmin",
+      "question": "Sence haklı mıyım?",
+      "seconds": 1.2919772416353226e-06,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": false,
+      "tavsiye_reddi": true
+    },
+    {
+      "id": "TA05",
+      "category": "tahmin",
+      "question": "Avukat tutmama gerek var mı, sen halledebilir misin?",
+      "seconds": 1.2088567018508911e-06,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": false,
+      "tavsiye_reddi": true
+    },
+    {
+      "id": "UC01",
+      "category": "uc_durum",
+      "question": "",
+      "seconds": 0.3186545839998871,
+      "aday_sayisi": 0,
+      "adaylar": [],
+      "bulunamadi": true,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "UC02",
+      "category": "uc_durum",
+      "question": "kira",
+      "seconds": 0.326991125009954,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6098 sayılı Türk Borçlar Kanunu md. 357 — ÜÇÜNCÜ AYIRIM Ürün Kirası · A. Tanımı",
+        "6098 sayılı Türk Borçlar Kanunu md. 363 — ÜÇÜNCÜ AYIRIM Ürün Kirası · E. Kiracının borçları · I. Kira bedelini ve yan giderleri ödeme borcu · 2. Olağanüstü durumlarda kira bedelinden indirim",
+        "6098 sayılı Türk Borçlar Kanunu md. 362 — ÜÇÜNCÜ AYIRIM Ürün Kirası · E. Kiracının borçları · I. Kira bedelini ve yan giderleri ödeme borcu · 1. Genel olarak",
+        "6098 sayılı Türk Borçlar Kanunu md. 352 — İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları · F. Konut ve çatılı işyeri kiralarında sözleşmenin sona ermesi · II. Dava yoluyla · 2. Kiracıdan kaynaklanan sebeplerle",
+        "6098 sayılı Türk Borçlar Kanunu md. Geçici 2 — ONSEKİZİNCİ BÖLÜM Adi Ortaklık Sözleşmesi · D. Ortaklığın sona ermesi · IV. Üçüncü kişilere karşı sorumluluk · 1- 31/3/2011 tarihli ve 6217 sayılı Kanunun hükmüdür:"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "UC03",
+      "category": "uc_durum",
+      "question": "hukuk nedir?",
+      "seconds": 0.3380062500946224,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 190 — BİRİNCİ BÖLÜM Genel Hükümler · İspat yükü",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 72 — DÖRDÜNCÜ AYIRIM Davaya Vekâlet · Davaya vekâlet hakkında uygulanacak hükümler",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 382 — DOKUZUNCU KISIM Çekişmesiz Yargı · Çekişmesiz yargı işleri",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 113 — BİRİNCİ BÖLÜM Dava Çeşitleri · Topluluk davası",
+        "6100 sayılı Hukuk Muhakemeleri Kanunu md. 108 — BİRİNCİ BÖLÜM Dava Çeşitleri · İnşaî dava"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false
+    },
+    {
+      "id": "UC04",
+      "category": "uc_durum",
+      "question": "Hem işten çıkarıldım hem ev sahibim beni çıkarmak istiyor hem de aldığım ürün bozuk çıktı, önce hangisiyle ilgilenmeliyim ve haklarım neler?",
+      "seconds": 0.7202623749617487,
+      "aday_sayisi": 5,
+      "adaylar": [
+        "4721 sayılı Türk Medeni Kanunu md. 887 — İKİNCİ AYIRIM İPOTEK · B. Kurulması ve sona ermesi · II. Sona erme · 4. Ödeme istemi",
+        "6502 sayılı Tüketicinin Korunması Hakkında Kanun md. 5 — İKİNCİ KISIM Genel Esaslar · Tüketici sözleşmelerindeki haksız şartlar",
+        "4721 sayılı Türk Medeni Kanunu md. 587 — BİRİNCİ BÖLÜM MİRASIN AÇILMASI · D. Gaiplik · III. Gaibin hem mirasbırakan, hem mirasçı olması",
+        "4721 sayılı Türk Medeni Kanunu md. 628 — ÜÇÜNCÜ AYIRIM RESMÎ DEFTER TUTMA · D. Sonuçları · III. Resmî deftere göre kabulün sonuçları · 1. Deftere yazılanlardan sorumluluk",
+        "4721 sayılı Türk Medeni Kanunu md. 1018 — İKİNCİ BÖLÜM TAPU SİCİLİ · B. İşlemler · III. Tescilin biçimi · 2. Taşınmaz lehine irtifaklarda"
+      ],
+      "bulunamadi": false,
+      "tavsiye_reddi": false
+    }
+  ]
+}

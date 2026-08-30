@@ -109,9 +109,12 @@ def sor(soru, k=None):
     "davayı kazanır mıyım" sorusunu cevaplamaz, ama cevapladığı izlenimini
     yaratır.
     """
-    from app import config, hukuki_kapsam, retriever
+    from app import config, hukuki_kapsam, retriever, terimler
     if hukuki_kapsam.tavsiye_istiyor(soru):
         return Yanit(tavsiye_reddi=True, mesaj=hukuki_kapsam.MESAJ)
-    parcalar = retriever.get_top_chunks(soru, k=k or config.TOP_K)
+    # Erişime giden sorgu kanun terimleriyle genişletilir; öne çıkan cümle ise
+    # özgün soruya göre seçilir — genişletme terimleri cümle seçimini kendi
+    # kelimeleriyle saptırmasın.
+    parcalar = retriever.get_top_chunks(terimler.genislet(soru), k=k or config.TOP_K)
     # retriever (kaynak, metin, puan) döndürür; burada kaynak değil metin gerekli.
     return hazirla(soru, [(p[-2], p[-1]) if len(p) == 3 else p for p in parcalar])

@@ -17,7 +17,7 @@ Bilgi tabanı, elle yazılmış teknik notlardan **gerçek kanun metnine** çevr
 | 6502 Tüketicinin Korunması Hakkında Kanun | 92 | 182 |
 | 6698 Kişisel Verilerin Korunması Kanunu | 33 | 71 |
 | 7036 İş Mahkemeleri Kanunu | 13 | 22 |
-| **Toplam** | **2.574** | **3.055** |
+| **Toplam** | **2.607** | **3.175** |
 
 Hiçbir madde elle yazılmadı, özetlenmedi ya da yeniden ifade edilmedi. Metnin güncelliği
 doğrulandı: KVKK'nın 6. maddesi `(Mülga:2/3/2024-7499/33 md.)` ve `(Değişik:2/3/2024-7499/33 md.)`
@@ -63,18 +63,18 @@ maddeyi bulup bulmadığıdır.
 
 | Ölçüt | Sonuç |
 |---|---|
-| Doğru madde 1. sırada | 15/27 (%56) |
-| Doğru madde ilk 3'te | 17/27 (%63) |
-| Doğru madde ilk 5'te | 18/27 (%67) |
-| **Doğru kanundan aday geldi** | **25/27 (%93)** |
+| Doğru madde 1. sırada | 16/27 (%59) |
+| Doğru madde ilk 3'te | 22/27 (%81) |
+| Doğru madde ilk 5'te | 24/27 (%89) |
+| **Doğru kanundan aday geldi** | **27/27 (%100)** |
 | Hukuk dışı soruda çekimserlik | 6/6 |
 | Tavsiye isteyen soruda ret | 5/5 |
 | Uç durumda çökme | 0/4 |
 | Ortalama süre | 0,38 sn |
 | p95 süre | 0,51 sn |
 
-Alan bazında doğru madde ilk sırada: trafik 4/4, iş 3/4, aile 2/4, KVKK 2/4, tüketici 2/4,
-kira 1/4, usul 1/3.
+Alan bazında doğru madde ilk sırada: iş 3/4, trafik 3/4, tüketici 3/4, aile 2/4, KVKK 2/4,
+kira 2/4, usul 1/3.
 
 **En anlamlı sayı %93.** Asistan neredeyse her zaman doğru kanuna gidiyor; zorlandığı yer doğru
 kanunun içinde doğru maddeyi seçmek. Kullanıcı açısından bu, 3.055 parçalık yığından beş maddeye
@@ -120,6 +120,37 @@ Türkçenin eklemeli yapısı BM25'i tek başına işe yaramaz kılıyor: sorgud
 kanunda "tahliye taahhüdünde". Kelimeler ilk beş karaktere indirilerek eşleştirilince tam kelime
 eşleşmesinin 1/10'u 4/10'a çıktı.
 
+## 5b. Kira ve tüketici alanlarının düzeltilmesi
+
+İlk ölçümde kira 1/4, tüketici 2/4 ile en zayıf alanlardı. Dört ayrı sebep denendi ve üçü elendi:
+
+| Denenen | Sonuç |
+|---|---|
+| PDF çıkarımını `layout` kipine almak | Kırık kelime 533 → 59 (%89), 20 madde daha bulundu; **isabet değişmedi** |
+| Başlık hiyerarşisini künyeye taşımak (bütün yığın) | hit@1 15/27 → 14/27, doğru kanun 25/27 |
+| Yalnız en yakın üst başlığı taşımak | hit@1 14/27, değişiklik yok |
+| **Gündelik dil → kanun terimi sözlüğü** | **ilk 5'te 18/27 → 24/27** |
+
+Hiyerarşi neden zarar verdi: "İKİNCİ AYIRIM Konut ve Çatılı İşyeri Kiraları" satırı o bölümdeki
+yüzlerce maddenin hepsinde aynıdır. Ayırt etmez, tersine benzeştirir. Künyeye eklenince doğru
+kanundan aday getirme oranı bile 27/27'den 25/27'ye düştü. Kod ve testleri kaldırıldı; kalan tek
+iz bu satırdır.
+
+Asıl sebep KR02'de çıplak görünüyordu: kullanıcı "tahliye taahhüdü" diyor, kanun bu kelimeyi hiç
+kullanmıyor — "kiralananı belli bir tarihte boşaltmayı üstlendiği hâlde boşaltmamışsa" diyor.
+Kullanıcının kelimesi uygulamadan, kanunun kelimesi metinden geliyor. Parçalama bunu düzeltemez.
+
+`app/terimler.py` bu boşluğu elle kurulmuş dar bir sözlükle kapatıyor: "tahliye" → "boşaltma",
+"ev sahibi" → "kiraya veren", "bozuk ürün" → "ayıplı mal". İki kural var. Birincisi, hiçbir terim
+uydurulmaz: sözlükteki her ifadenin kanun metninde birebir geçtiğini bir test her koşumda
+doğrular. İkincisi, terim madde başlığına değil sözcük dağarcığına eşlenir — ilk sürümde
+"verilerim" → "ilgili kişinin hakları" yazıyordu, o KVKK md. 11'in başlığıdır ve bütün KVKK
+sorularını o maddeye çekiyordu; "nasıl başvururum" sorusunun cevabı ise md. 13'tür. Genel terime
+("kişisel veri", "veri sorumlusu") çevrilince KVKK 1/4'ten 2/4'e döndü.
+
+Aynı çeviriyi modele yaptırmak daha önce denenmiş ve ölçümde batmıştı (Bölüm 5). Model bilgi
+üretmekte kötü, ama insan eliyle yazılmış yirmi küçük kural işi görüyor.
+
 ## 6. Ölçümün kendi hataları
 
 Bu projede iki kez ölçüm, ölçtüğü şeyi bozdu:
@@ -161,10 +192,12 @@ demiyor; "en yakın madde bu, karar senin, maddenin tamamını okumadan sonuç �
 
 ## 8. Sınırlar
 
-- **Doğru madde ilk sırada %56.** Soruların yaklaşık yarısında kullanıcı beş adayı gözden
-  geçirmek zorunda; üçte birinde doğru madde beş adayın içinde de yok.
-- **Kira ve tüketici alanları zayıf** (1/4 ve 2/4). Bu alanlarda sorular gündelik dille sorulup
-  kanunda çok farklı terimlerle karşılanıyor.
+- **Doğru madde ilk sırada %59.** Beş adayın içinde bulunma oranı %89; yine de her on sorudan
+  birinde doğru madde listede hiç yok.
+- **En zayıf alan usul** (1/3). Kira ve tüketici terim sözlüğüyle düzeldi ama usul soruları
+  ("dava dilekçesinde neler bulunur") hâlâ komşu maddelere gidiyor.
+- **Terim sözlüğü elle bakım ister.** Yeni bir alan eklenirse o alanın gündelik terimleri de
+  eklenmeli; sözlük kendini güncellemiyor.
 - Belge sonlarındaki değişiklik tabloları ve "kanuna işlenemeyen hükümler" bölümleri de
   parçalanıyor. Kesme işaretleri güvenilir olmadığı için (bazıları gerçek madde başlığı)
   ayıklanmadı; ölçümde belirgin zarar görülmedi.

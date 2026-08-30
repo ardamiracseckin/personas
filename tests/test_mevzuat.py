@@ -207,3 +207,27 @@ def test_next_articles_heading_does_not_leak_into_the_previous_body():
     assert "Veri güvenliğine" not in maddeler["11"].metin
     assert maddeler["12"].baslik == "Veri güvenliğine ilişkin yükümlülükler"
     assert "Herkes başvurarak" in maddeler["11"].metin
+
+
+def test_footnote_digits_are_stripped_from_headings():
+    """Resmî PDF'lerde başlığa dipnot numarası yapışık geliyor: 'II. Belirlenmesi234'.
+
+    Bu rakam kanunun bir parçası değil, sayfa dipnotuna gönderme. Künyede
+    görünüyor ve embedding'e giriyor; ikisinde de gürültü.
+    """
+    metin = ("KANUN\nKanun Numarası : 6098\n\n"
+             "II. Belirlenmesi234\nMADDE 344- Kira bedeline ilişkin anlaşmalar.\n")
+    assert mevzuat.maddeleri_ayir(metin)[0].baslik == "II. Belirlenmesi"
+
+
+def test_numbers_that_belong_to_the_heading_are_kept():
+    # Rakam kelimeye yapışık değilse başlığın kendisidir, silinmez.
+    metin = ("KANUN\nKanun Numarası : 4857\n\n"
+             "18 yaşını doldurmamış işçiler\nMADDE 71- Hüküm.\n")
+    assert mevzuat.maddeleri_ayir(metin)[0].baslik == "18 yaşını doldurmamış işçiler"
+
+
+# Başlık hiyerarşisi denendi ve ölçümde elendi: üst başlıkları künyeye taşımak
+# ("E. Kira bedeli · II. Belirlenmesi") aynı bölümdeki yüzlerce maddeyi
+# benzeştirdiği için erişimi bozuyordu — doğru madde ilk sırada 16/27 yerine
+# 15/27, doğru kanundan aday 27/27 yerine 25/27. Ayrıntı: docs/eval/.

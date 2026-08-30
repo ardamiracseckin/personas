@@ -62,6 +62,20 @@ class Parca:
     parca_adet: int = 1
 
     @property
+    def kunye(self):
+        """Parçanın ilk satırı: atıf ve maddenin başlığı.
+
+        Üst başlıkları da taşımak denendi ("E. Kira bedeli · II. Belirlenmesi")
+        ve ölçümde eledi: bölüm başlığı o bölümdeki yüzlerce maddede aynı olduğu
+        için onları ayırt etmiyor, benzeştiriyor. Bağlamlı hâlde doğru madde ilk
+        sırada 15/27, bağlamsız 16/27; doğru kanundan aday 25/27'ye karşı 27/27.
+        """
+        kunye = f"{self.atif} — {self.baslik}" if self.baslik else self.atif
+        if self.parca_adet > 1:
+            kunye += f" ({self.parca_no}/{self.parca_adet})"
+        return kunye
+
+    @property
     def atif(self):
         # Kanun adı künyede büyük harfle yazılıdır; atıf ekranda göründüğü için
         # okunur biçime çevrilir (Türkçe kurallarıyla — bkz. turkce_baslik).
@@ -85,6 +99,17 @@ def kanun_bilgisi(text):
                         kabul=kabul.group(1) if kabul else "")
 
 
+# Resmî PDF'lerde başlığa dipnot numarası yapışık geliyor: "II. Belirlenmesi234".
+# Rakam kanunun parçası değil, sayfa dipnotuna göndermedir; künyede görünür ve
+# embedding'e girer. Yalnız harfe yapışık olanlar atılır — "18 yaşını doldurmamış"
+# gibi başlıklarda rakam boşlukla ayrıldığı için korunur.
+_DIPNOT_RE = re.compile(r"(?<=[a-zçğıöşüA-ZÇĞİÖŞÜ])\d{1,3}$")
+
+
+def _dipnotu_at(baslik):
+    return _DIPNOT_RE.sub("", baslik).strip()
+
+
 def _baslik_satiri(onceki_metin):
     """(başlık, başlığın metindeki başlangıcı). Başlık yoksa ("", None).
 
@@ -102,7 +127,7 @@ def _baslik_satiri(onceki_metin):
             continue
         # Başlık kısa ve cümle değildir; uzun satır önceki maddenin gövdesidir.
         if len(temiz) <= 90 and not temiz.endswith("."):
-            return temiz, konum
+            return _dipnotu_at(temiz), konum
         return "", None
     return "", None
 
@@ -130,8 +155,7 @@ def maddeleri_ayir(text):
         # gibi numaralandırıyordu.
         on = turkce_kucult(m.group("on") or "")
         numara = f"{_ON_EK[on]} {m.group('no')}" if on in _ON_EK else m.group("no")
-        maddeler.append(Madde(numara=numara,
-                              baslik=_baslik_bul(metin[:bas]),
+        maddeler.append(Madde(numara=numara, baslik=_baslik_bul(metin[:bas]),
                               metin=govde))
     return maddeler
 
