@@ -183,6 +183,41 @@ genişletilmiş sorguda daha çok kelime vardır ve her başlık daha kolay eşl
 Bedeli gecikme: sorgu başına 0,42 sn'den 0,68 sn'ye çıktı, çünkü başlık eşleşmesi bütün korpusta
 hesaplanıyor (aday havuzunda hesaplanamaz, çünkü havuzu belirleyen sıralamaya katılıyor).
 
+## 5d. Kalan üç soru ve elenen iki deneme
+
+Başlık sinyalinden sonra üç soru kaldı: doğru madde ilk beşte hiç görünmüyor.
+
+| Soru | Beklenen | Gelen |
+|---|---|---|
+| "Bir yıldır çalışan işçinin kaç gün yıllık izni olur?" | 4857 md. 53 — *Yıllık ücretli izin hakkı ve izin süreleri* | md. 54 — *Yıllık ücretli izne hak kazanma* |
+| "Ev sahibi kendi ihtiyacım var diyerek kiracıyı çıkarabilir mi?" | 6098 md. 350 — *Gereksinim, yeniden inşa ve imar* | md. 332 — *Kiracının iflası* |
+| "Dava dilekçesinde neler bulunmak zorundadır?" | 6100 md. 119 — *Dava dilekçesinin içeriği* | md. 390 — *İhtiyati tedbir talebi* |
+
+Üçü de **aynı kanunun komşu maddesine** gidiyor; ilk ikisinde doğru madde 9. sırada, yani az
+kalıyor. Teşhis iki şey gösterdi.
+
+**Gövde kesme uzun kökleri eziyor.** Kelimeler ilk beş karaktere indiriliyor. Kira sorusunun en
+ayırt edici kelimesi "gereksinim", gövdesi `gerek` — korpusta 684 maddedeki "gerekli" (258),
+"gereken" (123), "gerekir" (87) ile aynı kovada. IDF 1,53'e düşüyor: kullanıcının özellikle yazdığı
+terim neredeyse hiçbir şey söylemez hâle geliyor, üstelik alakasız 684 maddeye gürültü ekliyor.
+"Bulunmak" → `bulun` da aynı: 833 madde.
+
+İki çözüm denendi, ikisi de ölçümde elendi:
+
+| Denenen | Sonuç |
+|---|---|
+| Gövdeye ek olarak tam kelimeyi de indeksleme (ağırlık 0,5–2,0 × doyum 20–30, 12 birleşim) | Hiçbiri kazandırmadı; en iyi durumda başabaş, çoğunda hit@1 16 → 14-15 |
+| Sıralamada yumuşak doyum `p/(p+15)` (sert doyum yalnız çekimserlik kararında) | Çevrimdışı taramada 16 → 17, **gerçek hatta 19 → 18** ve hit@3 24 → 23 |
+
+İkincisi öğretici: çevrimdışı tarama eşik ve BM25 kurtarma katmanını atladığı için yanılttı.
+Gerekçesi sağlamdı — kira sorusunda birbirinden farklı beş madde de sert doyumda 1,0 alıyor,
+aralarındaki fark siliniyor ve doğru madde 37. sıraya düşüyor — ama tam hat ölçümü onaylamadı.
+Değişiklik geri alındı. Bu korpusta bir sonraki adım muhtemelen prefix kesme değil, gerçek bir
+Türkçe ek ayırıcı; o da ayrı bir iş.
+
+Gövde uzunluğunu artırmak çözüm değil: "kiracı" (6 harf) ile "kiracının" (9 harf) yedi karakterde
+ayrışıyor. Sabit uzunlukta bir önek, kısa kökleri eklerinden ayıramaz.
+
 ## 6. Ölçümün kendi hataları
 
 Bu projede iki kez ölçüm, ölçtüğü şeyi bozdu:
