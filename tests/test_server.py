@@ -296,3 +296,60 @@ def test_user_messages_have_no_citations(istemci):
     cid = istemci.post("/api/conversations", json={}).json()["id"]
     chat_store.add_message(cid, "user", "Nasıl saklarım?")
     assert istemci.get(f"/api/conversations/{cid}/messages").json()[-1]["citations"] == []
+
+
+# --- mevzuat sayfası ---------------------------------------------------------
+
+def test_mevzuat_endpoint_returns_ranked_candidates(istemci, monkeypatch):
+    """Uç nokta aday maddeleri alaka sırasıyla, öne çıkan cümlesiyle döndürür."""
+    from server import main as sunucu
+    from app.mevzuat_yanit import Aday, Yanit
+
+    yanit = Yanit(birincil=Aday(atif="6502 sayılı Kanun md. 48", baslik="Mesafeli sözleşmeler",
+                                metin="Tam madde metni.", puan=0.71,
+                                one_cikan="Tüketici on dört gün içinde cayabilir."),
+                  digerleri=[Aday(atif="6502 sayılı Kanun md. 11", baslik="Seçimlik haklar",
+                                  metin="Diğer madde.", puan=0.62, one_cikan="Cümle.")])
+    monkeypatch.setattr(sunucu.mevzuat_yanit, "sor", lambda q, k=None: yanit)
+
+    cevap = istemci.post("/api/mevzuat", json={"question": "kaç gün içinde iade"}).json()
+    assert cevap["birincil"]["atif"] == "6502 sayılı Kanun md. 48"
+    assert cevap["birincil"]["one_cikan"] == "Tüketici on dört gün içinde cayabilir."
+    assert [a["atif"] for a in cevap["digerleri"]] == ["6502 sayılı Kanun md. 11"]
+    assert cevap["durum"] == "bulundu"
+
+
+def test_mevzuat_endpoint_reports_refusal_without_articles(istemci, monkeypatch):
+    from server import main as sunucu
+    from app.mevzuat_yanit import Yanit
+
+    monkeypatch.setattr(sunucu.mevzuat_yanit, "sor",
+                        lambda q, k=None: Yanit(tavsiye_reddi=True, mesaj="Tahmin yürütmüyorum."))
+    cevap = istemci.post("/api/mevzuat", json={"question": "kazanır mıyım"}).json()
+    assert cevap["durum"] == "kapsam_disi"
+    assert cevap["mesaj"] == "Tahmin yürütmüyorum."
+    assert cevap["birincil"] is None
+
+
+def test_mevzuat_endpoint_reports_when_nothing_matches(istemci, monkeypatch):
+    from server import main as sunucu
+    from app.mevzuat_yanit import Yanit
+
+    monkeypatch.setattr(sunucu.mevzuat_yanit, "sor", lambda q, k=None: Yanit(bulunamadi=True))
+    cevap = istemci.post("/api/mevzuat", json={"question": "mercimek çorbası"}).json()
+    assert cevap["durum"] == "bulunamadi"
+
+
+def test_empty_question_is_rejected(istemci):
+    assert istemci.post("/api/mevzuat", json={"question": "  "}).status_code == 400
+
+
+def test_mevzuat_page_is_served(istemci):
+    sayfa = istemci.get("/mevzuat")
+    assert sayfa.status_code == 200
+    assert "madde" in sayfa.text.lower()
+
+
+def test_loaded_laws_are_listed(istemci):
+    kanunlar = istemci.get("/api/mevzuat/kanunlar").json()
+    assert "kanunlar" in kanunlar and "parca" in kanunlar

@@ -181,3 +181,29 @@ def test_uppercase_temporary_article_is_not_confused_with_a_normal_one():
 def test_uppercase_additional_article_is_recognised():
     metin = "KANUN\nKanun Numarası : 4857\n\nEK MADDE 1 - Ek hüküm.\n"
     assert [m.numara for m in mevzuat.maddeleri_ayir(metin)] == ["Ek 1"]
+
+
+def test_citation_uses_readable_law_name():
+    """Atıf ekranda görünüyor; kanun adı BÜYÜK HARFLE değil okunur biçimde yazılır."""
+    metin = "TÜRK BORÇLAR KANUNU\nKanun Numarası : 6098\n\nBaşlık\nMADDE 344- Metin.\n"
+    parca = mevzuat.parcala(metin)[0]
+    assert parca.atif == "6098 sayılı Türk Borçlar Kanunu md. 344"
+
+
+def test_next_articles_heading_does_not_leak_into_the_previous_body():
+    """Madde metninin sonuna sonraki maddenin başlığı karışmamalı.
+
+    Kanun metninde başlık, ait olduğu maddenin ÜSTÜNDE durur. Bölme madde
+    satırından yapıldığı için önceki maddenin gövdesi, sonraki maddenin
+    başlığıyla bitiyordu — yani md. 11'in metni md. 12'nin başlığını taşıyordu.
+    Hukuki metinde bu, olmayan bir hükmü maddeye eklemektir.
+    """
+    metin = ("KANUN\nKanun Numarası : 6698\n\n"
+             "İlgili kişinin hakları\n"
+             "MADDE 11- (1) Herkes başvurarak bilgi talep edebilir.\n\n"
+             "Veri güvenliğine ilişkin yükümlülükler\n"
+             "MADDE 12- (1) Veri sorumlusu tedbir almakla yükümlüdür.\n")
+    maddeler = {m.numara: m for m in mevzuat.maddeleri_ayir(metin)}
+    assert "Veri güvenliğine" not in maddeler["11"].metin
+    assert maddeler["12"].baslik == "Veri güvenliğine ilişkin yükümlülükler"
+    assert "Herkes başvurarak" in maddeler["11"].metin

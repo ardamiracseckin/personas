@@ -134,3 +134,16 @@ def test_information_questions_still_return_articles(monkeypatch):
     yanit = my.sor("Ev sahibi kirayı ne kadar artırabilir?")
     assert yanit.tavsiye_reddi is False
     assert yanit.birincil is not None
+
+
+def test_displayed_text_and_extracted_sentence_use_the_same_spacing():
+    """Vurgulama, çıkarılan cümlenin metinde bulunabilmesine bağlı.
+
+    PDF'ten gelen metin rastgele satır sonları taşıyor; cümle çıkarılırken
+    boşluklar sadeleşiyordu. İkisi ayrı biçimde kalınca vurgu hiç eşleşmiyordu.
+    """
+    ham = ("6502 sayılı X md. 48 — Başlık\n\nMADDE 48- (1) Tüketici, on dört gün\n"
+           "içinde   cayma hakkını kullanabilir. (2) İkinci fıkra.")
+    yanit = mevzuat_yanit.hazirla("cayma hakkı kaç gün", [(ham, 0.7)])
+    assert yanit.birincil.one_cikan in yanit.birincil.metin
+    assert "\n" not in yanit.birincil.metin

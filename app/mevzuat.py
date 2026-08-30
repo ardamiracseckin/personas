@@ -63,7 +63,9 @@ class Parca:
 
     @property
     def atif(self):
-        return f"{self.kanun_no} sayılı {self.kanun_ad} md. {self.madde}"
+        # Kanun adı künyede büyük harfle yazılıdır; atıf ekranda göründüğü için
+        # okunur biçime çevrilir (Türkçe kurallarıyla — bkz. turkce_baslik).
+        return f"{self.kanun_no} sayılı {turkce_baslik(self.kanun_ad)} md. {self.madde}"
 
 
 def kanun_bilgisi(text):
@@ -83,17 +85,30 @@ def kanun_bilgisi(text):
                         kabul=kabul.group(1) if kabul else "")
 
 
-def _baslik_bul(onceki_metin):
-    """Madde başlığı, madde satırının hemen üstündeki kısa satırdır."""
-    for satir in reversed(onceki_metin.splitlines()):
+def _baslik_satiri(onceki_metin):
+    """(başlık, başlığın metindeki başlangıcı). Başlık yoksa ("", None).
+
+    Madde başlığı, madde satırının hemen üstündeki kısa satırdır ve ait olduğu
+    maddeye yazılır. Aynı satır önceki maddenin gövdesinden çıkarılmalıdır:
+    aksi hâlde md. 11'in metni md. 12'nin başlığıyla biter ve hukuki metne
+    olmayan bir ifade eklenmiş olur.
+    """
+    satirlar = onceki_metin.splitlines(keepends=True)
+    konum = len(onceki_metin)
+    for satir in reversed(satirlar):
+        konum -= len(satir)
         temiz = " ".join(satir.split())
         if not temiz:
             continue
         # Başlık kısa ve cümle değildir; uzun satır önceki maddenin gövdesidir.
         if len(temiz) <= 90 and not temiz.endswith("."):
-            return temiz
-        return ""
-    return ""
+            return temiz, konum
+        return "", None
+    return "", None
+
+
+def _baslik_bul(onceki_metin):
+    return _baslik_satiri(onceki_metin)[0]
 
 
 def maddeleri_ayir(text):
@@ -104,6 +119,11 @@ def maddeleri_ayir(text):
     for i, m in enumerate(eslesmeler):
         bas = m.start()
         son = eslesmeler[i + 1].start() if i + 1 < len(eslesmeler) else len(metin)
+        if i + 1 < len(eslesmeler):
+            # Sonraki maddenin başlığı bu maddenin gövdesine karışmasın.
+            _sonraki_baslik, baslik_konumu = _baslik_satiri(metin[:son])
+            if baslik_konumu is not None and baslik_konumu > bas:
+                son = baslik_konumu
         govde = metin[bas:son].strip()
         # Küçültme Türkçe kurallarıyla yapılmalı: "GEÇİCİ".lower() Python'da
         # "geçi̇ci̇" verir ve arama tutmaz. Bu hata geçici maddeyi normal madde

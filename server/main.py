@@ -15,7 +15,8 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from app import assistant, chat_store, citations, config, ingest, llm, models, store
+from app import (assistant, chat_store, citations, config, ingest, llm, mevzuat_yanit,
+                 models, store)
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 TITLE_PROMPT = (
@@ -282,6 +283,55 @@ def switch_model(body: ModelIn):
 
 
 # ---------------------------------------------------------------------- arayüz
+
+# --- mevzuat asistanı -------------------------------------------------------
+#
+# Bu uç nokta dil modeli çağırmaz. Asistan cevap üretmiyor, kanun metninden
+# madde çıkarıyor: ekranda görünen her kelime mevzuattan geliyor.
+
+
+class MevzuatSoru(BaseModel):
+    question: str
+    k: int | None = None
+
+
+def _aday_json(a):
+    return {"atif": a.atif, "baslik": a.baslik, "metin": a.metin,
+            "puan": round(a.puan, 3), "one_cikan": a.one_cikan}
+
+
+@app.post("/api/mevzuat")
+def mevzuat_sor(giris: MevzuatSoru):
+    soru = (giris.question or "").strip()
+    if not soru:
+        raise HTTPException(status_code=400, detail="Boş soru gönderilemez.")
+    yanit = mevzuat_yanit.sor(soru, k=giris.k)
+    if yanit.tavsiye_reddi:
+        durum = "kapsam_disi"
+    elif yanit.bulunamadi or yanit.birincil is None:
+        durum = "bulunamadi"
+    else:
+        durum = "bulundu"
+    return {
+        "durum": durum,
+        "mesaj": yanit.mesaj,
+        "birincil": _aday_json(yanit.birincil) if yanit.birincil else None,
+        "digerleri": [_aday_json(a) for a in yanit.digerleri],
+    }
+
+
+@app.get("/api/mevzuat/kanunlar")
+def mevzuat_kanunlar():
+    """Yüklü kanunlar — kullanıcı neyin sorulabileceğini bilsin."""
+    kaynaklar = store.sources()
+    return {"kanunlar": [{"ad": ad, "parca": adet} for ad, adet in kaynaklar],
+            "parca": sum(adet for _ad, adet in kaynaklar)}
+
+
+@app.get("/mevzuat")
+def mevzuat_sayfasi():
+    return FileResponse(STATIC_DIR / "mevzuat.html")
+
 
 @app.get("/")
 def index():

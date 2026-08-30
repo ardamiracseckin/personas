@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>personas — mevzuat asistanı</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='24'>§</text></svg>">
+<link rel="stylesheet" href="/static/mevzuat.css">
+</head>
+<body>
+
+<header class="ust">
+  <div class="marka"><span class="isaret">§</span> mevzuat asistanı</div>
+  <div class="kunye" id="kunye">yükleniyor…</div>
+</header>
+
+<main>
+  <section class="acilis" id="acilis">
+    <h1>Hangi kural geçerli?</h1>
+    <p class="alt">Sorunu gündelik dille yaz; ilgili kanun maddelerini bulup metniyle
+       birlikte göstereyim. Cevap üretmiyorum — ekranda gördüğün her kelime kanundan.</p>
+    <ul class="ornekler" id="ornekler">
+      <li><button>Ev sahibi kirayı ne kadar artırabilir?</button></li>
+      <li><button>İşten çıkarılırken kaç hafta önce haber verilmeli?</button></li>
+      <li><button>İnternetten aldığım ürünü kaç gün içinde iade edebilirim?</button></li>
+      <li><button>Kişisel verilerimle ilgili haklarım neler?</button></li>
+    </ul>
+    <div class="kanunlar" id="kanunlar"></div>
+  </section>
+
+  <section class="akis" id="akis" hidden></section>
+</main>
+
+<form class="soru-kutusu" id="form" autocomplete="off">
+  <input id="giris" type="text" placeholder="Durumunu anlat ya da kuralı sor…" aria-label="Soru">
+  <button id="gonder" type="submit" aria-label="Ara">→</button>
+</form>
+
+<footer class="dip">
+  Bu bir <strong>madde bulucudur</strong>, hukuki tavsiye değildir · metinler mevzuat.gov.tr'den ·
+  çevrimdışı çalışır
+</footer>
+
+<script src="/static/mevzuat.js"></script>
+</body>
+</html>

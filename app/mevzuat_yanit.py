@@ -54,9 +54,12 @@ def _ayikla(parca_metni):
         atif, baslik = kunye, ""
     # Bölünmüş maddelerde künyede "(2/5)" gibi bir ek olur; atıf madde düzeyindedir.
     _EK = r"\s*\(\d+/\d+\)\s*$"
+    # PDF'ten gelen metin rastgele satır sonları taşır. Boşluklar burada
+    # sadeleştirilir ki gösterilen metin ile çıkarılan cümle aynı biçimde olsun —
+    # aksi hâlde vurgulama hiç eşleşmez. Kelimeler değişmez, yalnız boşluk.
     return (re.sub(_EK, "", atif.strip()),
             re.sub(_EK, "", baslik.strip()),
-            govde)
+            " ".join(govde.split()))
 
 
 def cumleler(metin):
