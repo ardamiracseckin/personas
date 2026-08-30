@@ -109,3 +109,28 @@ def test_merged_article_can_highlight_a_sentence_from_any_of_its_pieces():
 def test_piece_marker_is_stripped_from_the_heading():
     yanit = mevzuat_yanit.hazirla("soru", [_parca("6502 sayılı Z", "45", "2/2", "Metin.", 0.5)])
     assert yanit.birincil.baslik == "Başlık"
+
+
+# --- tavsiye isteyen sorular -------------------------------------------------
+
+def test_advice_questions_are_refused_without_showing_articles(monkeypatch):
+    """Tahmin isteyen soruya madde listesi göstermek, cevabı verdiği izlenimi
+    yaratır. Asistan bunun yerine ne yapıp ne yapamayacağını söyler."""
+    from app import hukuki_kapsam, mevzuat_yanit as my, retriever
+
+    monkeypatch.setattr(retriever, "get_top_chunks",
+                        lambda q, k=None, embed_fn=None: [("6098 sayılı X md. 1 — B\n\nMetin.", 0.9)])
+    yanit = my.sor("Bu davayı kazanır mıyım?")
+    assert yanit.tavsiye_reddi is True
+    assert yanit.birincil is None
+    assert yanit.mesaj == hukuki_kapsam.MESAJ
+
+
+def test_information_questions_still_return_articles(monkeypatch):
+    from app import mevzuat_yanit as my, retriever
+
+    monkeypatch.setattr(retriever, "get_top_chunks",
+                        lambda q, k=None, embed_fn=None: [("6098 sayılı X md. 344 — B\n\nMetin.", 0.9)])
+    yanit = my.sor("Ev sahibi kirayı ne kadar artırabilir?")
+    assert yanit.tavsiye_reddi is False
+    assert yanit.birincil is not None

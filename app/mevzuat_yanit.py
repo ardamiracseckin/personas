@@ -35,6 +35,8 @@ class Yanit:
     birincil: Aday = None
     digerleri: list = field(default_factory=list)
     bulunamadi: bool = False
+    tavsiye_reddi: bool = False
+    mesaj: str = ""
 
 
 def _ayikla(parca_metni):
@@ -98,8 +100,15 @@ def hazirla(soru, parcalar):
 
 
 def sor(soru, k=None):
-    """Soruyu erişime verip aday maddeleri hazırlar. Dil modeli çağrılmaz."""
-    from app import config, retriever
+    """Soruyu erişime verip aday maddeleri hazırlar. Dil modeli çağrılmaz.
+
+    Tahmin ya da tavsiye isteyen sorularda madde gösterilmez: bir madde listesi
+    "davayı kazanır mıyım" sorusunu cevaplamaz, ama cevapladığı izlenimini
+    yaratır.
+    """
+    from app import config, hukuki_kapsam, retriever
+    if hukuki_kapsam.tavsiye_istiyor(soru):
+        return Yanit(tavsiye_reddi=True, mesaj=hukuki_kapsam.MESAJ)
     parcalar = retriever.get_top_chunks(soru, k=k or config.TOP_K)
     # retriever (kaynak, metin, puan) döndürür; burada kaynak değil metin gerekli.
     return hazirla(soru, [(p[-2], p[-1]) if len(p) == 3 else p for p in parcalar])
