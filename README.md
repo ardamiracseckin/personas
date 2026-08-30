@@ -61,6 +61,11 @@ soru
 oldu. Türkçe eklemeli olduğu için BM25 gövde bazlıdır: sorguda "tahliye taahhüdü", kanunda
 "tahliye taahhüdünde".
 
+Dördüncü bir sinyal daha var: **madde başlığı**. Kanun koyucunun yazdığı konu etiketi, 600
+karakterlik gövdenin içinde üç kelimedir ve sinyali erir; ayrı puanlanınca doğru madde ilk sırada
+16/27'den 19/27'ye çıktı. Tek kelimelik başlıklar ("Zamanı", "Şekil") bilgi taşımadığı için puan
+almaz — o kural olmadan "grip aşısı ne zaman" sorusu Medeni Kanun'a bağlanıyordu.
+
 Erişimden önce soru, **kanun terimleriyle genişletilir** (`app/terimler.py`). Kullanıcı "tahliye"
 diyor, kanun "boşaltma" diyor; kullanıcı "ev sahibi" diyor, kanun "kiraya veren" diyor. Elle
 kurulmuş, korpustan doğrulanmış bir sözlük bu boşluğu kapatıyor: doğru madde ilk beşte bulunma
@@ -107,22 +112,22 @@ bir test bunu her koşumda kontrol eder.
 
 | Ölçüt | Sonuç |
 |---|---|
-| Doğru madde 1. sırada | 16/27 (%59) |
-| Doğru madde ilk 3'te | 22/27 (%81) |
+| Doğru madde 1. sırada | 19/27 (%70) |
 | **Doğru madde ilk 5'te** | **24/27 (%89)** |
 | **Doğru kanundan aday geldi** | **27/27 (%100)** |
 | Hukuk dışı soruda çekimserlik | 6/6 |
 | Tavsiye isteyen soruda ret | 5/5 |
-| Ortalama süre | 0,38 sn |
+| Ortalama süre | 0,68 sn |
 
 Ayrıntılı çözümleme, denenip elenen sekiz yaklaşım ve ölçümün kendi hataları:
 [`docs/eval/mevzuat-degerlendirme.md`](docs/eval/mevzuat-degerlendirme.md).
 
 ## Sınırlar
 
-- **Doğru madde ilk sırada %59.** Beş adayın içinde bulunma oranı %89; yine de her on sorudan
+- **Doğru madde ilk sırada %70.** Beş adayın içinde bulunma oranı %89; yine de dokuz sorudan
   birinde doğru madde listede hiç yoktur. Arayüz bu yüzden "cevap budur" demez.
-- En zayıf alan usul (1/3). Kira ve tüketici, terim sözlüğüyle 1/4 ve 2/4'ten 2/4 ve 3/4'e çıktı.
+- Kalan üç başarısızlık komşu maddeye gidiyor: "kaç gün yıllık izin" sorusuna İş Kanunu md. 53
+  yerine md. 54 geliyor — ikisi de yıllık izni düzenliyor.
 - Yalnız sekiz kanun yüklü; dışındaki her konu kapsam dışıdır ve asistan bunu söyler.
 - Metinler indirildiği tarihteki hâldir. Mevzuat değişir.
 

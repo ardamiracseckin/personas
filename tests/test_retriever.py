@@ -147,3 +147,69 @@ def test_index_is_rebuilt_when_the_knowledge_base_changes(monkeypatch):
                         lambda: [("a.md", "birinci metin", [1.0]), ("b.md", "ikinci", [1.0])])
     retriever.get_top_chunks("ikinci", embed_fn=lambda m: [[1.0]])
     assert retriever._dizin_onbellek is not ilk
+
+
+# --- madde başlığı ayrı bir sinyal -------------------------------------------
+
+def test_heading_match_lifts_an_article_whose_title_answers_the_question(monkeypatch):
+    """Kanun maddelerinin başlığı, kanun koyucunun yazdığı konu etiketidir.
+
+    "Dava şartları nelerdir?" sorusunun cevabı başlığı tam da "Dava şartları"
+    olan maddedir; ama başlık 600 karakterlik gövdenin içinde üç kelimedir ve
+    sinyali erir. Başlık eşleşmesine ayrı bir puan verilir.
+    """
+    from app import retriever, store
+
+    dogru = ("6100 sayılı HMK", "6100 sayılı HMK md. 114 — Dava şartları\n\nMADDE 114- Hüküm.",
+             [0.5, 0.866])
+    rakip = ("6100 sayılı HMK", "6100 sayılı HMK md. 132 — Karşı dava açılabilmesinin şartları"
+                                "\n\nMADDE 132- Uzun bir hüküm metni burada.", [0.55, 0.835])
+    monkeypatch.setattr(store, "all_chunks", lambda: [rakip, dogru])
+    monkeypatch.setattr(retriever, "_dizin_onbellek", None)
+    sonuc = retriever.get_top_chunks("Dava şartları nelerdir?",
+                                     embed_fn=lambda m: [[1.0, 0.0]], k=2)
+    assert "md. 114" in sonuc[0][1]
+
+
+def test_heading_score_uses_the_original_question_not_the_expanded_one(monkeypatch):
+    """Sorgu kanun terimleriyle genişletiliyor; başlık puanı özgün soruya bakmalı.
+
+    Genişletilmiş sorguda daha çok kelime vardır ve her başlık daha kolay
+    eşleşir — sinyal körelir.
+    """
+    from app import lexical, retriever, store
+
+    gorulen = []
+    gercek = lexical.fuzzy_score
+    monkeypatch.setattr(lexical, "fuzzy_score",
+                        lambda a, b: (gorulen.append(b), gercek(a, b))[1])
+    # Başlık en az iki anlamlı kelime taşımalı, yoksa puan hesaplanmaz.
+    monkeypatch.setattr(store, "all_chunks",
+                        lambda: [("k.md", "k.md md. 1 — Dava şartları\n\nMetin.", [1.0, 0.0])])
+    monkeypatch.setattr(retriever, "_dizin_onbellek", None)
+    retriever.get_top_chunks("genişletilmiş sorgu ek terim", embed_fn=lambda m: [[1.0, 0.0]],
+                             baslik_sorgusu="özgün soru")
+    assert "özgün soru" in gorulen
+
+
+def test_chunk_without_a_heading_is_not_penalised(monkeypatch):
+    from app import retriever, store
+
+    monkeypatch.setattr(store, "all_chunks",
+                        lambda: [("k.md", "k.md md. 5\n\nBaşlıksız madde metni.", [1.0, 0.0])])
+    monkeypatch.setattr(retriever, "_dizin_onbellek", None)
+    assert retriever.get_top_chunks("başlıksız madde", embed_fn=lambda m: [[1.0, 0.0]])
+
+
+def test_single_word_generic_heading_earns_no_bonus(monkeypatch):
+    """Tek kelimelik başlık bilgi taşımaz ve yanlış eşleşme üretir.
+
+    Bu gerçekten oldu: "Grip aşısı ne zaman yaptırılır?" sorusu, başlığı
+    "2. Zamanı" olan bir Medeni Kanun maddesini çekti ve asistanın hukuk dışı
+    soruyu reddetme yetisi bozuldu. Başlık ancak birden çok anlamlı kelime
+    taşıyorsa puan alır.
+    """
+    from app import retriever
+
+    assert retriever.baslik_puani("2. Zamanı", "Grip aşısı ne zaman yaptırılır?") == 0.0
+    assert retriever.baslik_puani("Dava şartları", "Dava şartları nelerdir?") > 0.5

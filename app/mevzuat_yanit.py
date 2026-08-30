@@ -115,6 +115,7 @@ def sor(soru, k=None):
     # Erişime giden sorgu kanun terimleriyle genişletilir; öne çıkan cümle ise
     # özgün soruya göre seçilir — genişletme terimleri cümle seçimini kendi
     # kelimeleriyle saptırmasın.
-    parcalar = retriever.get_top_chunks(terimler.genislet(soru), k=k or config.TOP_K)
+    parcalar = retriever.get_top_chunks(terimler.genislet(soru), k=k or config.TOP_K,
+                                        baslik_sorgusu=soru)
     # retriever (kaynak, metin, puan) döndürür; burada kaynak değil metin gerekli.
     return hazirla(soru, [(p[-2], p[-1]) if len(p) == 3 else p for p in parcalar])

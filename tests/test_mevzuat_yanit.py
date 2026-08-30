@@ -61,7 +61,7 @@ def test_pipeline_returns_ranked_candidates(monkeypatch):
     from app import mevzuat_yanit as my, retriever
 
     monkeypatch.setattr(retriever, "get_top_chunks",
-                        lambda q, k=None, embed_fn=None: [("6502 sayılı X md. 48 — Mesafeli\n\nMADDE 48- (1) On dört gün içinde cayma hakkı vardır.", 0.7),
+                        lambda q, k=None, embed_fn=None, **_: [("6502 sayılı X md. 48 — Mesafeli\n\nMADDE 48- (1) On dört gün içinde cayma hakkı vardır.", 0.7),
                                                           ("4857 sayılı Y md. 17 — Fesih\n\nMadde 17 - Bildirim süresi.", 0.4)])
     yanit = my.sor("Kaç gün içinde cayabilirim?")
     assert yanit.birincil.atif.startswith("6502")
@@ -71,7 +71,7 @@ def test_pipeline_returns_ranked_candidates(monkeypatch):
 def test_pipeline_reports_when_nothing_passes_the_threshold(monkeypatch):
     from app import mevzuat_yanit as my, retriever
 
-    monkeypatch.setattr(retriever, "get_top_chunks", lambda q, k=None, embed_fn=None: [])
+    monkeypatch.setattr(retriever, "get_top_chunks", lambda q, k=None, embed_fn=None, **_: [])
     assert my.sor("Bugün hava nasıl?").bulunamadi is True
 
 
@@ -119,7 +119,7 @@ def test_advice_questions_are_refused_without_showing_articles(monkeypatch):
     from app import hukuki_kapsam, mevzuat_yanit as my, retriever
 
     monkeypatch.setattr(retriever, "get_top_chunks",
-                        lambda q, k=None, embed_fn=None: [("6098 sayılı X md. 1 — B\n\nMetin.", 0.9)])
+                        lambda q, k=None, embed_fn=None, **_: [("6098 sayılı X md. 1 — B\n\nMetin.", 0.9)])
     yanit = my.sor("Bu davayı kazanır mıyım?")
     assert yanit.tavsiye_reddi is True
     assert yanit.birincil is None
@@ -130,7 +130,7 @@ def test_information_questions_still_return_articles(monkeypatch):
     from app import mevzuat_yanit as my, retriever
 
     monkeypatch.setattr(retriever, "get_top_chunks",
-                        lambda q, k=None, embed_fn=None: [("6098 sayılı X md. 344 — B\n\nMetin.", 0.9)])
+                        lambda q, k=None, embed_fn=None, **_: [("6098 sayılı X md. 344 — B\n\nMetin.", 0.9)])
     yanit = my.sor("Ev sahibi kirayı ne kadar artırabilir?")
     assert yanit.tavsiye_reddi is False
     assert yanit.birincil is not None
@@ -155,7 +155,7 @@ def test_query_is_expanded_with_statutory_terms_before_retrieval(monkeypatch):
 
     gonderilen = []
     monkeypatch.setattr(retriever, "get_top_chunks",
-                        lambda q, k=None, embed_fn=None: gonderilen.append(q) or [])
+                        lambda q, k=None, embed_fn=None, **_: gonderilen.append(q) or [])
     my.sor("Tahliye taahhüdü verdim")
     assert "boşaltma" in gonderilen[0].lower()
     assert "Tahliye taahhüdü verdim" in gonderilen[0]
@@ -168,6 +168,6 @@ def test_extracted_sentence_is_matched_against_the_original_question(monkeypatch
 
     parca = ("6098 sayılı X md. 352 — Başlık\n\nMADDE 352 - Kiracı boşaltmayı üstlenmişse "
              "kiraya veren sözleşmeyi sona erdirebilir. Ayrıca kira bedeli ödenmezse.")
-    monkeypatch.setattr(retriever, "get_top_chunks", lambda q, k=None, embed_fn=None: [(parca, 0.6)])
+    monkeypatch.setattr(retriever, "get_top_chunks", lambda q, k=None, embed_fn=None, **_: [(parca, 0.6)])
     yanit = my.sor("Tahliye taahhüdü verdim, ev sahibi ne yapabilir")
     assert "boşaltmayı üstlenmişse" in yanit.birincil.one_cikan

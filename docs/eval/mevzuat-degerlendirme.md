@@ -63,8 +63,8 @@ maddeyi bulup bulmadığıdır.
 
 | Ölçüt | Sonuç |
 |---|---|
-| Doğru madde 1. sırada | 16/27 (%59) |
-| Doğru madde ilk 3'te | 22/27 (%81) |
+| Doğru madde 1. sırada | 19/27 (%70) |
+| Doğru madde ilk 3'te | 24/27 (%89) |
 | Doğru madde ilk 5'te | 24/27 (%89) |
 | **Doğru kanundan aday geldi** | **27/27 (%100)** |
 | Hukuk dışı soruda çekimserlik | 6/6 |
@@ -73,8 +73,8 @@ maddeyi bulup bulmadığıdır.
 | Ortalama süre | 0,38 sn |
 | p95 süre | 0,51 sn |
 
-Alan bazında doğru madde ilk sırada: iş 3/4, trafik 3/4, tüketici 3/4, aile 2/4, KVKK 2/4,
-kira 2/4, usul 1/3.
+Alan bazında doğru madde ilk sırada: aile 3/4, iş 3/4, KVKK 3/4, trafik 3/4, tüketici 3/4,
+kira 2/4, usul 2/3.
 
 **En anlamlı sayı %93.** Asistan neredeyse her zaman doğru kanuna gidiyor; zorlandığı yer doğru
 kanunun içinde doğru maddeyi seçmek. Kullanıcı açısından bu, 3.055 parçalık yığından beş maddeye
@@ -151,6 +151,38 @@ sorularını o maddeye çekiyordu; "nasıl başvururum" sorusunun cevabı ise md
 Aynı çeviriyi modele yaptırmak daha önce denenmiş ve ölçümde batmıştı (Bölüm 5). Model bilgi
 üretmekte kötü, ama insan eliyle yazılmış yirmi küçük kural işi görüyor.
 
+## 5c. Usul alanı ve madde başlığı sinyali
+
+Terim sözlüğünden sonra en zayıf alan usul kaldı (1/3). Üç sorunun teşhisi aynı yere çıktı:
+**doğru maddenin başlığı sorunun kendisiydi.** "Dava şartları nelerdir?" sorusunun cevabı başlığı
+tam da "Dava şartları" olan maddedir; "Dava dilekçesinde neler bulunur" sorusununki "Dava
+dilekçesinin içeriği"dir. Ama başlık, 600 karakterlik gövdenin içinde üç kelimedir ve embedding'de
+sinyali erir.
+
+Madde başlığı bu yüzden dördüncü bir sinyal olarak ayrı puanlandı. Ağırlık taramayla seçildi:
+
+| Başlık ağırlığı | hit@1 | hit@3 | hit@5 |
+|---|---|---|---|
+| 0.00 | 15/27 | 22/27 | 25/27 |
+| 0.08 | 17/27 | 23/27 | 24/27 |
+| **0.15** | **17/27** | **23/27** | **24/27** |
+| 0.20 | 17/27 | 22/27 | 24/27 |
+| 0.40 | 13/27 | 23/27 | 23/27 |
+
+(Bu tablo çevrimdışı taramadan; gerçek hatta eşik ve bulanık katman da devrede olduğu için
+sonuç 19/27 çıktı.)
+
+Bir kural gerekti: **tek kelimelik başlık puan almaz.** Kural olmadan "Grip aşısı ne zaman
+yaptırılır?" sorusu, başlığı "2. Zamanı" olan bir Medeni Kanun maddesini çekti ve hukuk dışı
+soruyu reddetme yetisi 6/6'dan 5/6'ya düştü. "Zamanı", "Şekil", "Konusu" gibi başlıklar bilgi
+taşımaz. En az iki anlamlı kelime şartı konunca çekimserlik 6/6'ya döndü.
+
+Başlık puanı **özgün soruyla** hesaplanır, terim sözlüğüyle genişletilmiş sorguyla değil:
+genişletilmiş sorguda daha çok kelime vardır ve her başlık daha kolay eşleşir — sinyal körelir.
+
+Bedeli gecikme: sorgu başına 0,42 sn'den 0,68 sn'ye çıktı, çünkü başlık eşleşmesi bütün korpusta
+hesaplanıyor (aday havuzunda hesaplanamaz, çünkü havuzu belirleyen sıralamaya katılıyor).
+
 ## 6. Ölçümün kendi hataları
 
 Bu projede iki kez ölçüm, ölçtüğü şeyi bozdu:
@@ -192,10 +224,11 @@ demiyor; "en yakın madde bu, karar senin, maddenin tamamını okumadan sonuç �
 
 ## 8. Sınırlar
 
-- **Doğru madde ilk sırada %59.** Beş adayın içinde bulunma oranı %89; yine de her on sorudan
-  birinde doğru madde listede hiç yok.
-- **En zayıf alan usul** (1/3). Kira ve tüketici terim sözlüğüyle düzeldi ama usul soruları
-  ("dava dilekçesinde neler bulunur") hâlâ komşu maddelere gidiyor.
+- **Doğru madde ilk sırada %70.** Beş adayın içinde bulunma oranı %89; dokuz sorudan birinde
+  doğru madde listede hiç yok.
+- **Kalan üç başarısızlık komşu maddeye gidiyor**: "kaç gün yıllık izin" sorusuna İş Kanunu
+  md. 53 yerine md. 54, "dava dilekçesi" sorusuna md. 119 yerine md. 390. Aynı konuyu düzenleyen
+  maddeler arasında ayrım yapmak, bu kurulumun sınırı.
 - **Terim sözlüğü elle bakım ister.** Yeni bir alan eklenirse o alanın gündelik terimleri de
   eklenmeli; sözlük kendini güncellemiyor.
 - Belge sonlarındaki değişiklik tabloları ve "kanuna işlenemeyen hükümler" bölümleri de
