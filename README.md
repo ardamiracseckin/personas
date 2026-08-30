@@ -82,11 +82,16 @@ yeterlidir.
 ## Kullanım
 
 ```bash
-uvicorn server.main:app --port 8000     # arayüz → http://localhost:8000/mevzuat
+uvicorn server.main:app --port 8000     # arayüz → http://localhost:8000
 python scripts/mevzuat_olcum.py         # değerlendirme koşumu
 ```
 
 Arayüz dil modeli çağırmaz, tamamen çevrimdışı çalışır ve hiçbir dış kaynağa bağlanmaz.
+
+Aynı sunucuda ikinci bir arayüz daha var: **`/sohbet`** adresinde projenin kişisel asistan kipi
+duruyor — sohbet geçmişi, Apple Takvim/Mail, WhatsApp taslağı ve uygulama açma. O kip dil modelini
+çağırır ve Foundry Local gerektirir. İki arayüz aynı bilgi tabanını paylaşır; şu an yüklü olan
+kanun metnidir.
 
 ## Ölçüm
 
@@ -126,8 +131,9 @@ app/
   retriever.py         kosinüs + BM25 + bulanık eşleşme harmanı
   ingest.py            kanun PDF'lerini bilgi tabanına yazar
 server/
-  main.py              /mevzuat uç noktaları
-  static/mevzuat.*     tek sayfa arayüz, bağımlılıksız
+  main.py              "/" mevzuat, "/sohbet" kişisel asistan
+  static/mevzuat.*     mevzuat arayüzü, bağımlılıksız
+  static/{index,app,styles}.*  kişisel asistan arayüzü
 scripts/
   mevzuat_yukle.py     kanunları yükle
   mevzuat_olcum.py     değerlendirme koşumu

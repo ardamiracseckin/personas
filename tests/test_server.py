@@ -177,10 +177,30 @@ def test_failed_model_switch_reports_the_reason(istemci, monkeypatch):
     assert "genai_config" in cevap.json()["detail"]
 
 
-def test_index_page_is_served(istemci):
+def test_root_serves_the_mevzuat_assistant(istemci):
+    """Projenin kimliği mevzuat asistanı; giriş noktası da onu vermeli.
+
+    Eski test "/" içinde "personas" arıyordu; mevzuat sayfasının başlığı da
+    "personas — mevzuat asistanı" olduğu için doğru sebeple değil, tesadüfen
+    geçerdi.
+    """
     sayfa = istemci.get("/")
     assert sayfa.status_code == 200
-    assert "personas" in sayfa.text
+    assert "mevzuat" in sayfa.text.lower()
+    assert "Hangi kural geçerli?" in sayfa.text
+
+
+def test_chat_assistant_moved_to_its_own_address(istemci):
+    sayfa = istemci.get("/sohbet")
+    assert sayfa.status_code == 200
+    assert "sohbet" in sayfa.text.lower()
+
+
+def test_old_mevzuat_address_still_works(istemci):
+    """README'de, ekran görüntülerinde ve paylaşılmış bağlantılarda /mevzuat geçiyor."""
+    sayfa = istemci.get("/mevzuat", follow_redirects=True)
+    assert sayfa.status_code == 200
+    assert "Hangi kural geçerli?" in sayfa.text
 
 
 def test_status_reports_model_and_warmth(istemci, monkeypatch):
@@ -345,7 +365,7 @@ def test_empty_question_is_rejected(istemci):
 
 
 def test_mevzuat_page_is_served(istemci):
-    sayfa = istemci.get("/mevzuat")
+    sayfa = istemci.get("/", follow_redirects=True)
     assert sayfa.status_code == 200
     assert "madde" in sayfa.text.lower()
 

@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, UploadFile
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -329,13 +329,21 @@ def mevzuat_kanunlar():
 
 
 @app.get("/mevzuat")
-def mevzuat_sayfasi():
-    return FileResponse(STATIC_DIR / "mevzuat.html")
+def mevzuat_eski_adres():
+    """Eski adres: README'de, ekran görüntülerinde ve paylaşılmış bağlantılarda geçiyor."""
+    return RedirectResponse("/")
+
+
+@app.get("/sohbet")
+def sohbet_sayfasi():
+    """Kişisel asistan (takvim, mail, WhatsApp, sohbet geçmişi) burada durur."""
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/")
 def index():
-    return FileResponse(STATIC_DIR / "index.html")
+    """Giriş noktası mevzuat asistanı — projenin kimliği bu."""
+    return FileResponse(STATIC_DIR / "mevzuat.html")
 
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
