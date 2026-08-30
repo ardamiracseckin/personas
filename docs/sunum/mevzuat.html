@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mevzuat Asistanı — proje sunumu</title>
+<style>
+:root{
+  --bg:#0E0E0E;--panel:#141414;--panel-2:#191919;--line:#262626;
+  --ink:#EAEAEA;--dim:#8A8A8A;--accent:#F5C518;--accent-dim:#C9A100;
+  --danger:#E06C6C;--ok:#4EC9A5;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;
+     background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65}
+.slayt{display:none;width:min(1120px,94vw);height:min(680px,88vh);background:var(--panel);
+       border:1px solid var(--line);border-radius:16px;padding:44px 54px;
+       flex-direction:column;gap:16px;overflow:hidden}
+.slayt.aktif{display:flex}
+h2{font-family:var(--serif);font-weight:400;font-size:31px;letter-spacing:-.01em;
+   display:flex;align-items:baseline;gap:14px;margin-bottom:4px}
+h2 .no{font-family:var(--mono);font-size:14px;color:var(--accent)}
+h3{font-size:15.5px;margin-bottom:8px;color:var(--accent-dim)}
+p{margin-bottom:10px}
+.lead{font-family:var(--serif);font-size:20px;line-height:1.6}
+.dim{color:var(--dim)}
+.kucuk{font-size:15px}
+code{font-family:var(--mono);font-size:.85em;background:var(--panel-2);color:var(--accent-dim);
+     padding:1px 6px;border-radius:5px}
+.kartlar{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.kartlar.iki{grid-template-columns:repeat(2,1fr)}
+.kart{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.sayi{font-family:var(--mono);font-size:32px;color:var(--accent);line-height:1}
+.etiket{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+th{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);font-weight:600}
+td.m{font-family:var(--mono);font-size:13px}
+ul{margin-bottom:10px;padding-left:20px}
+li{margin-bottom:6px}
+.akis{font-family:var(--mono);font-size:13px;line-height:1.85;background:var(--panel-2);
+      border:1px solid var(--line);border-radius:12px;padding:16px 20px;white-space:pre}
+.vurgu{color:var(--accent);font-weight:600}
+.kotu{color:var(--danger)}
+.iyi{color:var(--ok)}
+.baslik-slayt{justify-content:center;gap:8px}
+.baslik-slayt .isaret{font-family:var(--serif);font-size:46px;color:var(--accent)}
+.baslik-slayt h1{font-family:var(--serif);font-weight:400;font-size:48px;letter-spacing:-.02em}
+.dip{position:fixed;bottom:14px;font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+@media print{.slayt{display:flex!important;page-break-after:always;height:auto}.dip{display:none}}
+</style>
+</head>
+<body>
+
+<section class="slayt aktif baslik-slayt">
+  <div class="isaret">§</div>
+  <h1>Mevzuat Asistanı</h1>
+  <p class="lead dim">Türk mevzuatı üzerinde çalışan çevrimdışı madde bulucu</p>
+  <p class="kucuk dim">Microsoft Foundry Local · RAG · SQLite · 8 kanun, 2.574 madde<br>
+     Yaz okulu projesi — final sunumu</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">01</span>Problem</h2>
+  <p class="lead">Hukuki bir durumun içine düştüğünde ilk lazım olan şey avukat değil,
+     <em>hangi kuralın işlediğini bilmek</em>. Ama o kural, kimsenin okumadığı uzun bir metnin
+     içinde.</p>
+  <div class="kartlar">
+    <div class="kart"><h3>Arama işe yaramıyor</h3><p class="kucuk dim">"Tahliye taahhüdü verdim"
+      diye arıyorsun; kanun "kiracıdan kaynaklanan sebeplerle" diyor.</p></div>
+    <div class="kart"><h3>Genel model uyduruyor</h3><p class="kucuk dim">Yanlış madde numarası,
+      kaynaksız cevaptan beterdir: doğrulanmış izlenimi verir.</p></div>
+    <div class="kart"><h3>Kelimesi önemli</h3><p class="kucuk dim">"14 gün" ile "15 gün"
+      arasındaki fark hak kaybıdır. Özet yeterli değil, metnin kendisi gerekir.</p></div>
+  </div>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">02</span>Bilgi tabanı: gerçek kanun metni</h2>
+  <div class="kartlar">
+    <div class="kart"><div class="sayi">8</div><div class="etiket">kanun</div></div>
+    <div class="kart"><div class="sayi">2.574</div><div class="etiket">madde</div></div>
+    <div class="kart"><div class="sayi">3.055</div><div class="etiket">parça</div></div>
+  </div>
+  <p class="kucuk">İş, kira (Borçlar), tüketici, KVKK, aile (Medeni), trafik, usul
+     (HMK ve İş Mahkemeleri). Hepsi <code>mevzuat.gov.tr</code>'den indirilmiş, değişiklikleri
+     işlenmiş güncel hâl. <span class="vurgu">Hiçbir madde elle yazılmadı ya da özetlenmedi.</span></p>
+  <p class="kucuk dim">Güncellik doğrulandı: KVKK md. 6 <code>(Mülga:2/3/2024-7499/33 md.)</code>
+     ibaresini taşıyor — yani 2024 değişikliği işlenmiş metin. Kanunun ilk kabul edildiği baskı bu
+     ibareyi taşımaz; onunla çalışılsaydı asistan yürürlükten kalkmış hüküm gösterirdi.</p>
+  <p class="kucuk dim">Önceki bilgi tabanının 53 katı. Sebep ölçüm: eski değerlendirme raporunda
+     "58 parçada %100 skor, ölçekte çalıştığını kanıtlamaz" yazıyordu. Bu proje o uyarıyı sınadı.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">03</span>Parçalama birimi: madde</h2>
+  <p>Hukukta atıf, kaynağın kendisidir. "İş Kanunu md. 17" demek ile "bir yerde okudum" demek
+     arasındaki fark, hakkını arayıp arayamamandır.</p>
+  <ul class="kucuk">
+    <li>İki resmî yazım biçimi tanınır: <code>Madde 12 –</code> (2011 öncesi),
+        <code>MADDE 12- (1)</code> (2011 sonrası).</li>
+    <li><span class="vurgu">Ek ve geçici maddeler ayrı numaralandırılır.</span>
+        <code>GEÇİCİ MADDE 2</code> ile <code>MADDE 2</code> bambaşka hükümlerdir.</li>
+    <li>Değişiklik ibareleri korunur — maddenin hangi tarihli hâli olduğunu onlar söyler.</li>
+    <li>Uzun maddeler fıkra sınırından bölünür; her parça aynı maddeye atıf yapar.</li>
+  </ul>
+  <p class="kucuk dim">Bir hata bu yüzden yakalandı: <code>"GEÇİCİ".lower()</code> Python'da
+     <code>"geçi̇ci̇"</code> veriyor (birleşik noktalı i) ve sözlük araması tutmuyordu; geçici
+     maddeler normal madde gibi atıf alıyordu. Türkçe büyük harf tuzağı bu projede dört kez çıktı.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">04</span>Erişim: üç sinyal</h2>
+  <div class="akis">soru
+ ├─ tavsiye/tahmin istiyorsa → <span class="kotu">kapsam dışı, madde gösterilmez</span>
+ └─ değilse
+     ├─ <span class="vurgu">kosinüs</span>       anlamı yakalar            (bütün korpus)
+     ├─ <span class="vurgu">gövde BM25</span>    terimi birebir yakalar    (bütün korpus)
+     │    └─ 60 aday
+     │        └─ <span class="vurgu">bulanık eşleşme</span>  yazım hatasını affeder
+     └─ eşiği geçen en iyi 5 madde → en yakını öne, kalanlar alaka sırasıyla</div>
+  <p class="kucuk">Üçü de gerekli. Yalnız kosinüs doğru maddeyi ilk sırada <b>2/10</b> buluyordu;
+     BM25 eklenince <b>4/10</b> oldu. Türkçe eklemeli olduğu için BM25 gövde bazlı: sorguda
+     "tahliye taahhüdü", kanunda "tahliye taahhüdünde" — tam kelime eşleşmesi 1/10'da kalıyordu.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">05</span>Karar: asistan cevap üretmez, çıkarır</h2>
+  <p class="lead">Ekranda görünen her kelime kanun metnindendir. Tek kelime üretilmez.</p>
+  <div class="kartlar iki">
+    <div class="kart"><h3 class="kotu">Neden üretmesin</h3><p class="kucuk">Ölçüm gösterdi:
+      bu boyuttaki yerel modeller Türkçe hukuk metninde yanlış cümle kuruyor — "arabulucuya gitmek
+      zorunlu değildir" (yanlış), "yıllık izin 15 gündür" (yanlış). Hukukta uydurulmuş bir cümle
+      cevapsızlıktan beterdir; kaynak gösterildiği için doğrulanmış izlenimi verir.</p></div>
+    <div class="kart"><h3>Bunun yerine</h3><p class="kucuk">Maddenin tam metni gösterilir, soruyla
+      en çok örtüşen cümle içinde işaretlenir. Kullanıcı 3.055 parçadan beş maddeye, oradan bir
+      cümleye iner. Yalnız cümleyi göstermek yanıltıcı olurdu: hukukta bir fıkra, komşusu okunmadan
+      anlaşılmaz.</p></div>
+  </div>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">06</span>Karar: tahmine madde gösterilmez</h2>
+  <p>"Bu davayı kazanır mıyım?", "Ne yapmalıyım?", "Ne kadar tazminat alırım?" — bu sorular somut
+     olaya, delile ve mahkemenin takdirine bağlıdır. Bir madde listesi bunu cevaplamaz, ama
+     <span class="vurgu">cevapladığı izlenimini yaratır.</span></p>
+  <div class="kartlar iki">
+    <div class="kart"><h3 class="kotu">Kural yokken</h3><p class="kucuk">Beş tahmin sorusunun
+      dördüne madde listesi çıkıyordu.</p></div>
+    <div class="kart"><h3 class="iyi">Kural kodda</h3><p class="kucuk">5/5 reddediliyor; asistan ne
+      yapıp ne yapamayacağını söylüyor.</p></div>
+  </div>
+  <p class="kucuk dim">Dedektör dar tutuldu. İlk hâli "Verilerimin silinmesini isteyebilir miyim?"
+     sorusunu da reddediyordu — oysa o meşru bir bilgi sorusu, KVKK md. 7 cevaplıyor. Kalıp fiile
+     bakmadan yakalıyordu; yalnızca sonuç bildiren fiiller (kazanmak, haklı çıkmak, tazminat almak)
+     arandığında yanlış pozitif kalmadı. <b>Yanlış ret, yanlış cevaptan daha sık zarar verir.</b></p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">07</span>Nasıl ölçtük</h2>
+  <table>
+    <tr><th>Kategori</th><th>Adet</th><th>Beklenen davranış</th></tr>
+    <tr><td>Cevaplanabilir</td><td class="m">27</td><td>Doğru maddeyi aday listesinde göster</td></tr>
+    <tr><td>Hukuk dışı</td><td class="m">6</td><td>İlgili madde yok de</td></tr>
+    <tr><td>Tavsiye isteyen</td><td class="m">5</td><td>Kapsam dışı diye reddet</td></tr>
+    <tr><td>Uç durum</td><td class="m">4</td><td>Çökme yok</td></tr>
+  </table>
+  <p class="kucuk">Beklenen 27 madde numarası <span class="vurgu">korpustaki başlıklardan
+     doğrulandı</span>, ezberden yazılmadı — bir test bunu her koşumda kontrol ediyor. Ölçüm dil
+     modeli çağırmaz: asistan cevap üretmediği için ölçülen şey erişimin doğru maddeyi bulup
+     bulmadığıdır.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">08</span>Sonuçlar</h2>
+  <div class="kartlar">
+    <div class="kart"><div class="sayi">%56</div><div class="etiket">doğru madde 1. sırada</div></div>
+    <div class="kart"><div class="sayi">%67</div><div class="etiket">ilk 5'te</div></div>
+    <div class="kart"><div class="sayi iyi">%93</div><div class="etiket">doğru kanundan aday</div></div>
+    <div class="kart"><div class="sayi iyi">6/6</div><div class="etiket">hukuk dışında ret</div></div>
+    <div class="kart"><div class="sayi iyi">5/5</div><div class="etiket">tavsiyede ret</div></div>
+    <div class="kart"><div class="sayi">0.38 sn</div><div class="etiket">ortalama süre</div></div>
+  </div>
+  <p class="kucuk">En anlamlı sayı <b>%93</b>: asistan neredeyse her zaman doğru kanuna gidiyor,
+     zorlandığı yer o kanunun içinde doğru maddeyi seçmek. Başarısızlıkların çoğu komşu madde —
+     yıllık izin sorusunda md. 53 yerine md. 54 geliyor, ikisi de aynı konuyu düzenliyor.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">09</span>Denenip elenenler</h2>
+  <table>
+    <tr><th>Yaklaşım</th><th>hit@1</th><th>hit@3</th></tr>
+    <tr><td>Yalnız kosinüs (başlangıç)</td><td class="m">2/10</td><td class="m">5/10</td></tr>
+    <tr><td>Doğru kanunla sınırlama (kâhin)</td><td class="m">3/10</td><td class="m">6/10</td></tr>
+    <tr><td>Korpusu daraltma (3.069 → 1.027)</td><td class="m">2/10</td><td class="m">6/10</td></tr>
+    <tr><td>Madde başlığıyla eşleştirme</td><td class="m kotu">0/10</td><td class="m kotu">0/10</td></tr>
+    <tr><td>BM25, tam kelime</td><td class="m">1/10</td><td class="m">3/10</td></tr>
+    <tr><td class="vurgu">BM25 gövde + kosinüs harmanı</td><td class="m vurgu">4/10</td><td class="m">5/10</td></tr>
+    <tr><td>Model ile sorgu yeniden yazma</td><td class="m kotu">0–1/10</td><td class="m kotu">1–3/10</td></tr>
+    <tr><td>Model ile yeniden sıralama</td><td class="m kotu">2/10</td><td class="m">—</td></tr>
+    <tr><td><i>Elle kanun diliyle sorma (tavan)</i></td><td class="m"><i>5/10</i></td><td class="m"><i>7/10</i></td></tr>
+  </table>
+  <p class="kucuk"><b>Sorun ölçek değil, dil.</b> Aynı soru kanun diliyle sorulunca isabet ikiye
+     katlanıyor — ama bu çeviriyi yapacak model yok. Embedding modeli de kaldıraç değil:
+     2,2 GB'lık model 8 GB makineye sığmadı, 1 GB'lık olan on soruda bir tane kazandırdı.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">10</span>Ölçüm kendi kendini bozdu — iki kez</h2>
+  <div class="kartlar iki">
+    <div class="kart"><h3>Kelime katmanı yanlış yerdeydi</h3><p class="kucuk">Sözlüksel eşleşme
+      yalnız kosinüsün getirdiği adaylarda çalışıyordu; kosinüs kaçırınca doğru maddeyi hiç
+      göremiyordu. Ayrıca 3.069 parçada sorgu başına <b>8,7 saniye</b> sürüyordu. İki katman
+      ayrılınca erişim 6,53 → <b>0,43 saniye</b>.</p></div>
+    <div class="kart"><h3>Normalizasyon çekimserliği kırdı</h3><p class="kucuk">BM25 puanı sorgu
+      içi maksimuma bölününce alakasız soruda bile bir parça 1,0 alıyordu; "bilmiyorum" diyebilme
+      kayboldu. Ham puanlar ölçüldü (ilgili 10–19, alakasız 7–9,6), sabit doyuma bölündü.
+      Çekimserlik <b>2/6 → 6/6</b>.</p></div>
+  </div>
+  <p class="kucuk dim">Eşikler de yeniden ölçüldü. Eski tabanla "Bugün hava nasıl olacak?" sorusu
+     kanuna bağlanıyordu: "nasıl" ve "olacak" uzun maddelerde bulunduğu için bulanık skor 0,75'e
+     çıkarken kosinüs 0,14'te kalıyordu.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">11</span>Canlı demo</h2>
+  <ul>
+    <li><b>Bilgi sorusu</b> — "Kişisel verilerimle ilgili haklarım neler?" → KVKK md. 11, tam metin,
+      soruyla örtüşen cümle işaretli.</li>
+    <li><b>Komşu madde</b> — "İşten çıkarılırken kaç hafta önce haber verilmeli?" → ilk sırada
+      md. 29, ikinci sırada doğru olan md. 17. Sistemin sınırı böyle görünüyor.</li>
+    <li><b>Hukuk dışı</b> — "Mercimek çorbası tarifi nedir?" → yüklü kanunlarda madde yok, model
+      hiç çağrılmıyor.</li>
+    <li><b>Tavsiye</b> — "Bu davayı kazanır mıyım?" → madde gösterilmez; ne yapıp ne yapamayacağı
+      söylenir.</li>
+  </ul>
+  <p class="kucuk dim">Dördü de çevrimdışı: Wi-Fi kapalıyken aynı sonuçlar alınır.</p>
+</section>
+
+<section class="slayt">
+  <h2><span class="no">12</span>Öğrenilenler ve sınırlar</h2>
+  <div class="kartlar iki">
+    <div class="kart"><h3>Öğrenilenler</h3><ul class="kucuk">
+      <li>Küçük korpusta %100, ölçekte hiçbir şey kanıtlamıyor: aynı sistem 58 parçada 14/14,
+          3.069 parçada 2/10 verdi.</li>
+      <li>Modelden söz alarak garanti alınmıyor; kapsam kuralı ancak kodda tutunca çalıştı.</li>
+      <li>Moda olan teknik her zaman doğru teknik değil: sorgu yeniden yazma ve yeniden sıralama
+          ölçümde battı.</li>
+      <li>Ürün vaadi ölçüme göre kurulmalı. %56 isabetle "cevap budur" denemez, "en yakın madde
+          bu" denir.</li>
+    </ul></div>
+    <div class="kart"><h3>Sınırlar</h3><ul class="kucuk">
+      <li>Doğru madde ilk sırada %56; üçte birinde beş adayın içinde de yok.</li>
+      <li>Kira ve tüketici alanları zayıf — gündelik dille kanun dili en çok orada ayrışıyor.</li>
+      <li>Yalnız sekiz kanun yüklü; dışı kapsam dışıdır.</li>
+      <li>Metinler indirildiği tarihteki hâl; mevzuat değişir.</li>
+    </ul></div>
+  </div>
+</section>
+
+<div class="dip"><span id="sayac">1 / 13</span> · ← → veya boşluk ile gezinin</div>
+
+<script>
+const slaytlar=[...document.querySelectorAll('.slayt')];
+const sayac=document.getElementById('sayac');
+let i=0;
+function goster(n){
+  i=Math.max(0,Math.min(slaytlar.length-1,n));
+  slaytlar.forEach((s,k)=>s.classList.toggle('aktif',k===i));
+  sayac.textContent=`${i+1} / ${slaytlar.length}`;
+}
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();goster(i+1);}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();goster(i-1);}
+  else if(e.key==='Home')goster(0);
+  else if(e.key==='End')goster(slaytlar.length-1);
+});
+document.addEventListener('click',()=>goster(i+1));
+goster(0);
+</script>
+</body>
+</html>

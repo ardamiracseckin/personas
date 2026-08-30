@@ -1,183 +1,146 @@
-# personas — Kişisel Asistan (offline)
+# personas — mevzuat asistanı
 
-Mac'inde **tamamen internetsiz** çalışan kişisel asistan. Beş işi yapar:
+Türk mevzuatı üzerinde çalışan, tamamen çevrimdışı bir **madde bulucu**. Hukuki bir durumu
+gündelik dille anlatırsınız; asistan ilgili kanun maddelerini bulur, alaka sırasıyla dizer ve
+maddenin tam metnini gösterir. Cevap üretmez — ekranda gördüğünüz her kelime kanun metnindendir.
 
-1. **Belge Soru-Cevap (RAG):** `data/documents/` içindeki kendi belgelerinden kaynak göstererek cevap verir; bilmediğinde "bilmiyorum" der.
-2. **Takvim:** Apple Takvim'i okur ve özetler; **onayınla** yeni etkinlik ekler.
-3. **Mail:** Apple Mail'i okur ve özetler; **onayınla** e-posta gönderir.
-   Alıcıyı isimle söyleyebilirsin ("Ahmet'e mail at"): adres Rehber'den bulunur, birden fazla
-   eşleşme varsa asistan hangisi olduğunu sorar.
-4. **WhatsApp:** **onayınla** mesaj hazırlar. Varsayılan olarak sohbeti mesaj yazılmış hâlde açar,
-   gönder tuşuna sen basarsın; kenar çubuğundaki "WhatsApp'ı otomatik gönder" anahtarı açıksa
-   onaydan sonra doğrudan gönderir (macOS Erişilebilirlik izni ister).
-   WhatsApp **okuma** yapılamaz — uygulama dışarıya okuma izni vermiyor.
-5. **Uygulama açma:** "Spotify aç", "wp aç", "hesap makinesi aç" gibi komutlarla Mac
-   uygulamalarını açar.
+> Bu bir madde bulucudur, hukuki tavsiye değildir. Avukatın yerine geçmez; avukata gitmeden önce
+> hangi kuralın işlediğini bilmenizi sağlar.
 
-Asistanın "beyni" [Microsoft Foundry Local](https://learn.microsoft.com/azure/ai-foundry/foundry-local/)
-ile cihazda çalışan bir LLM'dir (bulut/Azure yok). Embedding'ler `fastembed` ile yereldir — Foundry
-Local kataloğunda embedding görevine sahip model bulunmuyor.
+## Neden cevap üretmiyor
 
-Bilgi tabanı 8 Türkçe teknik nottan oluşur ve ingest sonrası 58 parçaya bölünür. Erişim ayarları
-(`TOP_K = 3`, `SIM_THRESHOLD = 0.34`) tahminle değil, 50 soruluk bir set üzerinde ölçülerek
-seçilmiştir; ayrıntı için [değerlendirme raporu](docs/eval/degerlendirme-raporu.md).
+Ölçüm gösterdi ki bu boyuttaki yerel modeller Türkçe hukuk metninde yanlış cümleler kuruyor —
+"arabulucuya gitmek zorunlu değildir" gibi. Hukukta uydurulmuş bir cümle, cevapsızlıktan beterdir:
+kaynak gösterildiği için doğrulanmış izlenimi verir.
 
-> Yazma işlemleri (etkinlik ekleme, mail gönderme) **asla onay olmadan** yapılmaz. Silme yoktur.
+Bu yüzden yanıt tamamen çıkarımsaldır. Maddenin tam metni gösterilir ve soruyla en çok örtüşen
+cümle içinde işaretlenir. Kullanıcı 3.055 parçalık yığından beş maddeye, oradan da bir cümleye
+iner; kazanç budur.
 
-## Arayüz
+Aynı sebeple **tahmin ve tavsiye isteyen sorulara madde gösterilmez.** "Bu davayı kazanır mıyım",
+"ne yapmalıyım" gibi sorular somut olaya, delile ve mahkemenin takdirine bağlıdır; bir madde
+listesi bunu cevaplamaz ama cevapladığı izlenimi yaratır.
 
-Tarayıcıda açılan tek sayfa bir uygulama; hiçbir dış kaynağa (CDN dâhil) bağlanmaz.
+## Bilgi tabanı
 
-- Cevaplar **akarak** yazılır, markdown ve kod blokları biçimlendirilir (dil etiketi + kopyala).
-- **Sohbetler kalıcıdır**: soldaki listeden geçmiş sohbetlere dönülür, yeniden adlandırılır, silinir.
-  Başlığı ilk cevaptan sonra model üretir.
-- **Kaynak rozetine tıklayınca** cevabın dayandığı parça metniyle birlikte açılır.
-- **Satır içi atıflar**: her cümlenin sonunda dayandığı parçanın numarası çıkar; tıklanınca o parça
-  açılıp vurgulanır. Atıf modele yazdırılmaz — cevap üretildikten sonra sadakat ölçümüyle aynı
-  sözlüksel eşleştirmeden çıkarılır, bu yüzden gecikmeye eklediği süre ~3 ms'dir. CLI'da aynı
-  bilgi cümle sırasına göre bir harita olarak yazılır.
-- **Belge sürükle-bırak** ile bilgi tabanına anında eklenir (`.md`, `.txt`, `.pdf`).
-- Soldaki menüden **model değiştirilebilir** (8 GB bellekte tek model yüklü kalır, geçiş 20-30 sn).
-- **Durdur / yeniden üret / kopyala**, `Cmd+K` yeni sohbet, `Esc` durdurur.
-- Asistan **son iki turu hatırlar**: "Python'da sanal ortam nasıl oluşturulur?" → "Peki onu nasıl
-  kapatırım?" çalışır.
-- Arama **yazım hatalarına dayanıklıdır**: "ekran görünütsünü bölgden nasıl alrım" doğru notu bulur.
-- Uygulama açma kısaltma ve ek tanır: "wp aç", "whatsappı aç", "chrome'u aç"; bulunamazsa kurulu
-  uygulamalar arasından en yakınını önerir.
+`mevzuat.gov.tr` üzerinden indirilmiş, değişiklikleri işlenmiş güncel metinler. Hiçbir madde elle
+yazılmadı ya da özetlenmedi.
 
-## Mimari
+| Kanun | Madde |
+|---|---|
+| 2918 Karayolları Trafik Kanunu | 187 |
+| 4721 Türk Medeni Kanunu | 1016 |
+| 4857 İş Kanunu | 136 |
+| 6098 Türk Borçlar Kanunu | 642 |
+| 6100 Hukuk Muhakemeleri Kanunu | 455 |
+| 6502 Tüketicinin Korunması Hakkında Kanun | 92 |
+| 6698 Kişisel Verilerin Korunması Kanunu | 33 |
+| 7036 İş Mahkemeleri Kanunu | 13 |
+
+Toplam 2.574 madde → 3.055 parça. Parçalama birimi maddedir: uzun maddeler fıkra sınırından
+bölünür, her parça kendi kanun ve madde numarasını taşır. Ek ve geçici maddeler ayrı numaralandırılır
+(`GEÇİCİ MADDE 2` ile `MADDE 2` bambaşka hükümlerdir). `(Değişik:2/3/2024-7499/33 md.)` gibi
+ibareler korunur — maddenin hangi tarihli hâli olduğunu yalnızca onlar söyler.
+
+## Nasıl çalışır
 
 ```
-Soru → router (belge? takvim? mail? uygulama?) → bağlam topla / taslak çıkar
-     → Foundry Local LLM cevabı üretir → tarayıcıya akıtılır (SSE)
+soru
+ ├─ tavsiye/tahmin istiyorsa → kapsam dışı, madde gösterilmez
+ └─ değilse
+     ├─ kosinüs benzerliği      anlamı yakalar          (bütün korpus)
+     ├─ gövde bazlı BM25        terimi birebir yakalar  (bütün korpus)
+     │   └─ 60 aday
+     │       └─ bulanık eşleşme  yazım hatasını affeder (yalnız adaylarda)
+     └─ eşiği geçen en iyi 5 madde
+         ├─ hiçbiri geçmediyse → "yüklü kanunlarda bulamadım"
+         └─ geçtiyse → en yakın madde öne, kalanlar alaka sırasıyla
 ```
 
-- `app/` — iş mantığı: `config`, `store`, `chat_store`, `chunking`, `similarity`, `lexical`,
-  `llm`, `models`, `ingest`, `retriever`, `router`, `assistant`,
-  `tools/{applescript,calendar_tool,mail_tool,app_launcher}.py`
-- `server/` — FastAPI (`main.py`) ve tek sayfa arayüz (`static/`)
-- `ui/cli.py` — terminal arayüzü
+Üç sinyal de gerekli. Yalnız kosinüs doğru maddeyi ilk sırada 2/10 buluyordu; BM25 eklenince 4/10
+oldu. Türkçe eklemeli olduğu için BM25 gövde bazlıdır: sorguda "tahliye taahhüdü", kanunda
+"tahliye taahhüdünde".
 
 ## Kurulum
 
 ```bash
-# 1) Homebrew (yoksa)
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# 2) Foundry Local + sohbet modeli
+# 1) Foundry Local (sohbet modeli yalnız eski asistan kipi için gerekir)
 brew install microsoft/foundrylocal/foundrylocal
-foundry model download phi-4-mini
 
-# 3) Python ortamı
+# 2) Python ortamı
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# 4) Belgeleri yükle (embedding modeli ilk çalıştırmada bir kez iner)
-python -m app.ingest
+# 3) Kanun metinlerini yükle (data/mevzuat/ altındaki PDF'ler)
+python scripts/mevzuat_yukle.py --temizle
 ```
 
-Modelleri kontrol etmek için: `foundry model list`. Kullanılan aliaslar `app/config.py` içindedir
-(`CHAT_MODEL = "phi-4-mini"`, embedding: `paraphrase-multilingual-MiniLM-L12-v2`).
-
-**Daha hafif donanım için:** `phi-4-mini` 3,7 GB yer kaplar. 8 GB bellek zorlanıyorsa arayüzdeki
-model menüsünden `qwen2.5-1.5b` seçilebilir (1,5 GB, belirgin daha hızlı); karşılığında cevap
-doğruluğu düşer. Karşılaştırmanın tamamı değerlendirme raporundadır.
+Yükleme 3.055 parçayı yaklaşık 100 saniyede gömer. Kanun metinleri depoda `data/mevzuat/` altında
+durur; güncellemek için `mevzuat.gov.tr` üzerinden yeni PDF'i indirip aynı komutu çalıştırmak
+yeterlidir.
 
 ## Kullanım
 
 ```bash
-# Web arayüzü
-uvicorn server.main:app --port 8000      # → http://localhost:8000
-
-# Terminal arayüzü
-python -m ui.cli
+uvicorn server.main:app --port 8000     # arayüz → http://localhost:8000/mevzuat
+python scripts/mevzuat_olcum.py         # değerlendirme koşumu
 ```
 
-Terminalde cevap akarak yazıldığı için rozet metnin içine konamaz; atıflar cevabın altına cümle
-sırasına göre yazılır. Numaralar web arayüzündeki rozetlerle aynıdır:
+Arayüz dil modeli çağırmaz, tamamen çevrimdışı çalışır ve hiçbir dış kaynağa bağlanmaz.
 
-```
-Kaynaklar: [1] python-notlari.md · [2] vscode-notlari.md
-Atıflar: 1→[1] 3→[1] 4→[1] · atıfsız: 2
-```
+## Ölçüm
 
-Örnek sorular: "Ekran görüntüsünü belirli bir bölgeden nasıl alırım?",
-"git'te son commit'i nasıl geri alırım?", "Bugün takvimimde ne var?",
-"Cuma 14:30 dişçi randevusu ekle".
+42 soruluk sabit set (`eval/mevzuat_sorular.json`): 27 cevaplanabilir (yedi alan), 6 hukuk dışı,
+5 tavsiye isteyen, 4 uç durum. Beklenen madde numaraları korpustaki başlıklardan doğrulanmıştır;
+bir test bunu her koşumda kontrol eder.
 
-## İzinler (Takvim / Mail)
-
-İlk kullanımda macOS **Automation** izni ister:
-**System Settings > Privacy & Security > Automation** → Terminal'e Mail/Takvim erişimi ver.
-
-## Testler ve değerlendirme
-
-```bash
-python -m pytest -q                  # 275 test (birim, HTTP katmanı, soru seti regresyonu)
-```
-
-Değerlendirme koşumu `eval/questions.json` içindeki 50 soruyu çalıştırıp `docs/eval/` altına
-markdown rapor ve tam cevapların JSON dökümünü yazar:
-
-```bash
-python scripts/evaluate.py                        # tam koşum (model gerekir)
-python scripts/evaluate.py --llm-yok              # sadece deterministik metrikler, saniyeler sürer
-python scripts/evaluate.py --esik 0.30,0.34,0.40  # eşik taraması
-python scripts/evaluate.py --model qwen2.5-1.5b   # başka modelle karşılaştırma
-python scripts/evaluate.py --sadakat-tarama docs/eval/sonuclar-....json   # eşik taraması
-```
-
-Ölçülen metrikler: yönlendirme doğruluğu, erişim isabeti (hit@K), **yazım hatalı sorularda erişim**,
-**kısa/anahtar kelime sorgularında erişim**,
-cevaplanamaz sorularda çekimserlik, gecikme (p50/p95), **otomatik kalite puanı** —
-cevaplanabilir sorulardaki `expected_substrings` alanına göre 0–2 puan — ve **sadakat**:
-cevaptaki bilgi getirilen parçadan mı geliyor, yoksa modelin ezberinden mi. Model değiştirip koşumu
-tekrarlamak yeterli, elle puanlama gerekmez.
-
-Kalite puanı "doğru bilgi cevapta geçiyor mu" der; sadakat "cevap bağlamdan mı geliyor" der. İkisi
-farklıdır: model doğru cevabı kendi ezberinden de verebilir ve o durumda RAG zinciri aslında
-çalışmamıştır. Rapor iki sayı üretir — cümle bazlı **sadakat oranı** ve ikili **kod sadakati**
-(ters tırnak içindeki her komut bağlamda birebir geçiyor mu).
-
-## Teslimler
-
-| Dosya | İçerik |
+| Ölçüt | Sonuç |
 |---|---|
-| [`docs/eval/degerlendirme-raporu.md`](docs/eval/degerlendirme-raporu.md) | Ölçüm yöntemi, eşik taraması, model karşılaştırması, kalan zayıflıklar |
-| [`docs/rapor/personas-proje-raporu.docx`](docs/rapor/personas-proje-raporu.docx) | Proje raporu (Word). Elle düzenlenmez: metin `docs/rapor/rapor_uret.js` içindedir, `npm install && npm run rapor` ile yeniden üretilir |
-| [`docs/sunum/index.html`](docs/sunum/index.html) | Demo sunumu — çevrimdışı açılır, ok tuşlarıyla gezilir |
-| `docs/eval/sonuclar-*.md` / `.json` | Ham koşum çıktıları |
+| Doğru madde 1. sırada | 15/27 (%56) |
+| Doğru madde ilk 5'te | 18/27 (%67) |
+| **Doğru kanundan aday geldi** | **25/27 (%93)** |
+| Hukuk dışı soruda çekimserlik | 6/6 |
+| Tavsiye isteyen soruda ret | 5/5 |
+| Ortalama süre | 0,38 sn |
 
-## Sorun giderme
-
-**"Connection error" alıyorsan, önce daemon'ın gerçekten dinlediğini doğrula.** Foundry Local uzun
-süre ayakta kalınca HTTP ucu ölebiliyor; `foundry server status` yine de `Ready`, PID ve uptime
-gösteriyor — ama porta bakınca dinleyen yok:
-
-```bash
-foundry server status                       # bildirdiği adresi al
-curl -s http://127.0.0.1:<port>/v1/models   # boş dönüyorsa uç ölü
-foundry server restart && foundry model load phi-4-mini
-```
-
-Yeniden başlatınca **port değişir**. `llm._discover_base_url()` adresi süreç başına bir kez okuyup
-sakladığı için, çalışan `uvicorn` süreci eski portta takılı kalır; sunucuyu da yeniden başlat.
-
-Foundry 0.10 ile komut adları değişti: `foundry service status` → **`foundry server status`**,
-`foundry service ps` → **`foundry server status`**. Eski sürümün `Inference.Service.Agent` süreci
-yükseltmeden sonra da ayakta kalabiliyor; zararsız ama kafa karıştırıcı.
+Ayrıntılı çözümleme, denenip elenen sekiz yaklaşım ve ölçümün kendi hataları:
+[`docs/eval/mevzuat-degerlendirme.md`](docs/eval/mevzuat-degerlendirme.md).
 
 ## Sınırlar
 
-- Küçük yerel model (8 GB RAM'e uygun) → genel bilgi/sohbet ChatGPT kadar güçlü değildir; en iyi
-  kendi belgelerinden cevaplarken çalışır.
-- Takvim/Mail entegrasyonu yalnızca **Apple** uygulamaları içindir (macOS).
-- **Görsel yükleme kapalı.** Kod hazır (`llm.chat_stream(..., image_b64=...)`) ve Foundry Local
-  0.10.3 ile görsel-dil modeli artık yükleniyor; ancak yerel OpenAI uç noktası içerik dizisini
-  düz metne çevirip görseli modele iletmiyor. Model, gönderilen JSON'u metin olarak "okuyup"
-  cevap veriyor. Foundry bu davranışı düzeltene kadar özellik kapalı tutuluyor.
-- Model seçimi süreç ömrü boyunca geçerlidir; sunucu yeniden başlatılınca `config.CHAT_MODEL`
-  varsayılanına döner.
+- **Doğru madde ilk sırada %56.** Soruların yarısında beş adayı gözden geçirmek gerekir; üçte
+  birinde doğru madde beş adayın içinde de yoktur. Arayüz bu yüzden "cevap budur" demez.
+- Kira ve tüketici alanları zayıf (1/4 ve 2/4): gündelik dil ile kanun dili bu alanlarda en çok
+  ayrışıyor.
+- Yalnız sekiz kanun yüklü; dışındaki her konu kapsam dışıdır ve asistan bunu söyler.
+- Metinler indirildiği tarihteki hâldir. Mevzuat değişir.
 
-Tasarım dokümanı: `docs/specs/2026-07-03-kisisel-asistan-design.md` ·
-Uygulama planı: `docs/plans/2026-07-03-personas-implementation-plan.md`
+## Proje yapısı
+
+```
+app/
+  mevzuat.py           kanun metnini madde bazlı parçalar
+  mevzuat_yanit.py     aday maddeleri hazırlar, en yakın cümleyi çıkarır
+  hukuki_kapsam.py     tavsiye/tahmin isteyen soruları yakalar
+  bm25.py              gövde bazlı kelime araması
+  retriever.py         kosinüs + BM25 + bulanık eşleşme harmanı
+  ingest.py            kanun PDF'lerini bilgi tabanına yazar
+server/
+  main.py              /mevzuat uç noktaları
+  static/mevzuat.*     tek sayfa arayüz, bağımlılıksız
+scripts/
+  mevzuat_yukle.py     kanunları yükle
+  mevzuat_olcum.py     değerlendirme koşumu
+eval/mevzuat_sorular.json
+docs/eval/mevzuat-degerlendirme.md
+data/mevzuat/          kanun PDF'leri (mevzuat.gov.tr)
+```
+
+Bu dal (`mevzuat-uzmani`) projenin bilgi tabanını ve kimliğini değiştirir. Kişisel asistan sürümü
+(teknik notlar, takvim/mail/WhatsApp araçları) `main` dalında durur.
+
+## Testler
+
+```bash
+python -m pytest -q     # 346 test; Foundry ve model gerektirmez
+```
