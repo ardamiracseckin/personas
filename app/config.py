@@ -63,8 +63,17 @@ LEXICAL_WEIGHT = 0.25
 # düşük kalıyor ve harmanlanmış skor eşiğin altına düşüyordu. Kelimelerin yarısı
 # birebir tutuyorsa ve anlamsal yakınlık tabanın üstündeyse parça yine kabul edilir.
 LEXICAL_RESCUE = 0.5
-DENSE_FLOOR = 0.10
-SIM_THRESHOLD = 0.34  # hibrit skor bunun altındaysa ⇒ "ilgili bilgi yok"
+# Mevzuat korpusuyla ölçülerek yükseltildi (eskiden 0.10). Bulanık kurtarma
+# kuralı yazım hatalı soruları kurtarmak içindir; yazım hatalı bir soru yine de
+# makul bir kosinüs verir. 0.10 tabanıyla "Bugün hava nasıl olacak?" gibi
+# sorular kanun metnine bağlanıyordu: yaygın kelimeler ("nasıl", "olacak") uzun
+# maddelerde bulunduğu için bulanık skor 0,75'e çıkıyor, kosinüs ise 0,14'te
+# kalıyordu. Taban 0.30'a çekilince alakasız sorularda çekimserlik 2/6'dan
+# 6/6'ya çıktı, erişim isabetinden kayıp olmadı.
+DENSE_FLOOR = 0.30
+# Mevzuat korpusunda taramayla seçildi. 0.30-0.42 aralığı erişim isabetini
+# değiştirmiyor (4/4/5); 0.38 ise sınırda kalan alakasız soruyu da eliyor.
+SIM_THRESHOLD = 0.38  # hibrit skor bunun altındaysa ⇒ "ilgili bilgi yok"
 
 # Chunking
 # Parçalama başlık sınırlarında bölündüğü için bu üst sınır nadiren devreye girer:

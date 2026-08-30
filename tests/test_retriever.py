@@ -14,8 +14,9 @@ def test_returns_most_similar_above_threshold(tmp_path, monkeypatch):
     store.add_chunk("d", "köpekler", [0.0, 1.0])
     res = retriever.get_top_chunks("q", k=1, embed_fn=lambda t: [[1.0, 0.0]])
     assert res[0][1] == "kediler"
-    # Skor hibrit: 0.75 x kosinüs + 0.25 x sözlüksel. "q" tek harf, sözlüksel katkı 0.
-    assert res[0][2] == pytest.approx(config.DENSE_WEIGHT, abs=1e-6)
+    # Skor üç sinyalin harmanı: 0.5 kosinüs + 0.3 BM25 + 0.2 bulanık eşleşme.
+    # "q" tek harf; ne BM25 ne bulanık katman katkı verir, geriye kosinüs kalır.
+    assert res[0][2] == pytest.approx(retriever.YOGUN_AGIRLIK, abs=1e-6)
 
 
 def test_threshold_filters_everything(tmp_path, monkeypatch):
@@ -91,3 +92,58 @@ def test_shortlist_still_returns_the_best_chunk(monkeypatch):
     monkeypatch.setattr(store, "all_chunks", lambda: parcalar)
     sonuc = retriever.get_top_chunks("aranan metin", embed_fn=lambda m: [[1.0, 0.0]])
     assert sonuc and sonuc[0][0] == "dogru.md"
+
+
+# --- kelime katmanı bütün korpusu görüyor ------------------------------------
+
+def test_word_layer_improves_the_rank_of_a_chunk_cosine_underrates(monkeypatch):
+    """BM25 katmanı aday sıralamasını düzeltir.
+
+    Önceki tasarımda sözlüksel eşleşme yalnız kosinüsün getirdiği adaylarda
+    çalışıyordu; kosinüs doğru maddeyi geriye ittiğinde kelime katmanı onu hiç
+    göremiyordu. Kanunda ayırt edici terim ("tahliye taahhüdü") birebir geçtiği
+    için bu katmanın bütün korpusu görmesi gerekiyor.
+
+    Sav sıralamayla ilgilidir, kabul eşiğiyle değil: eşik korpus istatistiğine
+    bağlıdır ve yapay bir örnekte anlamlı değildir.
+    """
+    from app import bm25, retriever, store
+    from app.similarity import cosine
+
+    dogru = ("6098 sayılı TBK", "md. 352 — Kiracı yazılı tahliye taahhüdünde bulunmuşsa "
+                                "icra yoluyla tahliye istenebilir.", [0.3, 0.95])
+    # Çeldiriciler soruya orta yakınlıkta (kosinüs 0,5): kanun metninde her şey
+    # birbirine benzer. Doğru parça anlamsal olarak daha uzak (0,3) ama ayırt
+    # edici terimi birebir taşıyor.
+    parcalar = [(f"k{i}.md", f"kira sözleşmesi genel hükümleri {i}", [0.5, 0.866])
+                for i in range(200)] + [dogru]
+    monkeypatch.setattr(store, "all_chunks", lambda: parcalar)
+    monkeypatch.setattr(retriever, "_dizin_onbellek", None)
+
+    sorgu = "tahliye taahhüdü verdim ne olur"
+    qvec = [1.0, 0.0]
+    metinler = [t for (_s, t, _e) in parcalar]
+    kelime = bm25.Dizin(metinler).normalize(sorgu)
+
+    def sira(anahtar):
+        return sorted(range(len(parcalar)), key=anahtar, reverse=True).index(len(parcalar) - 1)
+
+    yalniz_kosinus = sira(lambda i: cosine(qvec, parcalar[i][2]))
+    harman = sira(lambda i: retriever.YOGUN_AGIRLIK * cosine(qvec, parcalar[i][2])
+                  + retriever.KELIME_AGIRLIK * kelime.get(i, 0.0))
+    assert harman < yalniz_kosinus, "kelime katmanı doğru parçayı yukarı taşımalı"
+    assert harman == 0, "ayırt edici terimi taşıyan tek parça başa gelmeli"
+
+
+def test_index_is_rebuilt_when_the_knowledge_base_changes(monkeypatch):
+    from app import retriever, store
+
+    monkeypatch.setattr(retriever, "_dizin_onbellek", None)
+    monkeypatch.setattr(store, "all_chunks", lambda: [("a.md", "birinci metin", [1.0])])
+    retriever.get_top_chunks("birinci", embed_fn=lambda m: [[1.0]])
+    ilk = retriever._dizin_onbellek
+
+    monkeypatch.setattr(store, "all_chunks",
+                        lambda: [("a.md", "birinci metin", [1.0]), ("b.md", "ikinci", [1.0])])
+    retriever.get_top_chunks("ikinci", embed_fn=lambda m: [[1.0]])
+    assert retriever._dizin_onbellek is not ilk
